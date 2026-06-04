@@ -2,9 +2,23 @@ import { jwtVerify, createRemoteJWKSet } from "jose";
 import ApiError from "@/utils/apiError";
 
 const KEYCLOAK_ISSUER = `${process.env.NEXT_PUBLIC_KEYCLOAK_URL}/realms/${process.env.NEXT_PUBLIC_KEYCLOAK_REALM}`;
-const JWKS = createRemoteJWKSet(
-  new URL(`${KEYCLOAK_ISSUER}/protocol/openid-connect/certs`)
-);
+
+// Keycloak is not part of the standalone build. Build the JWKS lazily so an
+// empty Keycloak config doesn't throw `Invalid URL` at module load (which would
+// break `next build` for every route that imports this). Any route that does
+// call into Keycloak verification without config gets a clean 501 at runtime.
+let _jwks = null;
+function getJWKS() {
+  if (!process.env.NEXT_PUBLIC_KEYCLOAK_URL || !process.env.NEXT_PUBLIC_KEYCLOAK_REALM) {
+    throw new ApiError("Keycloak is not configured in this deployment", 501);
+  }
+  if (!_jwks) {
+    _jwks = createRemoteJWKSet(
+      new URL(`${KEYCLOAK_ISSUER}/protocol/openid-connect/certs`)
+    );
+  }
+  return _jwks;
+}
 
 export async function checkUserAuthWithRole(request, role) {
   const authHeader = request.headers.get("Authorization");
@@ -66,7 +80,7 @@ export function userHasRole(payload, role, clientId) {
 
 export async function verifyAccessToken(token) {
   try {
-    const { payload } = await jwtVerify(token, JWKS, {
+    const { payload } = await jwtVerify(token, getJWKS(), {
       issuer: KEYCLOAK_ISSUER,
       algorithms: ["RS256"],
     });
