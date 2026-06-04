@@ -74,7 +74,7 @@ function NavLinks({ navigationProps }) {
         flexItem
         sx={{ mx: 0.5, borderColor: "divider", alignSelf: "stretch", my: 1 }}
       />
-      {renderLink(blogNavItem, navIndex++)}
+      {blogNavItem && renderLink(blogNavItem, navIndex++)}
     </Stack>
   );
 }

@@ -491,14 +491,18 @@ export default function MobileSidebar({ open, onClose }) {
                   onDesignSystemClick={handleDesignSystemClick}
                 />
               ))}
-              <Divider sx={{ my: 1.5, borderColor: "divider" }} />
-              <MobileNavItem
-                key={blogNavItem.label}
-                item={blogNavItem}
-                onClose={onClose}
-                isWide={isWide}
-                onDesignSystemClick={handleDesignSystemClick}
-              />
+              {blogNavItem && (
+                <>
+                  <Divider sx={{ my: 1.5, borderColor: "divider" }} />
+                  <MobileNavItem
+                    key={blogNavItem.label}
+                    item={blogNavItem}
+                    onClose={onClose}
+                    isWide={isWide}
+                    onDesignSystemClick={handleDesignSystemClick}
+                  />
+                </>
+              )}
             </Stack>
           </Box>
         </Box>

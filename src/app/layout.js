@@ -5,15 +5,13 @@ import { Roboto, Roboto_Mono } from "next/font/google";
 import { ToastProvider } from "@/context/shared/ToastContext";
 import { AuthContextProvider } from "@/context/auth/AuthContext";
 import SkipLink from "@/components/SkipLink";
-import ClientLayout from "@/components/ClientLayout";
 import AuthWrapper from "@/components/auth/AuthWrapper";
-import { VpnBannerProvider } from "@/context/shared/VpnBannerContext";
 import PostHogProvider from "@/components/PostHogProvider";
 import NextTopLoader from "nextjs-toploader";
 
 export const metadata = {
-  title: "EG Brandsync",
-  description: "EG Brandsync — the single source of truth for design, brand guidelines, and digital assets across EG products.",
+  title: "BrandSync Make",
+  description: "BrandSync Make — generate on-brand UI from the BrandSync design system, powered by the BrandSync MCP.",
   robots: {
     index: false,
     follow: false,
@@ -45,14 +43,9 @@ export default function RootLayout({ children }) {
           <SkipLink />
           <ToastProvider>
             <AuthContextProvider>
-              <VpnBannerProvider>
-                <ClientLayout>
-                  <AuthWrapper>
-                    <PostHogProvider>{children}</PostHogProvider>
-                  </AuthWrapper>
-                  
-                </ClientLayout>
-              </VpnBannerProvider>
+              <AuthWrapper>
+                <PostHogProvider>{children}</PostHogProvider>
+              </AuthWrapper>
             </AuthContextProvider>
           </ToastProvider>
         </ThemeRegistry>

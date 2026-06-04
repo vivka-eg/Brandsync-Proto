@@ -108,7 +108,7 @@ const Footer = () => {
         <Box sx={{ flexShrink: 0 }}>
           <Image
             src={logoWhite}
-            alt="EG Brandsync"
+            alt="BrandSync Make"
             width={200}
             height={40}
           />
@@ -125,7 +125,7 @@ const Footer = () => {
             flexShrink: 0,
           }}
         >
-          &copy; {new Date().getFullYear()} EG Brandsync. All rights reserved.
+          &copy; {new Date().getFullYear()} BrandSync Make. All rights reserved.
         </Typography>
       </Box>
       
