@@ -1,0 +1,189 @@
+/* BrandSync canonical table styles — logos-manage */
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.dataTable thead {
+  background-color: #F9FAFB;
+  border-bottom: 1px solid #DEE2ED;
+}
+
+.dataTable th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+  white-space: nowrap;
+}
+
+.dataTable td {
+  padding: 16px;
+  font-size: 16px;
+  color: #000000;
+  border-bottom: 1px solid #DEE2ED;
+  vertical-align: middle;
+}
+
+.dataTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.dataTable tbody tr:nth-child(even) {
+  background-color: #F9FAFB;
+}
+
+.dataTable tbody tr:hover {
+  background-color: #EFF0F8;
+}
+
+/* Table wrapper */
+.tableWrapper {
+  width: 100%;
+  border: 1px solid #DEE2ED;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+/* Sort button in header */
+.sortBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sortBtn svg {
+  width: 14px;
+  height: 14px;
+  color: #A5AAB5;
+  flex-shrink: 0;
+}
+
+.sortBtn.active svg {
+  color: #0062C1;
+}
+
+/* Action buttons */
+.actionBtn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  color: #5D6472;
+}
+
+.actionBtn:hover {
+  background-color: #EFF0F8;
+  color: #21262E;
+}
+
+.actionBtn.edit:hover {
+  color: #0062C1;
+}
+
+.actionBtn.delete:hover {
+  color: #982A2A;
+  background-color: #FFDAD7;
+}
+
+.actionBtn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.rowActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+}
+
+/* Logo thumbnail */
+.logoThumb {
+  width: 60px;
+  height: 60px;
+  background-color: #F9FAFB;
+  border: 1px solid #DEE2ED;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoThumbWide {
+  width: 80px;
+  height: 60px;
+  background-color: #F9FAFB;
+  border: 1px solid #DEE2ED;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Color palette badge */
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 120px;
+  font-size: 14px;
+  font-weight: 500;
+  background-color: #DEE2ED;
+  color: #4D535F;
+}
+
+/* Check indicator */
+.checkIcon {
+  color: #1B5D43;
+}
+
+.dash {
+  color: #A5AAB5;
+}
+
+/* Empty state */
+.emptyCell {
+  text-align: center;
+  padding: 64px 16px;
+  color: #5D6472;
+  font-size: 16px;
+}
+
+/* Skeleton rows */
+.skeletonLine {
+  height: 16px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #F9FAFB 25%, #DEE2ED 50%, #F9FAFB 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeletonRect {
+  border-radius: 4px;
+  background: linear-gradient(90deg, #F9FAFB 25%, #DEE2ED 50%, #F9FAFB 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
