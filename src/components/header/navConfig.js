@@ -1,38 +1,21 @@
-import {
-  House,
-  PaintBrush,
-  Palette,
-  Sparkle,
-  CirclesFour,
-  ImageSquare,
-  Wrench,
-  Newspaper,
-  TreeStructure,
-  ChartBar,
-} from "phosphor-react";
-import { Toolbox } from "@phosphor-icons/react";
+import { House, Sparkle, ChartBar } from "phosphor-react";
 
-/** Trailing header link — after marketing group, separated by a divider (desktop). */
-export const blogNavItem = { label: "Blog", icon: Newspaper, href: "/blog" };
+// Standalone BrandSync Make: nav trimmed to the MCP-backed product. The
+// eg-brandsync surfaces (design system, designer tools, theme builder,
+// product logos, digital assets, utilities, blog) are not part of this build.
+
+/** Trailing header link slot — unused in the standalone build. */
+export const blogNavItem = null;
 
 /** Primary nav (desktop header). */
 export const designerNavItems = [
   { label: "Home", icon: House, href: "/" },
-  { label: "Design System", icon: PaintBrush, href: "/design-system" },
-  { label: "Designer Tools", icon: Toolbox, href: "/figma-kit" },
-  { label: "Theme Builder", icon: Palette, href: "/theme-builder" },
   { label: "AI & MCP", icon: Sparkle, href: "/mcp" },
   { label: "Brandsync Make", icon: ChartBar, href: "/brandsync-make" },
 ];
 
-/** Mobile drawer includes Sitemap after the same core links. */
-export const designerNavItemsMobile = [
-  ...designerNavItems,
-  { label: "Sitemap", icon: TreeStructure, href: "/sitemap" },
-];
+/** Mobile drawer mirrors the desktop nav. */
+export const designerNavItemsMobile = [...designerNavItems];
 
-export const marketingNavItems = [
-  { label: "Product Logos", icon: CirclesFour, href: "/logos" },
-  { label: "Digital Assets", icon: ImageSquare, href: "/digital-assets" },
-  { label: "Utilities", icon: Wrench, href: "/utilities" },
-];
+/** Marketing/asset group — empty in the standalone build. */
+export const marketingNavItems = [];
