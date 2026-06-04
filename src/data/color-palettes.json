@@ -1,0 +1,7247 @@
+{
+  "purple": {
+    "primaryColor": "#5E47E6",
+    "primaryColorDark": "#8676FE",
+    "primarySection": [
+      {
+        "name": "purple-950",
+        "color": "#201463",
+        "white": {
+          "ratio": 15.65,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.34,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "purple-900",
+        "color": "#220F73",
+        "white": {
+          "ratio": 15.17,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.38,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "purple-800",
+        "color": "#3720A1",
+        "white": {
+          "ratio": 11.15,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.88,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "purple-700",
+        "color": "#4B35C9",
+        "white": {
+          "ratio": 7.92,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 2.65,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "purple-600",
+        "color": "#5E47E6",
+        "white": {
+          "ratio": 5.97,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 3.52,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "purple-500",
+        "color": "#715AFC",
+        "white": {
+          "ratio": 4.59,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 4.57,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "purple-400",
+        "color": "#8676FE",
+        "white": {
+          "ratio": 3.48,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 6.04,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "purple-300",
+        "color": "#A49AFF",
+        "white": {
+          "ratio": 2.43,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 8.64,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "purple-200",
+        "color": "#C8C0FF",
+        "white": {
+          "ratio": 1.69,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 12.44,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "purple-100",
+        "color": "#E5DFFD",
+        "white": {
+          "ratio": 1.29,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 16.31,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "purple-50",
+        "color": "#F3EFFB",
+        "white": {
+          "ratio": 1.13,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 18.55,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      }
+    ],
+    "accessibleCombinations": {
+      "primaryOnWhiteBackground": [
+        {
+          "name": "purple-950",
+          "color": "#201463",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "purple-900",
+          "color": "#220F73",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "purple-800",
+          "color": "#3720A1",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "purple-700",
+          "color": "#4B35C9",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "purple-600",
+          "color": "#5E47E6",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "purple-500",
+          "color": "#715AFC",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ],
+      "primaryOnBlackBackground": [
+        {
+          "name": "purple-500",
+          "color": "#715AFC",
+          "background": "#000000",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "purple-400",
+          "color": "#8676FE",
+          "background": "#000000",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "purple-300",
+          "color": "#A49AFF",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "purple-200",
+          "color": "#C8C0FF",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "purple-100",
+          "color": "#E5DFFD",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "purple-50",
+          "color": "#F3EFFB",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        }
+      ],
+      "primaryOnPrimaryBackground": [
+        {
+          "name": "purple-950 on purple-400",
+          "color": "#201463",
+          "background": "#8676FE",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "purple-950 on purple-300",
+          "color": "#201463",
+          "background": "#A49AFF",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "purple-950 on purple-200",
+          "color": "#201463",
+          "background": "#C8C0FF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "purple-950 on purple-100",
+          "color": "#201463",
+          "background": "#E5DFFD",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "purple-950 on purple-50",
+          "color": "#201463",
+          "background": "#F3EFFB",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "purple-900 on purple-300",
+          "color": "#220F73",
+          "background": "#A49AFF",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "purple-900 on purple-200",
+          "color": "#220F73",
+          "background": "#C8C0FF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "purple-900 on purple-100",
+          "color": "#220F73",
+          "background": "#E5DFFD",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "purple-900 on purple-50",
+          "color": "#220F73",
+          "background": "#F3EFFB",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "purple-800 on purple-300",
+          "color": "#3720A1",
+          "background": "#A49AFF",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "purple-800 on purple-200",
+          "color": "#3720A1",
+          "background": "#C8C0FF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "purple-800 on purple-100",
+          "color": "#3720A1",
+          "background": "#E5DFFD",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "purple-800 on purple-50",
+          "color": "#3720A1",
+          "background": "#F3EFFB",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "purple-700 on purple-200",
+          "color": "#4B35C9",
+          "background": "#C8C0FF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "purple-700 on purple-100",
+          "color": "#4B35C9",
+          "background": "#E5DFFD",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "purple-700 on purple-50",
+          "color": "#4B35C9",
+          "background": "#F3EFFB",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "purple-600 on purple-100",
+          "color": "#5E47E6",
+          "background": "#E5DFFD",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "purple-600 on purple-50",
+          "color": "#5E47E6",
+          "background": "#F3EFFB",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ]
+    }
+  },
+  "cobalt": {
+    "primaryColor": "#3B4EE9",
+    "primaryColorDark": "#6D7CFF",
+    "primarySection": [
+      {
+        "name": "cobalt-950",
+        "color": "#050D5D",
+        "white": {
+          "ratio": 17.18,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.22,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "cobalt-900",
+        "color": "#091675",
+        "white": {
+          "ratio": 15.18,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.38,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "cobalt-800",
+        "color": "#1928A5",
+        "white": {
+          "ratio": 11.12,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.89,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "cobalt-700",
+        "color": "#303ECD",
+        "white": {
+          "ratio": 7.79,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 2.7,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "cobalt-600",
+        "color": "#3B4EE9",
+        "white": {
+          "ratio": 6.08,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 3.45,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "cobalt-500",
+        "color": "#4F63FF",
+        "white": {
+          "ratio": 4.6,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 4.56,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "cobalt-400",
+        "color": "#6D7CFF",
+        "white": {
+          "ratio": 3.51,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 5.98,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "cobalt-300",
+        "color": "#939EFF",
+        "white": {
+          "ratio": 2.45,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 8.58,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "cobalt-200",
+        "color": "#BCC2FF",
+        "white": {
+          "ratio": 1.71,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 12.3,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "cobalt-100",
+        "color": "#E0E0FD",
+        "white": {
+          "ratio": 1.29,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 16.25,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "cobalt-50",
+        "color": "#F1EFFA",
+        "white": {
+          "ratio": 1.14,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 18.47,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      }
+    ],
+    "accessibleCombinations": {
+      "primaryOnWhiteBackground": [
+        {
+          "name": "cobalt-950",
+          "color": "#050D5D",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "cobalt-900",
+          "color": "#091675",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "cobalt-800",
+          "color": "#1928A5",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "cobalt-700",
+          "color": "#303ECD",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "cobalt-600",
+          "color": "#3B4EE9",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "cobalt-500",
+          "color": "#4F63FF",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ],
+      "primaryOnBlackBackground": [
+        {
+          "name": "cobalt-500",
+          "color": "#4F63FF",
+          "background": "#000000",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "cobalt-400",
+          "color": "#6D7CFF",
+          "background": "#000000",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "cobalt-300",
+          "color": "#939EFF",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "cobalt-200",
+          "color": "#BCC2FF",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "cobalt-100",
+          "color": "#E0E0FD",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "cobalt-50",
+          "color": "#F1EFFA",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        }
+      ],
+      "primaryOnPrimaryBackground": [
+        {
+          "name": "cobalt-950 on cobalt-400",
+          "color": "#050D5D",
+          "background": "#6D7CFF",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "cobalt-950 on cobalt-300",
+          "color": "#050D5D",
+          "background": "#939EFF",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "cobalt-950 on cobalt-200",
+          "color": "#050D5D",
+          "background": "#BCC2FF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "cobalt-950 on cobalt-100",
+          "color": "#050D5D",
+          "background": "#E0E0FD",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "cobalt-950 on cobalt-50",
+          "color": "#050D5D",
+          "background": "#F1EFFA",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "cobalt-900 on cobalt-300",
+          "color": "#091675",
+          "background": "#939EFF",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "cobalt-900 on cobalt-200",
+          "color": "#091675",
+          "background": "#BCC2FF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "cobalt-900 on cobalt-100",
+          "color": "#091675",
+          "background": "#E0E0FD",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "cobalt-900 on cobalt-50",
+          "color": "#091675",
+          "background": "#F1EFFA",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "cobalt-800 on cobalt-300",
+          "color": "#1928A5",
+          "background": "#939EFF",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "cobalt-800 on cobalt-200",
+          "color": "#1928A5",
+          "background": "#BCC2FF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "cobalt-800 on cobalt-100",
+          "color": "#1928A5",
+          "background": "#E0E0FD",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "cobalt-800 on cobalt-50",
+          "color": "#1928A5",
+          "background": "#F1EFFA",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "cobalt-700 on cobalt-200",
+          "color": "#303ECD",
+          "background": "#BCC2FF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "cobalt-700 on cobalt-100",
+          "color": "#303ECD",
+          "background": "#E0E0FD",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "cobalt-700 on cobalt-50",
+          "color": "#303ECD",
+          "background": "#F1EFFA",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "cobalt-600 on cobalt-100",
+          "color": "#3B4EE9",
+          "background": "#E0E0FD",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "cobalt-600 on cobalt-50",
+          "color": "#3B4EE9",
+          "background": "#F1EFFA",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ]
+    }
+  },
+  "blue": {
+    "primaryColor": "#0062C1",
+    "primaryColorDark": "#3E88EF",
+    "primarySection": [
+      {
+        "name": "blue-950",
+        "color": "#001B3E",
+        "white": {
+          "ratio": 17.12,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.23,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "blue-900",
+        "color": "#002550",
+        "white": {
+          "ratio": 15.21,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.38,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "blue-800",
+        "color": "#003A78",
+        "white": {
+          "ratio": 11.19,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.88,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "blue-700",
+        "color": "#0051A2",
+        "white": {
+          "ratio": 7.78,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 2.7,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "blue-600",
+        "color": "#0062C1",
+        "white": {
+          "ratio": 5.97,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 3.52,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "blue-500",
+        "color": "#0073E1",
+        "white": {
+          "ratio": 4.63,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 4.54,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "blue-400",
+        "color": "#3E88EF",
+        "white": {
+          "ratio": 3.52,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 5.97,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "blue-300",
+        "color": "#7AA6F2",
+        "white": {
+          "ratio": 2.45,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 8.56,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "blue-200",
+        "color": "#AEC7F8",
+        "white": {
+          "ratio": 1.7,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 12.32,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "blue-100",
+        "color": "#D8E3FC",
+        "white": {
+          "ratio": 1.29,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 16.31,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "blue-50",
+        "color": "#EEF0FA",
+        "white": {
+          "ratio": 1.14,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 18.48,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      }
+    ],
+    "accessibleCombinations": {
+      "primaryOnWhiteBackground": [
+        {
+          "name": "blue-950",
+          "color": "#001B3E",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "blue-900",
+          "color": "#002550",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "blue-800",
+          "color": "#003A78",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "blue-700",
+          "color": "#0051A2",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "blue-600",
+          "color": "#0062C1",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "blue-500",
+          "color": "#0073E1",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ],
+      "primaryOnBlackBackground": [
+        {
+          "name": "blue-500",
+          "color": "#0073E1",
+          "background": "#000000",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "blue-400",
+          "color": "#3E88EF",
+          "background": "#000000",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "blue-300",
+          "color": "#7AA6F2",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "blue-200",
+          "color": "#AEC7F8",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "blue-100",
+          "color": "#D8E3FC",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "blue-50",
+          "color": "#EEF0FA",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        }
+      ],
+      "primaryOnPrimaryBackground": [
+        {
+          "name": "blue-950 on blue-400",
+          "color": "#001B3E",
+          "background": "#3E88EF",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "blue-950 on blue-300",
+          "color": "#001B3E",
+          "background": "#7AA6F2",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "blue-950 on blue-200",
+          "color": "#001B3E",
+          "background": "#AEC7F8",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "blue-950 on blue-100",
+          "color": "#001B3E",
+          "background": "#D8E3FC",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "blue-950 on blue-50",
+          "color": "#001B3E",
+          "background": "#EEF0FA",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "blue-900 on blue-300",
+          "color": "#002550",
+          "background": "#7AA6F2",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "blue-900 on blue-200",
+          "color": "#002550",
+          "background": "#AEC7F8",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "blue-900 on blue-100",
+          "color": "#002550",
+          "background": "#D8E3FC",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "blue-900 on blue-50",
+          "color": "#002550",
+          "background": "#EEF0FA",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "blue-800 on blue-300",
+          "color": "#003A78",
+          "background": "#7AA6F2",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "blue-800 on blue-200",
+          "color": "#003A78",
+          "background": "#AEC7F8",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "blue-800 on blue-100",
+          "color": "#003A78",
+          "background": "#D8E3FC",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "blue-800 on blue-50",
+          "color": "#003A78",
+          "background": "#EEF0FA",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "blue-700 on blue-200",
+          "color": "#0051A2",
+          "background": "#AEC7F8",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "blue-700 on blue-100",
+          "color": "#0051A2",
+          "background": "#D8E3FC",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "blue-700 on blue-50",
+          "color": "#0051A2",
+          "background": "#EEF0FA",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "blue-600 on blue-100",
+          "color": "#0062C1",
+          "background": "#D8E3FC",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "blue-600 on blue-50",
+          "color": "#0062C1",
+          "background": "#EEF0FA",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ]
+    }
+  },
+  "steel": {
+    "primaryColor": "#2B6796",
+    "primaryColorDark": "#558DBE",
+    "primarySection": [
+      {
+        "name": "steel-950",
+        "color": "#032841",
+        "white": {
+          "ratio": 15.18,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.38,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "steel-900",
+        "color": "#041D30",
+        "white": {
+          "ratio": 17.16,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.22,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "steel-800",
+        "color": "#103E5F",
+        "white": {
+          "ratio": 11.19,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.88,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "steel-700",
+        "color": "#1F567F",
+        "white": {
+          "ratio": 7.79,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 2.7,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "steel-600",
+        "color": "#2B6796",
+        "white": {
+          "ratio": 6.03,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 3.48,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "steel-500",
+        "color": "#3779AE",
+        "white": {
+          "ratio": 4.66,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 4.51,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "steel-400",
+        "color": "#558DBE",
+        "white": {
+          "ratio": 3.54,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 5.94,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "steel-300",
+        "color": "#83AAD0",
+        "white": {
+          "ratio": 2.43,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 8.63,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "steel-200",
+        "color": "#B1C9E3",
+        "white": {
+          "ratio": 1.7,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 12.33,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "steel-100",
+        "color": "#D9E3F1",
+        "white": {
+          "ratio": 1.3,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 16.21,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "steel-50",
+        "color": "#EEF0F6",
+        "white": {
+          "ratio": 1.14,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 18.43,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      }
+    ],
+    "accessibleCombinations": {
+      "primaryOnWhiteBackground": [
+        {
+          "name": "steel-950",
+          "color": "#032841",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "steel-900",
+          "color": "#041D30",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "steel-800",
+          "color": "#103E5F",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "steel-700",
+          "color": "#1F567F",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "steel-600",
+          "color": "#2B6796",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "steel-500",
+          "color": "#3779AE",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ],
+      "primaryOnBlackBackground": [
+        {
+          "name": "steel-500",
+          "color": "#3779AE",
+          "background": "#000000",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "steel-400",
+          "color": "#558DBE",
+          "background": "#000000",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "steel-300",
+          "color": "#83AAD0",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "steel-200",
+          "color": "#B1C9E3",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "steel-100",
+          "color": "#D9E3F1",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "steel-50",
+          "color": "#EEF0F6",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        }
+      ],
+      "primaryOnPrimaryBackground": [
+        {
+          "name": "steel-950 on steel-300",
+          "color": "#032841",
+          "background": "#83AAD0",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "steel-950 on steel-200",
+          "color": "#032841",
+          "background": "#B1C9E3",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "steel-950 on steel-100",
+          "color": "#032841",
+          "background": "#D9E3F1",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "steel-950 on steel-50",
+          "color": "#032841",
+          "background": "#EEF0F6",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "steel-900 on steel-400",
+          "color": "#041D30",
+          "background": "#558DBE",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "steel-900 on steel-300",
+          "color": "#041D30",
+          "background": "#83AAD0",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "steel-900 on steel-200",
+          "color": "#041D30",
+          "background": "#B1C9E3",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "steel-900 on steel-100",
+          "color": "#041D30",
+          "background": "#D9E3F1",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "steel-900 on steel-50",
+          "color": "#041D30",
+          "background": "#EEF0F6",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "steel-800 on steel-300",
+          "color": "#103E5F",
+          "background": "#83AAD0",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "steel-800 on steel-200",
+          "color": "#103E5F",
+          "background": "#B1C9E3",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "steel-800 on steel-100",
+          "color": "#103E5F",
+          "background": "#D9E3F1",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "steel-800 on steel-50",
+          "color": "#103E5F",
+          "background": "#EEF0F6",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "steel-700 on steel-200",
+          "color": "#1F567F",
+          "background": "#B1C9E3",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "steel-700 on steel-100",
+          "color": "#1F567F",
+          "background": "#D9E3F1",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "steel-700 on steel-50",
+          "color": "#1F567F",
+          "background": "#EEF0F6",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "steel-600 on steel-100",
+          "color": "#2B6796",
+          "background": "#D9E3F1",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "steel-600 on steel-50",
+          "color": "#2B6796",
+          "background": "#EEF0F6",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ]
+    }
+  },
+  "teal": {
+    "primaryColor": "#116F6E",
+    "primaryColorDark": "#469593",
+    "primarySection": [
+      {
+        "name": "teal-950",
+        "color": "#02201F",
+        "white": {
+          "ratio": 17.09,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.23,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "teal-900",
+        "color": "#032B2A",
+        "white": {
+          "ratio": 15.19,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.38,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "teal-800",
+        "color": "#144241",
+        "white": {
+          "ratio": 11.14,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.89,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "teal-700",
+        "color": "#185B5A",
+        "white": {
+          "ratio": 7.83,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 2.68,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "teal-600",
+        "color": "#116F6E",
+        "white": {
+          "ratio": 5.96,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 3.52,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "teal-500",
+        "color": "#008280",
+        "white": {
+          "ratio": 4.66,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 4.5,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "teal-400",
+        "color": "#469593",
+        "white": {
+          "ratio": 3.51,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 5.98,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "teal-300",
+        "color": "#72B2B0",
+        "white": {
+          "ratio": 2.41,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 8.71,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "teal-200",
+        "color": "#9ED1CF",
+        "white": {
+          "ratio": 1.68,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 12.48,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "teal-100",
+        "color": "#C8E9E7",
+        "white": {
+          "ratio": 1.29,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 16.27,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "teal-50",
+        "color": "#E9F3F2",
+        "white": {
+          "ratio": 1.13,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 18.57,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      }
+    ],
+    "accessibleCombinations": {
+      "primaryOnWhiteBackground": [
+        {
+          "name": "teal-950",
+          "color": "#02201F",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "teal-900",
+          "color": "#032B2A",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "teal-800",
+          "color": "#144241",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "teal-700",
+          "color": "#185B5A",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "teal-600",
+          "color": "#116F6E",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "teal-500",
+          "color": "#008280",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ],
+      "primaryOnBlackBackground": [
+        {
+          "name": "teal-500",
+          "color": "#008280",
+          "background": "#000000",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "teal-400",
+          "color": "#469593",
+          "background": "#000000",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "teal-300",
+          "color": "#72B2B0",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "teal-200",
+          "color": "#9ED1CF",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "teal-100",
+          "color": "#C8E9E7",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "teal-50",
+          "color": "#E9F3F2",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        }
+      ],
+      "primaryOnPrimaryBackground": [
+        {
+          "name": "teal-950 on teal-400",
+          "color": "#02201F",
+          "background": "#469593",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "teal-950 on teal-300",
+          "color": "#02201F",
+          "background": "#72B2B0",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "teal-950 on teal-200",
+          "color": "#02201F",
+          "background": "#9ED1CF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "teal-950 on teal-100",
+          "color": "#02201F",
+          "background": "#C8E9E7",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "teal-950 on teal-50",
+          "color": "#02201F",
+          "background": "#E9F3F2",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "teal-900 on teal-300",
+          "color": "#032B2A",
+          "background": "#72B2B0",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "teal-900 on teal-200",
+          "color": "#032B2A",
+          "background": "#9ED1CF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "teal-900 on teal-100",
+          "color": "#032B2A",
+          "background": "#C8E9E7",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "teal-900 on teal-50",
+          "color": "#032B2A",
+          "background": "#E9F3F2",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "teal-800 on teal-300",
+          "color": "#144241",
+          "background": "#72B2B0",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "teal-800 on teal-200",
+          "color": "#144241",
+          "background": "#9ED1CF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "teal-800 on teal-100",
+          "color": "#144241",
+          "background": "#C8E9E7",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "teal-800 on teal-50",
+          "color": "#144241",
+          "background": "#E9F3F2",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "teal-700 on teal-200",
+          "color": "#185B5A",
+          "background": "#9ED1CF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "teal-700 on teal-100",
+          "color": "#185B5A",
+          "background": "#C8E9E7",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "teal-700 on teal-50",
+          "color": "#185B5A",
+          "background": "#E9F3F2",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "teal-600 on teal-100",
+          "color": "#116F6E",
+          "background": "#C8E9E7",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "teal-600 on teal-50",
+          "color": "#116F6E",
+          "background": "#E9F3F2",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ]
+    }
+  },
+  "jade": {
+    "primaryColor": "#0E7060",
+    "primaryColorDark": "#349985",
+    "primarySection": [
+      {
+        "name": "jade-950",
+        "color": "#02201A",
+        "white": {
+          "ratio": 17.16,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.22,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "jade-900",
+        "color": "#002C24",
+        "white": {
+          "ratio": 15.15,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.39,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "jade-800",
+        "color": "#034439",
+        "white": {
+          "ratio": 11.11,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.89,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "jade-700",
+        "color": "#0E5D50",
+        "white": {
+          "ratio": 7.78,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 2.7,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "jade-600",
+        "color": "#0E7060",
+        "white": {
+          "ratio": 5.99,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 3.51,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "jade-500",
+        "color": "#008370",
+        "white": {
+          "ratio": 4.69,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 4.48,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "jade-400",
+        "color": "#349985",
+        "white": {
+          "ratio": 3.48,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 6.04,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "jade-300",
+        "color": "#63B4A2",
+        "white": {
+          "ratio": 2.45,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 8.58,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "jade-200",
+        "color": "#8CD4C2",
+        "white": {
+          "ratio": 1.71,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 12.31,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "jade-100",
+        "color": "#C6EADF",
+        "white": {
+          "ratio": 1.29,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 16.24,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "jade-50",
+        "color": "#EAF3EF",
+        "white": {
+          "ratio": 1.13,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 18.57,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      }
+    ],
+    "accessibleCombinations": {
+      "primaryOnWhiteBackground": [
+        {
+          "name": "jade-950",
+          "color": "#02201A",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "jade-900",
+          "color": "#002C24",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "jade-800",
+          "color": "#034439",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "jade-700",
+          "color": "#0E5D50",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "jade-600",
+          "color": "#0E7060",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "jade-500",
+          "color": "#008370",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ],
+      "primaryOnBlackBackground": [
+        {
+          "name": "jade-400",
+          "color": "#349985",
+          "background": "#000000",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "jade-300",
+          "color": "#63B4A2",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "jade-200",
+          "color": "#8CD4C2",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "jade-100",
+          "color": "#C6EADF",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "jade-50",
+          "color": "#EAF3EF",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        }
+      ],
+      "primaryOnPrimaryBackground": [
+        {
+          "name": "jade-950 on jade-400",
+          "color": "#02201A",
+          "background": "#349985",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "jade-950 on jade-300",
+          "color": "#02201A",
+          "background": "#63B4A2",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "jade-950 on jade-200",
+          "color": "#02201A",
+          "background": "#8CD4C2",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "jade-950 on jade-100",
+          "color": "#02201A",
+          "background": "#C6EADF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "jade-950 on jade-50",
+          "color": "#02201A",
+          "background": "#EAF3EF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "jade-900 on jade-300",
+          "color": "#002C24",
+          "background": "#63B4A2",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "jade-900 on jade-200",
+          "color": "#002C24",
+          "background": "#8CD4C2",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "jade-900 on jade-100",
+          "color": "#002C24",
+          "background": "#C6EADF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "jade-900 on jade-50",
+          "color": "#002C24",
+          "background": "#EAF3EF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "jade-800 on jade-300",
+          "color": "#034439",
+          "background": "#63B4A2",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "jade-800 on jade-200",
+          "color": "#034439",
+          "background": "#8CD4C2",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "jade-800 on jade-100",
+          "color": "#034439",
+          "background": "#C6EADF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "jade-800 on jade-50",
+          "color": "#034439",
+          "background": "#EAF3EF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "jade-700 on jade-200",
+          "color": "#0E5D50",
+          "background": "#8CD4C2",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "jade-700 on jade-100",
+          "color": "#0E5D50",
+          "background": "#C6EADF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "jade-700 on jade-50",
+          "color": "#0E5D50",
+          "background": "#EAF3EF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "jade-600 on jade-100",
+          "color": "#0E7060",
+          "background": "#C6EADF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "jade-600 on jade-50",
+          "color": "#0E7060",
+          "background": "#EAF3EF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ]
+    }
+  },
+  "green": {
+    "primaryColor": "#2A7043",
+    "primaryColorDark": "#469961",
+    "primarySection": [
+      {
+        "name": "green-950",
+        "color": "#0B2011",
+        "white": {
+          "ratio": 17.09,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.23,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "green-900",
+        "color": "#112B19",
+        "white": {
+          "ratio": 15.18,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.38,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "green-800",
+        "color": "#21422A",
+        "white": {
+          "ratio": 11.19,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.88,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "green-700",
+        "color": "#295C3A",
+        "white": {
+          "ratio": 7.82,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 2.69,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "green-600",
+        "color": "#2A7043",
+        "white": {
+          "ratio": 6,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 3.5,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "green-500",
+        "color": "#23834A",
+        "white": {
+          "ratio": 4.75,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 4.42,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "green-400",
+        "color": "#469961",
+        "white": {
+          "ratio": 3.51,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 5.99,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "green-300",
+        "color": "#78B385",
+        "white": {
+          "ratio": 2.45,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 8.59,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "green-200",
+        "color": "#9FD3A9",
+        "white": {
+          "ratio": 1.7,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 12.36,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "green-100",
+        "color": "#D0E9D2",
+        "white": {
+          "ratio": 1.29,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 16.27,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "green-50",
+        "color": "#ECF2EA",
+        "white": {
+          "ratio": 1.14,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 18.46,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      }
+    ],
+    "accessibleCombinations": {
+      "primaryOnWhiteBackground": [
+        {
+          "name": "green-950",
+          "color": "#0B2011",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "green-900",
+          "color": "#112B19",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "green-800",
+          "color": "#21422A",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "green-700",
+          "color": "#295C3A",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "green-600",
+          "color": "#2A7043",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "green-500",
+          "color": "#23834A",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ],
+      "primaryOnBlackBackground": [
+        {
+          "name": "green-400",
+          "color": "#469961",
+          "background": "#000000",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "green-300",
+          "color": "#78B385",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "green-200",
+          "color": "#9FD3A9",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "green-100",
+          "color": "#D0E9D2",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "green-50",
+          "color": "#ECF2EA",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        }
+      ],
+      "primaryOnPrimaryBackground": [
+        {
+          "name": "green-950 on green-400",
+          "color": "#0B2011",
+          "background": "#469961",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "green-950 on green-300",
+          "color": "#0B2011",
+          "background": "#78B385",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "green-950 on green-200",
+          "color": "#0B2011",
+          "background": "#9FD3A9",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "green-950 on green-100",
+          "color": "#0B2011",
+          "background": "#D0E9D2",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "green-950 on green-50",
+          "color": "#0B2011",
+          "background": "#ECF2EA",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "green-900 on green-300",
+          "color": "#112B19",
+          "background": "#78B385",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "green-900 on green-200",
+          "color": "#112B19",
+          "background": "#9FD3A9",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "green-900 on green-100",
+          "color": "#112B19",
+          "background": "#D0E9D2",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "green-900 on green-50",
+          "color": "#112B19",
+          "background": "#ECF2EA",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "green-800 on green-300",
+          "color": "#21422A",
+          "background": "#78B385",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "green-800 on green-200",
+          "color": "#21422A",
+          "background": "#9FD3A9",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "green-800 on green-100",
+          "color": "#21422A",
+          "background": "#D0E9D2",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "green-800 on green-50",
+          "color": "#21422A",
+          "background": "#ECF2EA",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "green-700 on green-200",
+          "color": "#295C3A",
+          "background": "#9FD3A9",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "green-700 on green-100",
+          "color": "#295C3A",
+          "background": "#D0E9D2",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "green-700 on green-50",
+          "color": "#295C3A",
+          "background": "#ECF2EA",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "green-600 on green-100",
+          "color": "#2A7043",
+          "background": "#D0E9D2",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "green-600 on green-50",
+          "color": "#2A7043",
+          "background": "#ECF2EA",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ]
+    }
+  },
+  "lime": {
+    "primaryColor": "#406F1D",
+    "primaryColorDark": "#64963F",
+    "primarySection": [
+      {
+        "name": "lime-950",
+        "color": "#121F09",
+        "white": {
+          "ratio": 17.13,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.23,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "lime-900",
+        "color": "#182A0C",
+        "white": {
+          "ratio": 15.27,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.38,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "lime-800",
+        "color": "#2A4218",
+        "white": {
+          "ratio": 11.11,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.89,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "lime-700",
+        "color": "#385B1E",
+        "white": {
+          "ratio": 7.83,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 2.68,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "lime-600",
+        "color": "#406F1D",
+        "white": {
+          "ratio": 5.98,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 3.51,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "lime-500",
+        "color": "#478019",
+        "white": {
+          "ratio": 4.81,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 4.37,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "lime-400",
+        "color": "#64963F",
+        "white": {
+          "ratio": 3.51,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 5.98,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "lime-300",
+        "color": "#81B45C",
+        "white": {
+          "ratio": 2.44,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 8.62,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "lime-200",
+        "color": "#ADD18F",
+        "white": {
+          "ratio": 1.71,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 12.29,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "lime-100",
+        "color": "#D7E8C6",
+        "white": {
+          "ratio": 1.29,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 16.25,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "lime-50",
+        "color": "#F0F2E7",
+        "white": {
+          "ratio": 1.13,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 18.56,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      }
+    ],
+    "accessibleCombinations": {
+      "primaryOnWhiteBackground": [
+        {
+          "name": "lime-950",
+          "color": "#121F09",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "lime-900",
+          "color": "#182A0C",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "lime-800",
+          "color": "#2A4218",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "lime-700",
+          "color": "#385B1E",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "lime-600",
+          "color": "#406F1D",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "lime-500",
+          "color": "#478019",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ],
+      "primaryOnBlackBackground": [
+        {
+          "name": "lime-400",
+          "color": "#64963F",
+          "background": "#000000",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "lime-300",
+          "color": "#81B45C",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "lime-200",
+          "color": "#ADD18F",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "lime-100",
+          "color": "#D7E8C6",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "lime-50",
+          "color": "#F0F2E7",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        }
+      ],
+      "primaryOnPrimaryBackground": [
+        {
+          "name": "lime-950 on lime-400",
+          "color": "#121F09",
+          "background": "#64963F",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "lime-950 on lime-300",
+          "color": "#121F09",
+          "background": "#81B45C",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "lime-950 on lime-200",
+          "color": "#121F09",
+          "background": "#ADD18F",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "lime-950 on lime-100",
+          "color": "#121F09",
+          "background": "#D7E8C6",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "lime-950 on lime-50",
+          "color": "#121F09",
+          "background": "#F0F2E7",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "lime-900 on lime-300",
+          "color": "#182A0C",
+          "background": "#81B45C",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "lime-900 on lime-200",
+          "color": "#182A0C",
+          "background": "#ADD18F",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "lime-900 on lime-100",
+          "color": "#182A0C",
+          "background": "#D7E8C6",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "lime-900 on lime-50",
+          "color": "#182A0C",
+          "background": "#F0F2E7",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "lime-800 on lime-300",
+          "color": "#2A4218",
+          "background": "#81B45C",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "lime-800 on lime-200",
+          "color": "#2A4218",
+          "background": "#ADD18F",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "lime-800 on lime-100",
+          "color": "#2A4218",
+          "background": "#D7E8C6",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "lime-800 on lime-50",
+          "color": "#2A4218",
+          "background": "#F0F2E7",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "lime-700 on lime-200",
+          "color": "#385B1E",
+          "background": "#ADD18F",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "lime-700 on lime-100",
+          "color": "#385B1E",
+          "background": "#D7E8C6",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "lime-700 on lime-50",
+          "color": "#385B1E",
+          "background": "#F0F2E7",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "lime-600 on lime-100",
+          "color": "#406F1D",
+          "background": "#D7E8C6",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "lime-600 on lime-50",
+          "color": "#406F1D",
+          "background": "#F0F2E7",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ]
+    }
+  },
+  "yellow": {
+    "primaryColor": "#746202",
+    "primaryColorDark": "#A18800",
+    "primarySection": [
+      {
+        "name": "yellow-950",
+        "color": "#221B00",
+        "white": {
+          "ratio": 17.15,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.22,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "yellow-900",
+        "color": "#2E2500",
+        "white": {
+          "ratio": 15.21,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.38,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "yellow-800",
+        "color": "#463A01",
+        "white": {
+          "ratio": 11.25,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.87,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "yellow-700",
+        "color": "#615102",
+        "white": {
+          "ratio": 7.82,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 2.69,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "yellow-600",
+        "color": "#746202",
+        "white": {
+          "ratio": 6.02,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 3.49,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "yellow-500",
+        "color": "#887200",
+        "white": {
+          "ratio": 4.72,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 4.45,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "yellow-400",
+        "color": "#A18800",
+        "white": {
+          "ratio": 3.48,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 6.04,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "yellow-300",
+        "color": "#C0A300",
+        "white": {
+          "ratio": 2.48,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 8.48,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "yellow-200",
+        "color": "#E3C437",
+        "white": {
+          "ratio": 1.72,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 12.22,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "yellow-100",
+        "color": "#F9E28A",
+        "white": {
+          "ratio": 1.29,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 16.27,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "yellow-50",
+        "color": "#FAF1DB",
+        "white": {
+          "ratio": 1.12,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 18.67,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      }
+    ],
+    "accessibleCombinations": {
+      "primaryOnWhiteBackground": [
+        {
+          "name": "yellow-950",
+          "color": "#221B00",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "yellow-900",
+          "color": "#2E2500",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "yellow-800",
+          "color": "#463A01",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "yellow-700",
+          "color": "#615102",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "yellow-600",
+          "color": "#746202",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "yellow-500",
+          "color": "#887200",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ],
+      "primaryOnBlackBackground": [
+        {
+          "name": "yellow-400",
+          "color": "#A18800",
+          "background": "#000000",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "yellow-300",
+          "color": "#C0A300",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "yellow-200",
+          "color": "#E3C437",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "yellow-100",
+          "color": "#F9E28A",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "yellow-50",
+          "color": "#FAF1DB",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        }
+      ],
+      "primaryOnPrimaryBackground": [
+        {
+          "name": "yellow-950 on yellow-400",
+          "color": "#221B00",
+          "background": "#A18800",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "yellow-950 on yellow-300",
+          "color": "#221B00",
+          "background": "#C0A300",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "yellow-950 on yellow-200",
+          "color": "#221B00",
+          "background": "#E3C437",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "yellow-950 on yellow-100",
+          "color": "#221B00",
+          "background": "#F9E28A",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "yellow-950 on yellow-50",
+          "color": "#221B00",
+          "background": "#FAF1DB",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "yellow-900 on yellow-300",
+          "color": "#2E2500",
+          "background": "#C0A300",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "yellow-900 on yellow-200",
+          "color": "#2E2500",
+          "background": "#E3C437",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "yellow-900 on yellow-100",
+          "color": "#2E2500",
+          "background": "#F9E28A",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "yellow-900 on yellow-50",
+          "color": "#2E2500",
+          "background": "#FAF1DB",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "yellow-800 on yellow-300",
+          "color": "#463A01",
+          "background": "#C0A300",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "yellow-800 on yellow-200",
+          "color": "#463A01",
+          "background": "#E3C437",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "yellow-800 on yellow-100",
+          "color": "#463A01",
+          "background": "#F9E28A",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "yellow-800 on yellow-50",
+          "color": "#463A01",
+          "background": "#FAF1DB",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "yellow-700 on yellow-200",
+          "color": "#615102",
+          "background": "#E3C437",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "yellow-700 on yellow-100",
+          "color": "#615102",
+          "background": "#F9E28A",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "yellow-700 on yellow-50",
+          "color": "#615102",
+          "background": "#FAF1DB",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "yellow-600 on yellow-100",
+          "color": "#746202",
+          "background": "#F9E28A",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "yellow-600 on yellow-50",
+          "color": "#746202",
+          "background": "#FAF1DB",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ]
+    }
+  },
+  "amber": {
+    "primaryColor": "#875B04",
+    "primaryColorDark": "#B47F1E",
+    "primarySection": [
+      {
+        "name": "amber-950",
+        "color": "#291900",
+        "white": {
+          "ratio": 17.03,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.23,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "amber-900",
+        "color": "#352201",
+        "white": {
+          "ratio": 15.21,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.38,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "amber-800",
+        "color": "#513601",
+        "white": {
+          "ratio": 11.18,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.88,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "amber-700",
+        "color": "#6F4B02",
+        "white": {
+          "ratio": 7.83,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 2.68,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "amber-600",
+        "color": "#875B04",
+        "white": {
+          "ratio": 5.95,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 3.53,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "amber-500",
+        "color": "#996805",
+        "white": {
+          "ratio": 4.84,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 4.34,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "amber-400",
+        "color": "#B47F1E",
+        "white": {
+          "ratio": 3.5,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 6,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "amber-300",
+        "color": "#D19C46",
+        "white": {
+          "ratio": 2.45,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 8.55,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "amber-200",
+        "color": "#F1BE71",
+        "white": {
+          "ratio": 1.7,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 12.34,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "amber-100",
+        "color": "#F8DFBF",
+        "white": {
+          "ratio": 1.29,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 16.3,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "amber-50",
+        "color": "#FCEEE0",
+        "white": {
+          "ratio": 1.14,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 18.45,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      }
+    ],
+    "accessibleCombinations": {
+      "primaryOnWhiteBackground": [
+        {
+          "name": "amber-950",
+          "color": "#291900",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "amber-900",
+          "color": "#352201",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "amber-800",
+          "color": "#513601",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "amber-700",
+          "color": "#6F4B02",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "amber-600",
+          "color": "#875B04",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "amber-500",
+          "color": "#996805",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ],
+      "primaryOnBlackBackground": [
+        {
+          "name": "amber-400",
+          "color": "#B47F1E",
+          "background": "#000000",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "amber-300",
+          "color": "#D19C46",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "amber-200",
+          "color": "#F1BE71",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "amber-100",
+          "color": "#F8DFBF",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "amber-50",
+          "color": "#FCEEE0",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        }
+      ],
+      "primaryOnPrimaryBackground": [
+        {
+          "name": "amber-950 on amber-400",
+          "color": "#291900",
+          "background": "#B47F1E",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "amber-950 on amber-300",
+          "color": "#291900",
+          "background": "#D19C46",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "amber-950 on amber-200",
+          "color": "#291900",
+          "background": "#F1BE71",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "amber-950 on amber-100",
+          "color": "#291900",
+          "background": "#F8DFBF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "amber-950 on amber-50",
+          "color": "#291900",
+          "background": "#FCEEE0",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "amber-900 on amber-300",
+          "color": "#352201",
+          "background": "#D19C46",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "amber-900 on amber-200",
+          "color": "#352201",
+          "background": "#F1BE71",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "amber-900 on amber-100",
+          "color": "#352201",
+          "background": "#F8DFBF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "amber-900 on amber-50",
+          "color": "#352201",
+          "background": "#FCEEE0",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "amber-800 on amber-300",
+          "color": "#513601",
+          "background": "#D19C46",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "amber-800 on amber-200",
+          "color": "#513601",
+          "background": "#F1BE71",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "amber-800 on amber-100",
+          "color": "#513601",
+          "background": "#F8DFBF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "amber-800 on amber-50",
+          "color": "#513601",
+          "background": "#FCEEE0",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "amber-700 on amber-200",
+          "color": "#6F4B02",
+          "background": "#F1BE71",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "amber-700 on amber-100",
+          "color": "#6F4B02",
+          "background": "#F8DFBF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "amber-700 on amber-50",
+          "color": "#6F4B02",
+          "background": "#FCEEE0",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "amber-600 on amber-100",
+          "color": "#875B04",
+          "background": "#F8DFBF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "amber-600 on amber-50",
+          "color": "#875B04",
+          "background": "#FCEEE0",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ]
+    }
+  },
+  "orange": {
+    "primaryColor": "#A24907",
+    "primaryColorDark": "#D26D2B",
+    "primarySection": [
+      {
+        "name": "orange-950",
+        "color": "#301302",
+        "white": {
+          "ratio": 17.22,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.22,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "orange-900",
+        "color": "#411B02",
+        "white": {
+          "ratio": 15.19,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.38,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "orange-800",
+        "color": "#642C04",
+        "white": {
+          "ratio": 11.03,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.9,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "orange-700",
+        "color": "#873D07",
+        "white": {
+          "ratio": 7.78,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 2.7,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "orange-600",
+        "color": "#A24907",
+        "white": {
+          "ratio": 6.01,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 3.49,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "orange-500",
+        "color": "#BA5400",
+        "white": {
+          "ratio": 4.82,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 4.36,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "orange-400",
+        "color": "#D26D2B",
+        "white": {
+          "ratio": 3.52,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 5.96,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "orange-300",
+        "color": "#F08C50",
+        "white": {
+          "ratio": 2.45,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 8.57,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "orange-200",
+        "color": "#F7B997",
+        "white": {
+          "ratio": 1.7,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 12.34,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "orange-100",
+        "color": "#F9DDD0",
+        "white": {
+          "ratio": 1.29,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 16.28,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "orange-50",
+        "color": "#FAEEE9",
+        "white": {
+          "ratio": 1.14,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 18.47,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      }
+    ],
+    "accessibleCombinations": {
+      "primaryOnWhiteBackground": [
+        {
+          "name": "orange-950",
+          "color": "#301302",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "orange-900",
+          "color": "#411B02",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "orange-800",
+          "color": "#642C04",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "orange-700",
+          "color": "#873D07",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "orange-600",
+          "color": "#A24907",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "orange-500",
+          "color": "#BA5400",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ],
+      "primaryOnBlackBackground": [
+        {
+          "name": "orange-400",
+          "color": "#D26D2B",
+          "background": "#000000",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "orange-300",
+          "color": "#F08C50",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "orange-200",
+          "color": "#F7B997",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "orange-100",
+          "color": "#F9DDD0",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "orange-50",
+          "color": "#FAEEE9",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        }
+      ],
+      "primaryOnPrimaryBackground": [
+        {
+          "name": "orange-950 on orange-400",
+          "color": "#301302",
+          "background": "#D26D2B",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "orange-950 on orange-300",
+          "color": "#301302",
+          "background": "#F08C50",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "orange-950 on orange-200",
+          "color": "#301302",
+          "background": "#F7B997",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "orange-950 on orange-100",
+          "color": "#301302",
+          "background": "#F9DDD0",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "orange-950 on orange-50",
+          "color": "#301302",
+          "background": "#FAEEE9",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "orange-900 on orange-300",
+          "color": "#411B02",
+          "background": "#F08C50",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "orange-900 on orange-200",
+          "color": "#411B02",
+          "background": "#F7B997",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "orange-900 on orange-100",
+          "color": "#411B02",
+          "background": "#F9DDD0",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "orange-900 on orange-50",
+          "color": "#411B02",
+          "background": "#FAEEE9",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "orange-800 on orange-300",
+          "color": "#642C04",
+          "background": "#F08C50",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "orange-800 on orange-200",
+          "color": "#642C04",
+          "background": "#F7B997",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "orange-800 on orange-100",
+          "color": "#642C04",
+          "background": "#F9DDD0",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "orange-800 on orange-50",
+          "color": "#642C04",
+          "background": "#FAEEE9",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "orange-700 on orange-200",
+          "color": "#873D07",
+          "background": "#F7B997",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "orange-700 on orange-100",
+          "color": "#873D07",
+          "background": "#F9DDD0",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "orange-700 on orange-50",
+          "color": "#873D07",
+          "background": "#FAEEE9",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "orange-600 on orange-100",
+          "color": "#A24907",
+          "background": "#F9DDD0",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "orange-600 on orange-50",
+          "color": "#A24907",
+          "background": "#FAEEE9",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ]
+    }
+  },
+  "magenta": {
+    "primaryColor": "#B62965",
+    "primaryColorDark": "#EA4F8B",
+    "primarySection": [
+      {
+        "name": "magenta-950",
+        "color": "#38091C",
+        "white": {
+          "ratio": 17.16,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.22,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "magenta-900",
+        "color": "#4A0D27",
+        "white": {
+          "ratio": 15.24,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.38,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "magenta-800",
+        "color": "#71163C",
+        "white": {
+          "ratio": 11.16,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.88,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "magenta-700",
+        "color": "#9A1F53",
+        "white": {
+          "ratio": 7.79,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 2.69,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "magenta-600",
+        "color": "#B62965",
+        "white": {
+          "ratio": 6.01,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 3.49,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "magenta-500",
+        "color": "#D12E75",
+        "white": {
+          "ratio": 4.82,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 4.36,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "magenta-400",
+        "color": "#EA4F8B",
+        "white": {
+          "ratio": 3.51,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 5.99,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "magenta-300",
+        "color": "#FF7AA7",
+        "white": {
+          "ratio": 2.44,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 8.59,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "magenta-200",
+        "color": "#FFB1C7",
+        "white": {
+          "ratio": 1.7,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 12.37,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "magenta-100",
+        "color": "#FFD7E0",
+        "white": {
+          "ratio": 1.31,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 16.05,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "magenta-50",
+        "color": "#FBEEEF",
+        "white": {
+          "ratio": 1.13,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 18.58,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      }
+    ],
+    "accessibleCombinations": {
+      "primaryOnWhiteBackground": [
+        {
+          "name": "magenta-950",
+          "color": "#38091C",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "magenta-900",
+          "color": "#4A0D27",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "magenta-800",
+          "color": "#71163C",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "magenta-700",
+          "color": "#9A1F53",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "magenta-600",
+          "color": "#B62965",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "magenta-500",
+          "color": "#D12E75",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ],
+      "primaryOnBlackBackground": [
+        {
+          "name": "magenta-400",
+          "color": "#EA4F8B",
+          "background": "#000000",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "magenta-300",
+          "color": "#FF7AA7",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "magenta-200",
+          "color": "#FFB1C7",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "magenta-100",
+          "color": "#FFD7E0",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "magenta-50",
+          "color": "#FBEEEF",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        }
+      ],
+      "primaryOnPrimaryBackground": [
+        {
+          "name": "magenta-950 on magenta-400",
+          "color": "#38091C",
+          "background": "#EA4F8B",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "magenta-950 on magenta-300",
+          "color": "#38091C",
+          "background": "#FF7AA7",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "magenta-950 on magenta-200",
+          "color": "#38091C",
+          "background": "#FFB1C7",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "magenta-950 on magenta-100",
+          "color": "#38091C",
+          "background": "#FFD7E0",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "magenta-950 on magenta-50",
+          "color": "#38091C",
+          "background": "#FBEEEF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "magenta-900 on magenta-300",
+          "color": "#4A0D27",
+          "background": "#FF7AA7",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "magenta-900 on magenta-200",
+          "color": "#4A0D27",
+          "background": "#FFB1C7",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "magenta-900 on magenta-100",
+          "color": "#4A0D27",
+          "background": "#FFD7E0",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "magenta-900 on magenta-50",
+          "color": "#4A0D27",
+          "background": "#FBEEEF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "magenta-800 on magenta-300",
+          "color": "#71163C",
+          "background": "#FF7AA7",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "magenta-800 on magenta-200",
+          "color": "#71163C",
+          "background": "#FFB1C7",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "magenta-800 on magenta-100",
+          "color": "#71163C",
+          "background": "#FFD7E0",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "magenta-800 on magenta-50",
+          "color": "#71163C",
+          "background": "#FBEEEF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "magenta-700 on magenta-200",
+          "color": "#9A1F53",
+          "background": "#FFB1C7",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "magenta-700 on magenta-100",
+          "color": "#9A1F53",
+          "background": "#FFD7E0",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "magenta-700 on magenta-50",
+          "color": "#9A1F53",
+          "background": "#FBEEEF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "magenta-600 on magenta-100",
+          "color": "#B62965",
+          "background": "#FFD7E0",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "magenta-600 on magenta-50",
+          "color": "#B62965",
+          "background": "#FBEEEF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ]
+    }
+  },
+  "maroon": {
+    "primaryColor": "#983F98",
+    "primaryColorDark": "#C465C0",
+    "primarySection": [
+      {
+        "name": "maroon-950",
+        "color": "#2C122B",
+        "white": {
+          "ratio": 17.09,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.23,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "maroon-900",
+        "color": "#3E163D",
+        "white": {
+          "ratio": 15.14,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.39,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "maroon-800",
+        "color": "#5E245D",
+        "white": {
+          "ratio": 11.13,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.89,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "maroon-700",
+        "color": "#7F347E",
+        "white": {
+          "ratio": 7.79,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 2.69,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "maroon-600",
+        "color": "#983F98",
+        "white": {
+          "ratio": 6,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 3.5,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "maroon-500",
+        "color": "#B14BB0",
+        "white": {
+          "ratio": 4.66,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 4.5,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "maroon-400",
+        "color": "#C465C0",
+        "white": {
+          "ratio": 3.52,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 5.97,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "maroon-300",
+        "color": "#D88CD1",
+        "white": {
+          "ratio": 2.44,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 8.59,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "maroon-200",
+        "color": "#EAB6E3",
+        "white": {
+          "ratio": 1.71,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 12.3,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "maroon-100",
+        "color": "#F6DBEF",
+        "white": {
+          "ratio": 1.29,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 16.3,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "maroon-50",
+        "color": "#F9EEF3",
+        "white": {
+          "ratio": 1.13,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 18.55,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      }
+    ],
+    "accessibleCombinations": {
+      "primaryOnWhiteBackground": [
+        {
+          "name": "maroon-950",
+          "color": "#2C122B",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "maroon-900",
+          "color": "#3E163D",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "maroon-800",
+          "color": "#5E245D",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "maroon-700",
+          "color": "#7F347E",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "maroon-600",
+          "color": "#983F98",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "maroon-500",
+          "color": "#B14BB0",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ],
+      "primaryOnBlackBackground": [
+        {
+          "name": "maroon-500",
+          "color": "#B14BB0",
+          "background": "#000000",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "maroon-400",
+          "color": "#C465C0",
+          "background": "#000000",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "maroon-300",
+          "color": "#D88CD1",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "maroon-200",
+          "color": "#EAB6E3",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "maroon-100",
+          "color": "#F6DBEF",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "maroon-50",
+          "color": "#F9EEF3",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        }
+      ],
+      "primaryOnPrimaryBackground": [
+        {
+          "name": "maroon-950 on maroon-400",
+          "color": "#2C122B",
+          "background": "#C465C0",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "maroon-950 on maroon-300",
+          "color": "#2C122B",
+          "background": "#D88CD1",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "maroon-950 on maroon-200",
+          "color": "#2C122B",
+          "background": "#EAB6E3",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "maroon-950 on maroon-100",
+          "color": "#2C122B",
+          "background": "#F6DBEF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "maroon-950 on maroon-50",
+          "color": "#2C122B",
+          "background": "#F9EEF3",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "maroon-900 on maroon-300",
+          "color": "#3E163D",
+          "background": "#D88CD1",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "maroon-900 on maroon-200",
+          "color": "#3E163D",
+          "background": "#EAB6E3",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "maroon-900 on maroon-100",
+          "color": "#3E163D",
+          "background": "#F6DBEF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "maroon-900 on maroon-50",
+          "color": "#3E163D",
+          "background": "#F9EEF3",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "maroon-800 on maroon-300",
+          "color": "#5E245D",
+          "background": "#D88CD1",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "maroon-800 on maroon-200",
+          "color": "#5E245D",
+          "background": "#EAB6E3",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "maroon-800 on maroon-100",
+          "color": "#5E245D",
+          "background": "#F6DBEF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "maroon-800 on maroon-50",
+          "color": "#5E245D",
+          "background": "#F9EEF3",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "maroon-700 on maroon-200",
+          "color": "#7F347E",
+          "background": "#EAB6E3",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "maroon-700 on maroon-100",
+          "color": "#7F347E",
+          "background": "#F6DBEF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "maroon-700 on maroon-50",
+          "color": "#7F347E",
+          "background": "#F9EEF3",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "maroon-600 on maroon-100",
+          "color": "#983F98",
+          "background": "#F6DBEF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "maroon-600 on maroon-50",
+          "color": "#983F98",
+          "background": "#F9EEF3",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ]
+    }
+  },
+  "violet": {
+    "primaryColor": "#7750A8",
+    "primaryColorDark": "#A372DD",
+    "primarySection": [
+      {
+        "name": "violet-950",
+        "color": "#241338",
+        "white": {
+          "ratio": 17.14,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.23,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "violet-900",
+        "color": "#311B4B",
+        "white": {
+          "ratio": 15.12,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.39,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "violet-800",
+        "color": "#492E6A",
+        "white": {
+          "ratio": 11.16,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 1.88,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "violet-700",
+        "color": "#64428D",
+        "white": {
+          "ratio": 7.76,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "black": {
+          "ratio": 2.71,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "violet-600",
+        "color": "#7750A8",
+        "white": {
+          "ratio": 6,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 3.5,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "violet-500",
+        "color": "#8F5ACE",
+        "white": {
+          "ratio": 4.64,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 4.52,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "violet-400",
+        "color": "#A372DD",
+        "white": {
+          "ratio": 3.5,
+          "large": {
+            "AA": true,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 6.01,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": false
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "violet-300",
+        "color": "#BE92F4",
+        "white": {
+          "ratio": 2.44,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 8.61,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "violet-200",
+        "color": "#D8B8FD",
+        "white": {
+          "ratio": 1.72,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 12.19,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "violet-100",
+        "color": "#EEDCFD",
+        "white": {
+          "ratio": 1.29,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 16.29,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      },
+      {
+        "name": "violet-50",
+        "color": "#F9EEFE",
+        "white": {
+          "ratio": 1.12,
+          "large": {
+            "AA": false,
+            "AAA": false
+          },
+          "body": {
+            "AA": false,
+            "AAA": false
+          }
+        },
+        "black": {
+          "ratio": 18.69,
+          "large": {
+            "AA": true,
+            "AAA": true
+          },
+          "body": {
+            "AA": true,
+            "AAA": true
+          }
+        },
+        "overallCompliance": "AAA"
+      }
+    ],
+    "accessibleCombinations": {
+      "primaryOnWhiteBackground": [
+        {
+          "name": "violet-950",
+          "color": "#241338",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "violet-900",
+          "color": "#311B4B",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "violet-800",
+          "color": "#492E6A",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "violet-700",
+          "color": "#64428D",
+          "background": "#FFFFFF",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "violet-600",
+          "color": "#7750A8",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "violet-500",
+          "color": "#8F5ACE",
+          "background": "#FFFFFF",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ],
+      "primaryOnBlackBackground": [
+        {
+          "name": "violet-500",
+          "color": "#8F5ACE",
+          "background": "#000000",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "violet-400",
+          "color": "#A372DD",
+          "background": "#000000",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "violet-300",
+          "color": "#BE92F4",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "violet-200",
+          "color": "#D8B8FD",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "violet-100",
+          "color": "#EEDCFD",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "violet-50",
+          "color": "#F9EEFE",
+          "background": "#000000",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        }
+      ],
+      "primaryOnPrimaryBackground": [
+        {
+          "name": "violet-950 on violet-400",
+          "color": "#241338",
+          "background": "#A372DD",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "violet-950 on violet-300",
+          "color": "#241338",
+          "background": "#BE92F4",
+          "compliance": "AAA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "violet-950 on violet-200",
+          "color": "#241338",
+          "background": "#D8B8FD",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "violet-950 on violet-100",
+          "color": "#241338",
+          "background": "#EEDCFD",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "violet-950 on violet-50",
+          "color": "#241338",
+          "background": "#F9EEFE",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "violet-900 on violet-300",
+          "color": "#311B4B",
+          "background": "#BE92F4",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "violet-900 on violet-200",
+          "color": "#311B4B",
+          "background": "#D8B8FD",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "violet-900 on violet-100",
+          "color": "#311B4B",
+          "background": "#EEDCFD",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "violet-900 on violet-50",
+          "color": "#311B4B",
+          "background": "#F9EEFE",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "violet-800 on violet-300",
+          "color": "#492E6A",
+          "background": "#BE92F4",
+          "compliance": "AA",
+          "isDarkerColor": true
+        },
+        {
+          "name": "violet-800 on violet-200",
+          "color": "#492E6A",
+          "background": "#D8B8FD",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "violet-800 on violet-100",
+          "color": "#492E6A",
+          "background": "#EEDCFD",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "violet-800 on violet-50",
+          "color": "#492E6A",
+          "background": "#F9EEFE",
+          "compliance": "AAA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "violet-700 on violet-200",
+          "color": "#64428D",
+          "background": "#D8B8FD",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "violet-700 on violet-100",
+          "color": "#64428D",
+          "background": "#EEDCFD",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "violet-700 on violet-50",
+          "color": "#64428D",
+          "background": "#F9EEFE",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "violet-600 on violet-100",
+          "color": "#7750A8",
+          "background": "#EEDCFD",
+          "compliance": "AA",
+          "isDarkerColor": false
+        },
+        {
+          "name": "violet-600 on violet-50",
+          "color": "#7750A8",
+          "background": "#F9EEFE",
+          "compliance": "AA",
+          "isDarkerColor": false
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,71 @@
+FROM node:20-slim AS base
+
+WORKDIR /app
+
+FROM base AS deps
+
+RUN apt-get update && apt-get install -y python3 make g++ git
+
+COPY package.json package-lock.json ./
+
+RUN npm install
+
+FROM base AS builder
+
+WORKDIR /app
+
+# ARG NEXT_PUBLIC_STRAPI_API_TOKEN
+ARG NEXT_PUBLIC_STRAPI_API_URL
+ARG NEXT_PUBLIC_STRAPI_URL
+ARG NEXT_PUBLIC_KEYCLOAK_URL
+ARG NEXT_PUBLIC_KEYCLOAK_REALM
+ARG NEXT_PUBLIC_KEYCLOAK_CLIENT_ID
+ARG NEXT_PUBLIC_INTERNAL_API_URL
+ARG NEXT_PUBLIC_BRANDSYNC_MCP_URL
+ARG NEXT_PUBLIC_APP_ENV
+ARG NEXT_PUBLIC_POSTHOG_KEY
+ARG NEXT_PUBLIC_POSTHOG_HOST
+ARG NEXT_PUBLIC_ICONS_BACKEND_BASE_URL
+
+# ENV NEXT_PUBLIC_STRAPI_API_TOKEN=$NEXT_PUBLIC_STRAPI_API_TOKEN
+ENV NEXT_PUBLIC_STRAPI_API_URL=$NEXT_PUBLIC_STRAPI_API_URL
+ENV NEXT_PUBLIC_STRAPI_URL=$NEXT_PUBLIC_STRAPI_URL
+ENV NEXT_PUBLIC_KEYCLOAK_URL=$NEXT_PUBLIC_KEYCLOAK_URL
+ENV NEXT_PUBLIC_KEYCLOAK_REALM=$NEXT_PUBLIC_KEYCLOAK_REALM
+ENV NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=$NEXT_PUBLIC_KEYCLOAK_CLIENT_ID
+ENV NEXT_PUBLIC_INTERNAL_API_URL=$NEXT_PUBLIC_INTERNAL_API_URL
+ENV NEXT_PUBLIC_BRANDSYNC_MCP_URL=$NEXT_PUBLIC_BRANDSYNC_MCP_URL
+ENV NEXT_PUBLIC_APP_ENV=$NEXT_PUBLIC_APP_ENV
+ENV NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY
+ENV NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
+ENV NEXT_PUBLIC_ICONS_BACKEND_BASE_URL=$NEXT_PUBLIC_ICONS_BACKEND_BASE_URL
+ENV NODE_ENV=production
+
+
+COPY --from=deps /app/node_modules ./node_modules
+
+COPY . .
+
+RUN npm run build
+
+FROM base AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nodejs
+
+
+COPY --from=builder --chown=nodejs:nodejs /app/public ./public
+COPY --from=builder --chown=nodejs:nodejs /app/.next ./.next
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nodejs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nodejs:nodejs /app/next.config.mjs ./next.config.mjs
+
+USER nodejs
+
+EXPOSE 3000
+
+CMD ["npm", "run", "start"]
