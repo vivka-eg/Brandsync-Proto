@@ -5,7 +5,6 @@ import { Roboto, Roboto_Mono } from "next/font/google";
 import { ToastProvider } from "@/context/shared/ToastContext";
 import { AuthContextProvider } from "@/context/auth/AuthContext";
 import AuthWrapper from "@/components/auth/AuthWrapper";
-import PostHogProvider from "@/components/PostHogProvider";
 import NextTopLoader from "nextjs-toploader";
 
 // This is an auth-gated, MCP-driven client app — render dynamically rather than
@@ -45,7 +44,7 @@ export default function RootLayout({ children }) {
           <ToastProvider>
             <AuthContextProvider>
               <AuthWrapper>
-                <PostHogProvider>{children}</PostHogProvider>
+                {children}
               </AuthWrapper>
             </AuthContextProvider>
           </ToastProvider>
