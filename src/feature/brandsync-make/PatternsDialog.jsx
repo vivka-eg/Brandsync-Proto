@@ -1,4 +1,5 @@
 "use client";
+import { getUserEmail } from "@/lib/userEmail";
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -23,7 +24,6 @@ import { X, CheckCircle, Sparkle, UsersThree, Clock } from "phosphor-react";
 import { getStoredOrgId } from "@/lib/useActiveOrg";
 
 // LOCAL DEV ONLY — same hardcoded user as the other Make dialogs.
-const USER_EMAIL = "vivka@eg.dk";
 
 const NAME_STOP = new Set([
   "a", "an", "the", "to", "of", "for", "and", "or", "with", "my", "our", "me",
@@ -66,7 +66,7 @@ function Preview({ patternId, tokensCss }) {
   const [content, setContent] = useState(null);
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/patterns/${patternId}?userEmail=${encodeURIComponent(USER_EMAIL)}`)
+    fetch(`/api/patterns/${patternId}?userEmail=${encodeURIComponent(getUserEmail())}`)
       .then((r) => r.json())
       .then((d) => { if (!cancelled) setContent(d.content ?? ""); })
       .catch(() => { if (!cancelled) setContent(""); });
@@ -174,11 +174,11 @@ export default function PatternsDialog({ open, onClose }) {
   const orgQs = () => (getStoredOrgId() ? `&orgId=${encodeURIComponent(getStoredOrgId())}` : "");
 
   const loadApproved = useCallback(() => {
-    fetch(`/api/patterns?userEmail=${encodeURIComponent(USER_EMAIL)}${orgQs()}&scope=approved`)
+    fetch(`/api/patterns?userEmail=${encodeURIComponent(getUserEmail())}${orgQs()}&scope=approved`)
       .then((r) => r.json()).then((d) => setApproved(d.patterns || [])).catch(() => setApproved([]));
   }, []);
   const loadPending = useCallback(() => {
-    fetch(`/api/patterns?userEmail=${encodeURIComponent(USER_EMAIL)}${orgQs()}&scope=pending`)
+    fetch(`/api/patterns?userEmail=${encodeURIComponent(getUserEmail())}${orgQs()}&scope=pending`)
       .then((r) => r.json()).then((d) => setPending(d.error ? [] : (d.patterns || []))).catch(() => setPending([]));
   }, []);
 
@@ -187,7 +187,7 @@ export default function PatternsDialog({ open, onClose }) {
     setView("explore"); setApproved(null); setPending(null);
     loadApproved();
     if (!tokensCss) fetch("/brandsync-tokens.css").then((r) => r.text()).then(setTokensCss).catch(() => {});
-    fetch(`/api/orgs?userEmail=${encodeURIComponent(USER_EMAIL)}`)
+    fetch(`/api/orgs?userEmail=${encodeURIComponent(getUserEmail())}`)
       .then((r) => r.json())
       .then((d) => {
         const oid = getStoredOrgId();
@@ -204,7 +204,7 @@ export default function PatternsDialog({ open, onClose }) {
     try {
       await fetch(`/api/patterns/${id}/approve`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userEmail: USER_EMAIL }),
+        body: JSON.stringify({ userEmail: getUserEmail() }),
       });
       loadPending(); loadApproved();
     } finally { setApprovingId(null); }
@@ -220,7 +220,7 @@ export default function PatternsDialog({ open, onClose }) {
     setPickPatternId(id);
     setPickAnchor(anchorEl);
     setProjects(null);
-    fetch(`/api/projects?userEmail=${encodeURIComponent(USER_EMAIL)}${orgQs()}`)
+    fetch(`/api/projects?userEmail=${encodeURIComponent(getUserEmail())}${orgQs()}`)
       .then((r) => r.json()).then((d) => setProjects(d.projects || [])).catch(() => setProjects([]));
   };
   const closePicker = () => { setPickAnchor(null); setPickPatternId(null); };
@@ -233,7 +233,7 @@ export default function PatternsDialog({ open, onClose }) {
     try {
       const res = await fetch(`/api/patterns/${id}/clone`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userEmail: USER_EMAIL, orgId: getStoredOrgId() || undefined, projectId: projectId || undefined }),
+        body: JSON.stringify({ userEmail: getUserEmail(), orgId: getStoredOrgId() || undefined, projectId: projectId || undefined }),
       });
       const d = await res.json();
       if (res.ok && d.pattern) {

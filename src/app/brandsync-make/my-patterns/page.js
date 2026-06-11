@@ -1,4 +1,5 @@
 'use client';
+import { getUserEmail } from "@/lib/userEmail";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -2047,7 +2048,7 @@ export default function MyPatternsPage() {
   const activeProject = projects.find(p => p.id === activeProjectId) ?? null;
 
   const fetchProjects = () =>
-    fetch(`/api/projects?userEmail=${encodeURIComponent('vivka@eg.dk')}${getStoredOrgId() ? `&orgId=${encodeURIComponent(getStoredOrgId())}` : ''}`)
+    fetch(`/api/projects?userEmail=${encodeURIComponent(getUserEmail())}${getStoredOrgId() ? `&orgId=${encodeURIComponent(getStoredOrgId())}` : ''}`)
       .then(r => r.json())
       .then(body => { setProjects(body.projects ?? []); })
       .catch(() => setProjects([]));
@@ -2059,7 +2060,7 @@ export default function MyPatternsPage() {
   // newly-logged row without the user having to reload.
   const [usage, setUsage] = useState(null);
   const fetchUsage = () =>
-    fetch(`/api/brandsync-make/usage?userEmail=${encodeURIComponent('vivka@eg.dk')}`)
+    fetch(`/api/brandsync-make/usage?userEmail=${encodeURIComponent(getUserEmail())}`)
       .then(r => r.ok ? r.json() : null)
       .then(body => { if (body && !body.error) setUsage(body); })
       .catch(() => {});
@@ -2102,7 +2103,7 @@ export default function MyPatternsPage() {
       return;
     }
     setProjectFilesLoading(true);
-    fetch(`/api/projects/${activeProjectId}?userEmail=${encodeURIComponent('vivka@eg.dk')}`)
+    fetch(`/api/projects/${activeProjectId}?userEmail=${encodeURIComponent(getUserEmail())}`)
       .then(r => r.json())
       .then(body => setProjectFiles(body.files ?? []))
       .catch(() => setProjectFiles([]))
@@ -2248,7 +2249,7 @@ export default function MyPatternsPage() {
           'Accept': 'text/event-stream',
         },
         body: JSON.stringify({
-          userEmail: 'vivka@eg.dk',
+          userEmail: getUserEmail(),
           prompt: trimmed,
           projectId: activeProjectId,
           orgId: getStoredOrgId(),
@@ -2361,7 +2362,7 @@ export default function MyPatternsPage() {
           : [updatedPattern, ...prev]);
         if (activeProjectId) {
           const [detail] = await Promise.all([
-            fetch(`/api/projects/${activeProjectId}?userEmail=${encodeURIComponent('vivka@eg.dk')}`).then(r => r.json()),
+            fetch(`/api/projects/${activeProjectId}?userEmail=${encodeURIComponent(getUserEmail())}`).then(r => r.json()),
             fetchProjects(),
           ]);
           setProjectFiles(detail.files ?? []);
@@ -2386,11 +2387,11 @@ export default function MyPatternsPage() {
       // a new pattern instead of repeatedly trying to edit a ghost.
       if (typeof e.message === 'string' && e.message.toLowerCase().includes('edit target not found')) {
         setSelectedId(null);
-        fetch(`/api/my-patterns?userEmail=${encodeURIComponent('vivka@eg.dk')}${getStoredOrgId() ? `&orgId=${encodeURIComponent(getStoredOrgId())}` : ''}`)
+        fetch(`/api/my-patterns?userEmail=${encodeURIComponent(getUserEmail())}${getStoredOrgId() ? `&orgId=${encodeURIComponent(getStoredOrgId())}` : ''}`)
           .then(r => r.json()).then(d => setPatterns(d.patterns ?? []))
           .catch(() => {});
         if (activeProjectId) {
-          fetch(`/api/projects/${activeProjectId}?userEmail=${encodeURIComponent('vivka@eg.dk')}`)
+          fetch(`/api/projects/${activeProjectId}?userEmail=${encodeURIComponent(getUserEmail())}`)
             .then(r => r.json()).then(d => setProjectFiles(d.files ?? []))
             .catch(() => {});
         }
@@ -2405,7 +2406,7 @@ export default function MyPatternsPage() {
 
   const handleRemoveFileFromProject = async (fileId) => {
     if (!activeProjectId) return;
-    await fetch(`/api/projects/${activeProjectId}/files/${fileId}?userEmail=${encodeURIComponent('vivka@eg.dk')}`, {
+    await fetch(`/api/projects/${activeProjectId}/files/${fileId}?userEmail=${encodeURIComponent(getUserEmail())}`, {
       method: 'DELETE',
     });
     setProjectFiles(prev => prev.filter(f => f.id !== fileId));
@@ -2417,7 +2418,7 @@ export default function MyPatternsPage() {
   // current membership row. Pattern (corpus_entry) is untouched.
   const handleMoveFileToProject = async ({ projectFileId, corpusEntryId, targetProjectId }) => {
     if (!activeProjectId || !targetProjectId || activeProjectId === targetProjectId) return;
-    const userEmail = 'vivka@eg.dk';
+    const userEmail = getUserEmail();
     await fetch(`/api/projects/${targetProjectId}/files`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2434,7 +2435,7 @@ export default function MyPatternsPage() {
   // project_files FK cascades so any memberships go with it.
   const handleDeletePattern = async (patternId) => {
     if (!confirm('Delete this pattern? This removes it from every project and cannot be undone.')) return;
-    const res = await fetch(`/api/my-patterns/${patternId}?userEmail=${encodeURIComponent('vivka@eg.dk')}`, {
+    const res = await fetch(`/api/my-patterns/${patternId}?userEmail=${encodeURIComponent(getUserEmail())}`, {
       method: 'DELETE',
     });
     if (!res.ok) {
@@ -2467,7 +2468,7 @@ export default function MyPatternsPage() {
     const res = await fetch(`/api/my-patterns/${patternId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userEmail: 'vivka@eg.dk', slug: trimmed }),
+      body: JSON.stringify({ userEmail: getUserEmail(), slug: trimmed }),
     });
     const body = await res.json().catch(() => ({}));
     if (!res.ok) {
@@ -2491,7 +2492,7 @@ export default function MyPatternsPage() {
       const res = await fetch(`/api/my-patterns/${selectedId}/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userEmail: 'vivka@eg.dk' }),
+        body: JSON.stringify({ userEmail: getUserEmail() }),
       });
       const body = await res.json();
       if (!res.ok) {
@@ -2517,7 +2518,7 @@ export default function MyPatternsPage() {
       const res = await fetch(`/api/my-patterns/${patternId}/revert`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userEmail: 'vivka@eg.dk', versionId }),
+        body: JSON.stringify({ userEmail: getUserEmail(), versionId }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
@@ -2562,7 +2563,7 @@ export default function MyPatternsPage() {
         const res = await fetch('/api/projects', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userEmail: 'vivka@eg.dk', name, orgId: getStoredOrgId(), brandPalette: pal, logoName }),
+          body: JSON.stringify({ userEmail: getUserEmail(), name, orgId: getStoredOrgId(), brandPalette: pal, logoName }),
         });
         const body = await res.json();
         if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
@@ -2575,7 +2576,7 @@ export default function MyPatternsPage() {
         const res = await fetch(`/api/projects/${activeProjectId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userEmail: 'vivka@eg.dk', brandPalette: pal, logoName }),
+          body: JSON.stringify({ userEmail: getUserEmail(), brandPalette: pal, logoName }),
         });
         const body = await res.json();
         if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
@@ -2697,9 +2698,9 @@ export default function MyPatternsPage() {
 
   useEffect(() => {
     // Local-dev identity. Swap for Keycloak session / Supabase auth
-    // before any non-local deploy — every `'vivka@eg.dk'` literal in
+    // before any non-local deploy — every `getUserEmail()` literal in
     // this file is a swap point.
-    const userEmail = 'vivka@eg.dk';
+    const userEmail = getUserEmail();
 
     Promise.all([
       fetch(`/api/my-patterns?userEmail=${encodeURIComponent(userEmail)}${getStoredOrgId() ? `&orgId=${encodeURIComponent(getStoredOrgId())}` : ''}`).then(r => r.json()),

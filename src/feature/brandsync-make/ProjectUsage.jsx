@@ -1,4 +1,5 @@
 "use client";
+import { getUserEmail } from "@/lib/userEmail";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -7,8 +8,6 @@ import { useRouter } from "next/navigation";
 // project-usage and shows the project's totals plus a chronological ledger of
 // every generation (tokens + cost + running total) that grows as you design.
 // "Export" copies the ledger as Markdown so it can be pasted into a doc/ticket.
-
-const USER_EMAIL = "vivka@eg.dk";
 
 // Figma Make baseline — SAME key + shape the Cost & savings screen persists, so
 // the assumptions are shared. Read-only here; adjust them on Cost & savings.
@@ -60,7 +59,7 @@ export default function ProjectUsage({ projectId }) {
   const figma = perScreenFigma(baseline);
 
   const load = () => {
-    fetch(`/api/brandsync-make/project-usage?userEmail=${encodeURIComponent(USER_EMAIL)}&projectId=${encodeURIComponent(projectId)}`)
+    fetch(`/api/brandsync-make/project-usage?userEmail=${encodeURIComponent(getUserEmail())}&projectId=${encodeURIComponent(projectId)}`)
       .then((r) => r.json())
       .then((b) => { if (b?.error) setError(b.error); else { setData(b); setError(null); } })
       .catch((e) => setError(e.message));

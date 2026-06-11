@@ -1,4 +1,5 @@
 "use client";
+import { getUserEmail } from "@/lib/userEmail";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -24,9 +25,8 @@ import ProjectBrandDialog from "./ProjectBrandDialog";
 
 // LOCAL DEV ONLY — same hardcoded user as /brandsync-make/my-patterns/page.js.
 // When real auth lands, both files should switch in lockstep.
-const USER_EMAIL = "vivka@eg.dk";
 
-// Initials for an owner/collaborator avatar, e.g. "vivka@eg.dk" → "VI".
+// Initials for an owner/collaborator avatar, e.g. getUserEmail() → "VI".
 function initials(email) {
   if (!email) return "?";
   const name = email.split("@")[0];
@@ -134,7 +134,7 @@ function ProjectPreviewGrid({ projectId, fileCount, tokensCss }) {
   useEffect(() => {
     if (!fileCount) { setFiles([]); return; }
     let cancelled = false;
-    fetch(`/api/projects/${projectId}/previews?userEmail=${encodeURIComponent(USER_EMAIL)}`)
+    fetch(`/api/projects/${projectId}/previews?userEmail=${encodeURIComponent(getUserEmail())}`)
       .then((r) => r.json())
       .then((d) => { if (!cancelled) setFiles(d.files || []); })
       .catch(() => { if (!cancelled) setFiles([]); });
@@ -302,7 +302,7 @@ function NewProjectForm({ onCancel, onCreated }) {
       const res = await fetch("/api/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userEmail: USER_EMAIL, name: trimmed, orgId: getStoredOrgId() }),
+        body: JSON.stringify({ userEmail: getUserEmail(), name: trimmed, orgId: getStoredOrgId() }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
@@ -394,7 +394,7 @@ export default function ProjectsDialog({ open, onClose }) {
   const load = async () => {
     setLoadError(null);
     try {
-      const res = await fetch(`/api/projects?userEmail=${encodeURIComponent(USER_EMAIL)}${getStoredOrgId() ? `&orgId=${encodeURIComponent(getStoredOrgId())}` : ""}`);
+      const res = await fetch(`/api/projects?userEmail=${encodeURIComponent(getUserEmail())}${getStoredOrgId() ? `&orgId=${encodeURIComponent(getStoredOrgId())}` : ""}`);
       const body = await res.json();
       if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
       setProjects(body.projects || []);
@@ -409,7 +409,7 @@ export default function ProjectsDialog({ open, onClose }) {
       setCreating(false);
       setProjects(null);
       load();
-      fetch(`/api/brandsync-make/usage?userEmail=${encodeURIComponent(USER_EMAIL)}`)
+      fetch(`/api/brandsync-make/usage?userEmail=${encodeURIComponent(getUserEmail())}`)
         .then((r) => r.json())
         .then((body) => { if (body && !body.error) setUsage(body); })
         .catch(() => {});
@@ -441,7 +441,7 @@ export default function ProjectsDialog({ open, onClose }) {
       const res = await fetch("/api/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userEmail: USER_EMAIL, name, orgId: getStoredOrgId(), brandPalette, logoName }),
+        body: JSON.stringify({ userEmail: getUserEmail(), name, orgId: getStoredOrgId(), brandPalette, logoName }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
@@ -562,7 +562,7 @@ export default function ProjectsDialog({ open, onClose }) {
               }}
             >
               {projects.map((p) => (
-                <ProjectCard key={p.id} project={p} ownerEmail={USER_EMAIL} tokensCss={tokensCss} onOpen={openProject} usage={usage} />
+                <ProjectCard key={p.id} project={p} ownerEmail={getUserEmail()} tokensCss={tokensCss} onOpen={openProject} usage={usage} />
               ))}
             </Box>
           )}

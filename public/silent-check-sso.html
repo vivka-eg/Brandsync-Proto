@@ -1,0 +1,11 @@
+<!doctype html>
+<html>
+  <head><title>Keycloak silent SSO check</title></head>
+  <body>
+    <script>
+      // Keycloak posts the auth result back to the main window during the
+      // silent check-sso flow (onLoad: "check-sso").
+      parent.postMessage(location.href, location.origin);
+    </script>
+  </body>
+</html>

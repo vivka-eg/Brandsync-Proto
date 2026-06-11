@@ -1,4 +1,5 @@
 'use client';
+import { getUserEmail } from "@/lib/userEmail";
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -6,8 +7,6 @@ import { X, Sun, Moon, MagnifyingGlass, PencilSimple } from '@phosphor-icons/rea
 import { brandOverrideCss, substituteBrand } from '@/lib/brand-substitute';
 import { getStoredOrgId } from '@/lib/useActiveOrg';
 import { replaceEmojisWithPhosphor } from '@/lib/icons';
-
-const DRAWER_USER_EMAIL = 'vivka@eg.dk';
 // Components come from /api/components, which now reads Supabase
 // (`kit_components`, migrated off Strapi). The stored detail includes
 // CodeExamples, so live previews render the same as before.
@@ -278,7 +277,7 @@ export default function ComponentsDrawer({
   useEffect(() => {
     if (!open || items.length > 0) return;
     const orgId = getStoredOrgId();
-    const qs = `orgId=${encodeURIComponent(orgId ?? '')}&userEmail=${encodeURIComponent(DRAWER_USER_EMAIL)}`;
+    const qs = `orgId=${encodeURIComponent(orgId ?? '')}&userEmail=${encodeURIComponent(getUserEmail())}`;
     Promise.all([
       fetch(`/api/kit?${qs}`).then(async r => {
         const body = await r.json();
@@ -287,7 +286,7 @@ export default function ComponentsDrawer({
       }),
       fetch(`/api/kit?css=1&${qs}`).then(r => (r.ok ? r.text() : '')),
       fetch('/api/tokens').then(r => (r.ok ? r.text() : '')),
-      fetch(`/api/orgs?userEmail=${encodeURIComponent(DRAWER_USER_EMAIL)}`).then(r => (r.ok ? r.json() : { orgs: [] })).catch(() => ({ orgs: [] })),
+      fetch(`/api/orgs?userEmail=${encodeURIComponent(getUserEmail())}`).then(r => (r.ok ? r.json() : { orgs: [] })).catch(() => ({ orgs: [] })),
     ])
       .then(([kit, kitCss, tokens, orgsBody]) => {
         const catalog = kit.catalog || [];

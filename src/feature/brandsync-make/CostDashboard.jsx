@@ -1,4 +1,5 @@
 "use client";
+import { getUserEmail } from "@/lib/userEmail";
 
 import { useEffect, useMemo, useState } from "react";
 
@@ -9,8 +10,6 @@ import { useEffect, useMemo, useState } from "react";
 //   Figma Make:  $14.97 · 18.9M tokens · 211,736 output · 15 prompts
 //   BrandSync:   $1.07  · 0.37M tokens · 65,435 output · 17 generations
 // → ~14× cheaper, ~51× fewer tokens. The benchmark figures are editable.
-
-const USER_EMAIL = "vivka@eg.dk";
 const BENCHMARK_KEY = "brandsync-make:figma-benchmark-v1";
 
 // Measured, same-app benchmark (June 2026 Figma Make session report).
@@ -75,7 +74,7 @@ export default function CostDashboard() {
       const s = JSON.parse(localStorage.getItem(BENCHMARK_KEY) || "null");
       if (s && typeof s === "object") setBm({ ...BENCHMARK_DEFAULTS, ...s });
     } catch { /* private mode */ }
-    fetch(`/api/brandsync-make/cost?userEmail=${encodeURIComponent(USER_EMAIL)}`)
+    fetch(`/api/brandsync-make/cost?userEmail=${encodeURIComponent(getUserEmail())}`)
       .then((r) => r.json())
       .then((b) => { if (b?.error) setError(b.error); else setData(b); })
       .catch((e) => setError(e.message));
