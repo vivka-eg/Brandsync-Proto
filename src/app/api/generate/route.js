@@ -805,8 +805,8 @@ async function logUsage({ userEmail, projectId, startedAt, usage, success, error
     await getPool().query(
       `INSERT INTO tool_usage_logs
          (id, user_email, tool_name, duration_ms, success, error,
-          input_tokens, output_tokens, cache_read_tokens, project_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+          input_tokens, output_tokens, cache_read_tokens, cache_creation_tokens, project_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
       [
         // Anthropic-style cuid would be nicer but uuid is fine — the
         // column is plain text and the existing rows are a mix of
@@ -822,6 +822,10 @@ async function logUsage({ userEmail, projectId, startedAt, usage, success, error
         // Anthropic returns cache_read_input_tokens; the schema column
         // is just cache_read_tokens.
         usage?.cache_read_input_tokens ?? null,
+        // Cache WRITES — billed at 1.25× input. Previously dropped, which
+        // under-stated true cost (the prompt-cache prefix is rewritten on
+        // every cold start). Logging it closes that gap.
+        usage?.cache_creation_input_tokens ?? null,
         // Attributes this generation to a project so per-project daily
         // token meters can sum it. Null when generating outside a project.
         projectId ?? null,
@@ -1334,7 +1338,7 @@ async function handlePost(request, ctx, emit) {
       `[generate] scope=${envelope.scope} edited=${!!editTarget} ` +
       `mcpToolCalls=${mcpToolCalls} componentHtmlPulls=${componentHtmlPulls} ` +
       `in=${usageTotals.input_tokens ?? 0} cacheRead=${usageTotals.cache_read_input_tokens ?? 0} ` +
-      `out=${usageTotals.output_tokens ?? 0}`,
+      `cacheWrite=${usageTotals.cache_creation_input_tokens ?? 0} out=${usageTotals.output_tokens ?? 0}`,
     );
     // Defensive: the model is told to always include `summary`, but if
     // it forgets (or the second-pass retry strips it), fall back to

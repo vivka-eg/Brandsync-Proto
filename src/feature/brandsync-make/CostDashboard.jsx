@@ -114,6 +114,7 @@ export default function CostDashboard() {
   const cacheShare = w30.inTokens + w30.cacheTokens > 0 ? Math.round((w30.cacheTokens / (w30.inTokens + w30.cacheTokens)) * 100) : 0;
   const outputCost = w30.outTokens * 15 / 1e6;
   const cacheCost = w30.cacheTokens * 0.3 / 1e6;
+  const cacheWriteCost = (w30.cacheWriteTokens || 0) * 3.75 / 1e6;
   const inputCost = w30.inTokens * 3 / 1e6;
   const outputShare = w30.cost > 0 ? Math.round((outputCost / w30.cost) * 100) : 0;
   const cacheSaved = w30.cacheTokens * (3 - 0.3) / 1e6;
@@ -175,6 +176,9 @@ export default function CostDashboard() {
           </div>
           <div style={{ fontSize: 13, color: "var(--bs-text-muted)", lineHeight: 1.6 }}>
             <strong style={{ color: "var(--bs-text-default)" }}>Uncached input is {fmtUSD(inputCost)}</strong> — effectively free. Input is never the problem here; output is.
+          </div>
+          <div style={{ fontSize: 13, color: "var(--bs-text-muted)", lineHeight: 1.6 }}>
+            <strong style={{ color: "var(--bs-text-default)" }}>Cache writes are {fmtUSD(cacheWriteCost)}</strong> — the cold-start cost of seeding the cache at 1.25× input ({fmtTok(w30.cacheWriteTokens || 0)} tokens). Now counted in spend, so this figure is true cost, not an estimate.
           </div>
         </div>
       </div>

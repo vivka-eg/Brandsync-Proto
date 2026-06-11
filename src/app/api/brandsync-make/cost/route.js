@@ -17,18 +17,20 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 // USD per token (Anthropic list price, Claude Sonnet 4.6).
-//   input (uncached): $3 / Mtok · cache read: $0.30 / Mtok · output: $15 / Mtok
-// Cache-creation tokens aren't logged (a small, mostly one-off cost) so they're
-// omitted — this slightly UNDER-states our cost, i.e. the savings shown are
-// conservative.
+//   input (uncached): $3 / Mtok · cache read: $0.30 / Mtok
+//   cache write: $3.75 / Mtok (1.25× input) · output: $15 / Mtok
+// Cache-creation tokens are now logged (the prefix is rewritten on every cold
+// start), so cost reflects true spend rather than the old conservative figure.
 const PRICE = {
   input: 3 / 1_000_000,
   cacheRead: 0.30 / 1_000_000,
+  cacheWrite: 3.75 / 1_000_000,
   output: 15 / 1_000_000,
 };
 
-function costOf({ in_tok = 0, cache_tok = 0, out_tok = 0 }) {
-  return in_tok * PRICE.input + cache_tok * PRICE.cacheRead + out_tok * PRICE.output;
+function costOf({ in_tok = 0, cache_tok = 0, cache_write_tok = 0, out_tok = 0 }) {
+  return in_tok * PRICE.input + cache_tok * PRICE.cacheRead
+    + cache_write_tok * PRICE.cacheWrite + out_tok * PRICE.output;
 }
 
 export async function GET(request) {
@@ -59,9 +61,10 @@ export async function GET(request) {
             return `
          COUNT(*) FILTER (WHERE success AND ${pred})::int            AS screens_${k},
          COUNT(*) FILTER (WHERE ${pred})::int                        AS gens_${k},
-         COALESCE(SUM(input_tokens)       FILTER (WHERE ${pred}),0)::bigint AS in_${k},
-         COALESCE(SUM(cache_read_tokens)  FILTER (WHERE ${pred}),0)::bigint AS cache_${k},
-         COALESCE(SUM(output_tokens)      FILTER (WHERE ${pred}),0)::bigint AS out_${k}`;
+         COALESCE(SUM(input_tokens)          FILTER (WHERE ${pred}),0)::bigint AS in_${k},
+         COALESCE(SUM(cache_read_tokens)     FILTER (WHERE ${pred}),0)::bigint AS cache_${k},
+         COALESCE(SUM(cache_creation_tokens) FILTER (WHERE ${pred}),0)::bigint AS cwrite_${k},
+         COALESCE(SUM(output_tokens)         FILTER (WHERE ${pred}),0)::bigint AS out_${k}`;
           }).join(',')}
        FROM base`,
       [userEmail],
@@ -72,14 +75,16 @@ export async function GET(request) {
     for (const k of ['today', '7d', '30d', 'all']) {
       const in_tok = Number(row[`in_${k}`] ?? 0);
       const cache_tok = Number(row[`cache_${k}`] ?? 0);
+      const cache_write_tok = Number(row[`cwrite_${k}`] ?? 0);
       const out_tok = Number(row[`out_${k}`] ?? 0);
       windows[k] = {
         screens: row[`screens_${k}`] ?? 0,
         gens: row[`gens_${k}`] ?? 0,
         inTokens: in_tok,
         cacheTokens: cache_tok,
+        cacheWriteTokens: cache_write_tok,
         outTokens: out_tok,
-        cost: costOf({ in_tok, cache_tok, out_tok }),
+        cost: costOf({ in_tok, cache_tok, cache_write_tok, out_tok }),
       };
     }
 
@@ -89,9 +94,10 @@ export async function GET(request) {
               p.name,
               COUNT(*) FILTER (WHERE t.success)::int AS screens,
               COUNT(*)::int                          AS gens,
-              COALESCE(SUM(t.input_tokens),0)::bigint      AS in_tok,
-              COALESCE(SUM(t.cache_read_tokens),0)::bigint AS cache_tok,
-              COALESCE(SUM(t.output_tokens),0)::bigint     AS out_tok
+              COALESCE(SUM(t.input_tokens),0)::bigint          AS in_tok,
+              COALESCE(SUM(t.cache_read_tokens),0)::bigint     AS cache_tok,
+              COALESCE(SUM(t.cache_creation_tokens),0)::bigint AS cwrite_tok,
+              COALESCE(SUM(t.output_tokens),0)::bigint         AS out_tok
          FROM tool_usage_logs t
          LEFT JOIN projects p ON p.id::text = t.project_id
         WHERE t.user_email = $1
@@ -109,17 +115,19 @@ export async function GET(request) {
       gens: r.gens,
       inTokens: Number(r.in_tok),
       cacheTokens: Number(r.cache_tok),
+      cacheWriteTokens: Number(r.cwrite_tok),
       outTokens: Number(r.out_tok),
-      cost: costOf({ in_tok: Number(r.in_tok), cache_tok: Number(r.cache_tok), out_tok: Number(r.out_tok) }),
+      cost: costOf({ in_tok: Number(r.in_tok), cache_tok: Number(r.cache_tok), cache_write_tok: Number(r.cwrite_tok), out_tok: Number(r.out_tok) }),
     }));
 
     // 30-day daily series for the trend chart.
     const { rows: dayRows } = await pool.query(
       `SELECT to_char(date_trunc('day', created_at), 'YYYY-MM-DD') AS day,
               COUNT(*) FILTER (WHERE success)::int          AS screens,
-              COALESCE(SUM(input_tokens),0)::bigint      AS in_tok,
-              COALESCE(SUM(cache_read_tokens),0)::bigint AS cache_tok,
-              COALESCE(SUM(output_tokens),0)::bigint     AS out_tok
+              COALESCE(SUM(input_tokens),0)::bigint          AS in_tok,
+              COALESCE(SUM(cache_read_tokens),0)::bigint     AS cache_tok,
+              COALESCE(SUM(cache_creation_tokens),0)::bigint AS cwrite_tok,
+              COALESCE(SUM(output_tokens),0)::bigint         AS out_tok
          FROM tool_usage_logs
         WHERE user_email = $1
           AND tool_name = 'brandsync_make.generate'
@@ -131,11 +139,11 @@ export async function GET(request) {
     const daily = dayRows.map((r) => ({
       day: r.day,
       screens: r.screens,
-      cost: costOf({ in_tok: Number(r.in_tok), cache_tok: Number(r.cache_tok), out_tok: Number(r.out_tok) }),
+      cost: costOf({ in_tok: Number(r.in_tok), cache_tok: Number(r.cache_tok), cache_write_tok: Number(r.cwrite_tok), out_tok: Number(r.out_tok) }),
     }));
 
     return Response.json({
-      pricing: { inputPerMtok: 3, cacheReadPerMtok: 0.3, outputPerMtok: 15, model: 'claude-sonnet-4-6' },
+      pricing: { inputPerMtok: 3, cacheReadPerMtok: 0.3, cacheWritePerMtok: 3.75, outputPerMtok: 15, model: 'claude-sonnet-4-6' },
       windows,
       byProject,
       daily,

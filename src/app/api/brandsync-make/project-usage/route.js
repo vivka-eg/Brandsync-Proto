@@ -15,8 +15,10 @@ const TOOL = 'brandsync_make.generate';
 const LEDGER_LIMIT = 500; // newest-N cap so a long-lived project stays bounded
 
 // USD per token (Claude Sonnet 4.6 list price).
-const PRICE = { input: 3 / 1e6, cacheRead: 0.3 / 1e6, output: 15 / 1e6 };
-const costOf = (i = 0, c = 0, o = 0) => i * PRICE.input + c * PRICE.cacheRead + o * PRICE.output;
+// cache write = 1.25× input ($3.75/Mtok); now logged, so cost is true spend.
+const PRICE = { input: 3 / 1e6, cacheRead: 0.3 / 1e6, cacheWrite: 3.75 / 1e6, output: 15 / 1e6 };
+const costOf = (i = 0, c = 0, o = 0, cw = 0) =>
+  i * PRICE.input + c * PRICE.cacheRead + o * PRICE.output + cw * PRICE.cacheWrite;
 
 export async function GET(request) {
   const url = new URL(request.url);
@@ -51,10 +53,12 @@ export async function GET(request) {
          COUNT(*) FILTER (WHERE success AND created_at >= date_trunc('day', now()))::int AS screens_today,
          COALESCE(SUM(input_tokens), 0)::bigint                        AS in_tok,
          COALESCE(SUM(cache_read_tokens), 0)::bigint                   AS cache_tok,
+         COALESCE(SUM(cache_creation_tokens), 0)::bigint               AS cwrite_tok,
          COALESCE(SUM(output_tokens), 0)::bigint                       AS out_tok,
-         COALESCE(SUM(input_tokens)      FILTER (WHERE created_at >= date_trunc('day', now())), 0)::bigint AS in_today,
-         COALESCE(SUM(cache_read_tokens) FILTER (WHERE created_at >= date_trunc('day', now())), 0)::bigint AS cache_today,
-         COALESCE(SUM(output_tokens)     FILTER (WHERE created_at >= date_trunc('day', now())), 0)::bigint AS out_today
+         COALESCE(SUM(input_tokens)          FILTER (WHERE created_at >= date_trunc('day', now())), 0)::bigint AS in_today,
+         COALESCE(SUM(cache_read_tokens)     FILTER (WHERE created_at >= date_trunc('day', now())), 0)::bigint AS cache_today,
+         COALESCE(SUM(cache_creation_tokens) FILTER (WHERE created_at >= date_trunc('day', now())), 0)::bigint AS cwrite_today,
+         COALESCE(SUM(output_tokens)         FILTER (WHERE created_at >= date_trunc('day', now())), 0)::bigint AS out_today
        FROM tool_usage_logs
        WHERE tool_name = $1 AND project_id = $2`,
       [TOOL, projectId],
@@ -65,20 +69,21 @@ export async function GET(request) {
       screens: t.screens ?? 0,
       gens: t.gens ?? 0,
       screensToday: t.screens_today ?? 0,
-      inTokens: num('in_tok'), cacheTokens: num('cache_tok'), outTokens: num('out_tok'),
-      cost: costOf(num('in_tok'), num('cache_tok'), num('out_tok')),
+      inTokens: num('in_tok'), cacheTokens: num('cache_tok'), cacheWriteTokens: num('cwrite_tok'), outTokens: num('out_tok'),
+      cost: costOf(num('in_tok'), num('cache_tok'), num('out_tok'), num('cwrite_tok')),
       today: {
-        inTokens: num('in_today'), cacheTokens: num('cache_today'), outTokens: num('out_today'),
-        cost: costOf(num('in_today'), num('cache_today'), num('out_today')),
+        inTokens: num('in_today'), cacheTokens: num('cache_today'), cacheWriteTokens: num('cwrite_today'), outTokens: num('out_today'),
+        cost: costOf(num('in_today'), num('cache_today'), num('out_today'), num('cwrite_today')),
       },
     };
 
     // Per-generation ledger (chronological), newest-N capped.
     const { rows: ledRows } = await pool.query(
       `SELECT created_at, success, error, duration_ms,
-              COALESCE(input_tokens,0)::int      AS in_tok,
-              COALESCE(cache_read_tokens,0)::int AS cache_tok,
-              COALESCE(output_tokens,0)::int     AS out_tok
+              COALESCE(input_tokens,0)::int          AS in_tok,
+              COALESCE(cache_read_tokens,0)::int     AS cache_tok,
+              COALESCE(cache_creation_tokens,0)::int AS cwrite_tok,
+              COALESCE(output_tokens,0)::int         AS out_tok
          FROM tool_usage_logs
         WHERE tool_name = $1 AND project_id = $2
         ORDER BY created_at ASC
@@ -87,20 +92,20 @@ export async function GET(request) {
     );
     let cumulative = 0;
     const ledger = ledRows.map((r) => {
-      const cost = costOf(r.in_tok, r.cache_tok, r.out_tok);
+      const cost = costOf(r.in_tok, r.cache_tok, r.out_tok, r.cwrite_tok);
       cumulative += cost;
       return {
         at: r.created_at.toISOString(),
         success: r.success,
         error: r.error || null,
         durationMs: r.duration_ms ?? null,
-        inTokens: r.in_tok, cacheTokens: r.cache_tok, outTokens: r.out_tok,
+        inTokens: r.in_tok, cacheTokens: r.cache_tok, cacheWriteTokens: r.cwrite_tok, outTokens: r.out_tok,
         cost, cumulativeCost: cumulative,
       };
     });
 
     return Response.json({
-      pricing: { inputPerMtok: 3, cacheReadPerMtok: 0.3, outputPerMtok: 15, model: 'claude-sonnet-4-6' },
+      pricing: { inputPerMtok: 3, cacheReadPerMtok: 0.3, cacheWritePerMtok: 3.75, outputPerMtok: 15, model: 'claude-sonnet-4-6' },
       project,
       totals,
       ledger,
