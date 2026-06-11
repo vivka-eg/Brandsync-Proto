@@ -31,6 +31,8 @@ import {
 } from '@phosphor-icons/react';
 import ComponentsDrawer from '@/feature/brandsync-make/ComponentsDrawer';
 import OrgSwitcher from '@/feature/brandsync-make/OrgSwitcher';
+import TokenMeter from '@/feature/brandsync-make/TokenMeter';
+import ProjectBrandDialog from '@/feature/brandsync-make/ProjectBrandDialog';
 import { getStoredOrgId } from '@/lib/useActiveOrg';
 import { BRAND_PALETTES, brandOverrideCss, substituteBrand } from '@/lib/brand-substitute';
 
@@ -194,6 +196,62 @@ function buildPreviewDoc(content, tokensCss, theme, brandPalette, selectedLogo, 
           if (!inspecting && hl) hl.style.display = 'none';
         });
       })();
+
+      // Preserve place across an edit reload: continuously report scroll +
+      // the visible [data-view] to the host, and on request restore them.
+      // Patterns toggle views via the 'hidden' attribute (the generation
+      // convention), so restoring by hidden works for the common case; even
+      // when it doesn't, scroll restoration still keeps the user near where
+      // they were editing.
+      (function () {
+        function activeView() {
+          var secs = document.querySelectorAll('[data-view]');
+          for (var i = 0; i < secs.length; i++) {
+            if (!secs[i].hasAttribute('hidden') && secs[i].offsetParent !== null) {
+              return secs[i].getAttribute('data-view');
+            }
+          }
+          return null;
+        }
+        function report() {
+          parent.postMessage({
+            type: 'bs-preview-report',
+            scrollY: window.scrollY || document.documentElement.scrollTop || 0,
+            view: activeView()
+          }, '*');
+        }
+        var t = null;
+        window.addEventListener('scroll', function () {
+          if (t) return;
+          t = setTimeout(function () { t = null; report(); }, 200);
+        }, true);
+        // A click may switch the visible view — report just after it settles.
+        document.addEventListener('click', function () { setTimeout(report, 60); }, true);
+        setTimeout(report, 0); // initial snapshot
+
+        window.addEventListener('message', function (e) {
+          if (!e.data || e.data.type !== 'bs-preview-restore') return;
+          var name = e.data.view;
+          if (name) {
+            var secs = document.querySelectorAll('[data-view]');
+            var found = false;
+            for (var i = 0; i < secs.length; i++) {
+              if (secs[i].getAttribute('data-view') === name) { found = true; break; }
+            }
+            if (found) {
+              for (var j = 0; j < secs.length; j++) {
+                if (secs[j].getAttribute('data-view') === name) secs[j].removeAttribute('hidden');
+                else secs[j].setAttribute('hidden', '');
+              }
+            }
+          }
+          var y = e.data.scrollY || 0;
+          // Two rAFs so fonts/pattern-JS have laid out before we scroll.
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () { window.scrollTo(0, y); });
+          });
+        });
+      })();
     </script>
   </body>
 </html>`;
@@ -219,24 +277,8 @@ const ui = {
 
 function ProjectSwitcher({
   projects, activeProject, open, setOpen,
-  onSwitch, onCreate,
+  onSwitch, onRequestCreate, usage,
 }) {
-  const [creating, setCreating] = useState(false);
-  const [newName, setNewName] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-
-  const submitCreate = async () => {
-    const name = newName.trim();
-    if (!name || submitting) return;
-    setSubmitting(true);
-    try {
-      await onCreate(name);
-      setNewName('');
-      setCreating(false);
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   const label = activeProject?.name ?? 'No project';
 
@@ -269,7 +311,7 @@ function ProjectSwitcher({
         <>
           {/* backdrop to close on outside click */}
           <div
-            onClick={() => { setOpen(false); setCreating(false); }}
+            onClick={() => setOpen(false)}
             style={{ position: 'fixed', inset: 0, zIndex: 50 }}
           />
           <div style={{
@@ -319,7 +361,7 @@ function ProjectSwitcher({
                       onClick={() => onSwitch(p.id)}
                       style={{
                         width: '100%', textAlign: 'left',
-                        display: 'flex', alignItems: 'center', gap: 8,
+                        display: 'flex', flexDirection: 'column', gap: 4,
                         padding: '6px 10px', borderRadius: 6,
                         background: isActive ? ui.pill : 'transparent',
                         border: '1px solid transparent',
@@ -327,14 +369,23 @@ function ProjectSwitcher({
                         fontFamily: 'inherit',
                       }}
                     >
-                      <span style={{ width: 12, display: 'inline-flex', justifyContent: 'center' }}>
-                        {isActive && <Check size={10} />}
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
+                        <span style={{ width: 12, display: 'inline-flex', justifyContent: 'center' }}>
+                          {isActive && <Check size={10} />}
+                        </span>
+                        <span style={{
+                          flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        }}>{p.name}</span>
+                        <span style={{ fontSize: 10, color: ui.textFaint }}>
+                          {p.file_count} {p.file_count === 1 ? 'file' : 'files'}
+                        </span>
                       </span>
-                      <span style={{
-                        flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      }}>{p.name}</span>
-                      <span style={{ fontSize: 10, color: ui.textFaint }}>
-                        {p.file_count} {p.file_count === 1 ? 'file' : 'files'}
+                      <span style={{ paddingLeft: 20 }}>
+                        <TokenMeter
+                          compact
+                          used={usage?.by_project?.[p.id] ?? 0}
+                          limit={usage?.daily_limit}
+                        />
                       </span>
                     </button>
                   );
@@ -344,64 +395,20 @@ function ProjectSwitcher({
 
             <div style={{ height: 1, background: ui.panelLine, margin: '6px 0' }} />
 
-            {creating ? (
-              <div style={{ padding: '4px 6px 6px' }}>
-                <input
-                  autoFocus
-                  type="text"
-                  value={newName}
-                  onChange={e => setNewName(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter') submitCreate();
-                    if (e.key === 'Escape') { setCreating(false); setNewName(''); }
-                  }}
-                  placeholder="Project name…"
-                  style={{
-                    width: '100%', padding: '6px 8px',
-                    background: ui.bg, border: `1px solid ${ui.panelLine}`,
-                    borderRadius: 6, fontSize: 12, color: ui.text,
-                    fontFamily: 'inherit', outline: 'none',
-                  }}
-                />
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6, marginTop: 6 }}>
-                  <button
-                    onClick={() => { setCreating(false); setNewName(''); }}
-                    style={{
-                      padding: '4px 10px', fontSize: 11,
-                      background: 'transparent', color: ui.textMuted,
-                      border: 'none', borderRadius: 6, cursor: 'pointer',
-                      fontFamily: 'inherit',
-                    }}
-                  >Cancel</button>
-                  <button
-                    onClick={submitCreate}
-                    disabled={!newName.trim() || submitting}
-                    style={{
-                      padding: '4px 10px', fontSize: 11,
-                      background: ui.accent, color: ui.accentText,
-                      border: 'none', borderRadius: 6, cursor: 'pointer',
-                      fontFamily: 'inherit',
-                      opacity: !newName.trim() || submitting ? 0.5 : 1,
-                    }}
-                  >{submitting ? 'Creating…' : 'Create'}</button>
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={() => setCreating(true)}
-                style={{
-                  width: '100%', textAlign: 'left',
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '6px 10px', borderRadius: 6,
-                  background: 'transparent', border: '1px solid transparent',
-                  color: ui.text, fontSize: 12, cursor: 'pointer',
-                  fontFamily: 'inherit',
-                }}
-              >
-                <Plus size={12} weight="bold" />
-                <span>New project</span>
-              </button>
-            )}
+            <button
+              onClick={() => { setOpen(false); onRequestCreate?.(); }}
+              style={{
+                width: '100%', textAlign: 'left',
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '6px 10px', borderRadius: 6,
+                background: 'transparent', border: '1px solid transparent',
+                color: ui.text, fontSize: 12, cursor: 'pointer',
+                fontFamily: 'inherit',
+              }}
+            >
+              <Plus size={12} weight="bold" />
+              <span>New project</span>
+            </button>
           </div>
         </>
       )}
@@ -413,12 +420,14 @@ function TopBar({
   title, mode, onModeChange, onOpenComponents, onGoHome,
   projects, activeProject, projectMenuOpen, setProjectMenuOpen,
   onSwitchProject, onCreateProject,
-  selectedPattern, onSavePattern, saving,
+  selectedPattern, onSavePattern, saving, usage,
+  onEditBrand, brandPalette, onRefreshPreview,
 }) {
-  // A freshly-generated pattern has saved_at IS NULL. The button only
-  // appears for those — once saved (or for any pattern that pre-dates
-  // this feature), it disappears.
-  const showSave = selectedPattern && !selectedPattern.saved_at;
+  // The button is always present for the selected pattern: it reads "Save as
+  // pattern" while there are unsaved changes (saved_at IS NULL) and flips to a
+  // passive "Saved" once saved. An edit clears saved_at server-side, so the
+  // actionable state returns automatically when new edits happen.
+  const isSaved = !!selectedPattern?.saved_at;
   return (
     <header style={{
       height: 56, display: 'flex', alignItems: 'center', gap: 14,
@@ -444,33 +453,57 @@ function TopBar({
         open={projectMenuOpen}
         setOpen={setProjectMenuOpen}
         onSwitch={onSwitchProject}
-        onCreate={onCreateProject}
+        onRequestCreate={onCreateProject}
+        usage={usage}
       />
       <span style={{ color: ui.textFaint, fontSize: 12 }}>/</span>
       <span style={{ fontWeight: 500, textTransform: 'capitalize' }}>{title}</span>
       <span style={{ ...pillStyle, fontSize: 10, padding: '2px 7px' }}>AI</span>
 
+      {/* Edit the active project's brand (color + logo) */}
+      {activeProject && (
+        <button
+          onClick={onEditBrand}
+          title="Edit project brand (color + logo)"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '4px 10px 4px 6px', borderRadius: 999,
+            background: ui.pill, border: `1px solid ${ui.pillBorder}`,
+            color: ui.textMuted, fontSize: 11.5, cursor: 'pointer', fontFamily: 'inherit',
+          }}
+        >
+          <span style={{
+            width: 14, height: 14, borderRadius: '50%',
+            background: `var(--bs-brand-colors-${brandPalette}-500)`,
+            border: `1px solid ${ui.pillBorder}`, flexShrink: 0,
+          }} />
+          Brand
+        </button>
+      )}
+
       <div style={{ flex: 1 }} />
 
-      {showSave && (
+      {selectedPattern && (
         <button
-          onClick={onSavePattern}
-          disabled={saving}
-          title="Save this design as a pattern in your library"
+          onClick={isSaved ? undefined : onSavePattern}
+          disabled={saving || isSaved}
+          title={isSaved ? 'Saved to your library' : 'Save this design as a pattern in your library'}
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
             padding: '6px 12px',
-            background: ui.accent, color: ui.accentText,
-            border: 0, borderRadius: 999,
+            background: isSaved ? ui.pill : ui.accent,
+            color: isSaved ? ui.textMuted : ui.accentText,
+            border: isSaved ? `1px solid ${ui.pillBorder}` : 0,
+            borderRadius: 999,
             fontSize: 12, fontWeight: 600,
-            cursor: saving ? 'wait' : 'pointer',
+            cursor: saving ? 'wait' : (isSaved ? 'default' : 'pointer'),
             opacity: saving ? 0.6 : 1,
             fontFamily: 'inherit',
-            transition: 'opacity 120ms ease',
+            transition: 'background 120ms ease, color 120ms ease',
           }}
         >
           {saving ? <CircleNotch size={12} weight="bold" /> : <Check size={12} weight="bold" />}
-          {saving ? 'Saving…' : 'Save as pattern'}
+          {saving ? 'Saving…' : (isSaved ? 'Saved' : 'Save as pattern')}
         </button>
       )}
 
@@ -478,7 +511,12 @@ function TopBar({
         <IconButton active={mode === 'preview'} onClick={() => onModeChange('preview')} label="Preview" icon={Eye} />
         <IconButton active={mode === 'source'}  onClick={() => onModeChange('source')}  label="Source"  icon={Code} />
       </PillGroup>
-      <IconButton label="Refresh" icon={ArrowsClockwise} />
+      <IconButton
+        label="Refresh preview"
+        icon={ArrowsClockwise}
+        onClick={onRefreshPreview}
+        disabled={mode !== 'preview' || !selectedPattern}
+      />
 
       <div style={{ flex: 1 }} />
 
@@ -503,7 +541,7 @@ function PillGroup({ children }) {
   );
 }
 
-function CanvasControlBar({ viewport, onViewportChange, theme, onThemeChange }) {
+function CanvasControlBar({ viewport, onViewportChange, theme, onThemeChange, inspectOn, onToggleInspect }) {
   const vp = VIEWPORTS[viewport];
   return (
     <div style={{
@@ -544,6 +582,24 @@ function CanvasControlBar({ viewport, onViewportChange, theme, onThemeChange }) 
           icon={Moon}
         />
       </PillGroup>
+
+      {/* Click-to-edit toggle, adjacent to the theme toggle. */}
+      <PillGroup>
+        <button
+          onClick={onToggleInspect}
+          title="Click an element in the preview to edit it"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '5px 11px', borderRadius: 999, cursor: 'pointer',
+            fontSize: 12, fontWeight: 500, fontFamily: 'inherit',
+            border: 'none',
+            background: inspectOn ? '#1f9cf0' : 'transparent',
+            color: inspectOn ? '#fff' : ui.text,
+          }}
+        >
+          {inspectOn ? 'Click an element…' : 'Edit element'}
+        </button>
+      </PillGroup>
     </div>
   );
 }
@@ -556,10 +612,11 @@ const pillStyle = {
   fontSize: 12, lineHeight: 1,
 };
 
-function IconButton({ icon: Icon, label, onClick, active }) {
+function IconButton({ icon: Icon, label, onClick, active, disabled }) {
   return (
     <button
       onClick={onClick}
+      disabled={disabled}
       aria-label={label}
       title={label}
       style={{
@@ -567,7 +624,8 @@ function IconButton({ icon: Icon, label, onClick, active }) {
         background: active ? ui.pill : 'transparent',
         color: active ? ui.text : ui.textMuted,
         border: `1px solid ${active ? ui.pillBorder : 'transparent'}`,
-        borderRadius: 6, cursor: 'pointer',
+        borderRadius: 6, cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.4 : 1,
       }}
     ><Icon size={16} weight="regular" /></button>
   );
@@ -751,176 +809,11 @@ function PatternListItem({ pattern, selected, onClick, menuItems }) {
   );
 }
 
-function BrandSection({
-  selectedLogo, onPickLogo, logoMenuOpen, setLogoMenuOpen,
-  logos, logosLoading, logosError, onEnsureLogosLoaded,
-  brandPalette, setBrandPalette, colorMenuOpen, setColorMenuOpen,
-}) {
-  // Sidebar bg is white — prefer dark-colored logos (dark.horizontal),
-  // fall back to icon mark (logo), then to light (which is white-on-dark
-  // and won't read on a white sidebar).
-  const logoUrl = selectedLogo?.assets?.dark?.horizontal
-    || selectedLogo?.assets?.logo
-    || selectedLogo?.assets?.light?.horizontal
-    || null;
-
-  return (
-    <div style={{ padding: '14px 20px 16px', borderBottom: `1px solid ${ui.panelLine}` }}>
-      <div style={{
-        fontSize: 11, fontWeight: 600, letterSpacing: 0.6,
-        color: ui.textFaint, textTransform: 'uppercase', marginBottom: 10,
-      }}>Brand</div>
-
-      <div style={{ display: 'flex', gap: 8, position: 'relative' }}>
-        {/* Logo picker */}
-        <button
-          onClick={() => { onEnsureLogosLoaded(); setLogoMenuOpen(o => !o); setColorMenuOpen(false); }}
-          style={{
-            flex: 1, display: 'flex', alignItems: 'center', gap: 8,
-            padding: '8px 10px',
-            background: ui.bg, border: `1px solid ${ui.panelLine}`,
-            borderRadius: 8, cursor: 'pointer', textAlign: 'left',
-            fontFamily: 'inherit',
-          }}
-        >
-          <span style={{
-            width: 28, height: 28, borderRadius: 4,
-            background: '#fff', border: `1px solid ${ui.panelLine}`,
-            display: 'grid', placeItems: 'center', flexShrink: 0, overflow: 'hidden',
-          }}>
-            {logoUrl
-              // eslint-disable-next-line @next/next/no-img-element
-              ? <img src={logoUrl} alt="" style={{ maxWidth: '90%', maxHeight: '90%' }} />
-              : <span style={{ fontSize: 14, color: ui.textFaint }}>?</span>}
-          </span>
-          <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 12.5, color: ui.text }}>
-            {selectedLogo?.name ?? 'Pick a logo'}
-          </span>
-          <CaretDown size={12} color={ui.textMuted} />
-        </button>
-
-        {/* Color picker */}
-        <button
-          onClick={() => { setColorMenuOpen(o => !o); setLogoMenuOpen(false); }}
-          aria-label="Brand color"
-          title={`Brand color: ${brandPalette}`}
-          style={{
-            width: 44, height: 44, padding: 0,
-            background: ui.bg, border: `1px solid ${ui.panelLine}`,
-            borderRadius: 8, cursor: 'pointer',
-            display: 'grid', placeItems: 'center', flexShrink: 0,
-          }}
-        >
-          <span style={{
-            width: 22, height: 22, borderRadius: '50%',
-            background: `var(--bs-brand-colors-${brandPalette}-500)`,
-            border: `1px solid ${ui.panelLine}`,
-          }} />
-        </button>
-
-        {logoMenuOpen && (
-          <BrandPopover anchor="left" onClose={() => setLogoMenuOpen(false)}>
-            {logosLoading ? (
-              <div style={{ padding: 16, fontSize: 12, color: ui.textMuted }}>Loading logos…</div>
-            ) : logos.length === 0 ? (
-              <div style={{ padding: 16, fontSize: 12, color: '#b00020', lineHeight: 1.5 }}>
-                {logosError ?? 'No logos loaded. Is Strapi running at localhost:1337?'}
-              </div>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, padding: 8, maxHeight: 320, overflow: 'auto' }}>
-                {logos.map(l => {
-                  const thumb = l.assets?.dark?.horizontal || l.assets?.logo || l.assets?.light?.horizontal;
-                  const isSel = selectedLogo?.id === l.id;
-                  return (
-                    <button
-                      key={l.id}
-                      onClick={() => { onPickLogo(l); setLogoMenuOpen(false); }}
-                      title={l.name}
-                      style={{
-                        padding: 6, background: isSel ? ui.pill : '#fff',
-                        border: `1px solid ${isSel ? ui.accent : ui.panelLine}`,
-                        borderRadius: 6, cursor: 'pointer',
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                      }}
-                    >
-                      <span style={{
-                        width: '100%', height: 40, display: 'grid', placeItems: 'center',
-                        background: '#fff', borderRadius: 4, overflow: 'hidden',
-                      }}>
-                        {thumb
-                          // eslint-disable-next-line @next/next/no-img-element
-                          ? <img src={thumb} alt={l.name} style={{ maxWidth: '90%', maxHeight: '90%' }} />
-                          : <span style={{ fontSize: 10, color: ui.textFaint }}>{l.name?.[0] ?? '?'}</span>}
-                      </span>
-                      <span style={{ fontSize: 10.5, color: ui.textMuted, lineHeight: 1.2, textAlign: 'center', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </BrandPopover>
-        )}
-
-        {colorMenuOpen && (
-          <BrandPopover anchor="right" onClose={() => setColorMenuOpen(false)}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8, padding: 12 }}>
-              {BRAND_PALETTES.map(p => {
-                const isSel = brandPalette === p;
-                return (
-                  <button
-                    key={p}
-                    onClick={() => { setBrandPalette(p); setColorMenuOpen(false); }}
-                    title={p}
-                    style={{
-                      width: 36, height: 36, padding: 0,
-                      background: 'transparent', border: 'none', cursor: 'pointer',
-                      display: 'grid', placeItems: 'center',
-                    }}
-                  >
-                    <span style={{
-                      width: 28, height: 28, borderRadius: '50%',
-                      background: `var(--bs-brand-colors-${p}-500)`,
-                      border: `2px solid ${isSel ? ui.accent : 'transparent'}`,
-                      boxShadow: `0 0 0 1px ${ui.panelLine}`,
-                    }} />
-                  </button>
-                );
-              })}
-            </div>
-          </BrandPopover>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function BrandPopover({ children, anchor = 'left', onClose }) {
-  // Lightweight click-outside backdrop. Positioned absolutely below the
-  // triggering control inside the sidebar's relative wrapper.
-  return (
-    <>
-      <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 50 }} />
-      <div style={{
-        position: 'absolute',
-        top: '100%', marginTop: 8,
-        [anchor === 'right' ? 'right' : 'left']: 0,
-        minWidth: anchor === 'right' ? 240 : 320,
-        background: ui.panel,
-        border: `1px solid ${ui.panelLine}`,
-        borderRadius: 10,
-        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-        zIndex: 60,
-      }}>
-        {children}
-      </div>
-    </>
-  );
-}
 
 function ProjectFilesSection({
   project, files, allProjects, loading,
   selectedId, onSelect, onRequestAdd, onRemoveFile,
-  onMoveFile, onDeletePattern, onRenamePattern,
+  onMoveFile, onDeletePattern, onRenamePattern, usage,
 }) {
   const otherProjects = (allProjects || []).filter(p => p.id !== project.id);
   const buildMenu = (f) => [
@@ -1064,18 +957,30 @@ function TokenChip({ usage }) {
 // response (muted, with model + context + token usage). Height is
 // capped so it never pushes the input bar off-screen; new turns scroll
 // the panel automatically.
-function TranscriptView({ transcript, selected }) {
+function TranscriptView({ transcript, selected, onRevert }) {
   const scrollerRef = useRef(null);
+  // Reasoning is shown per FILE. A turn matches the selected file by its
+  // patternId (new turns) OR, for older turns saved before tagging existed, by
+  // its editingSlug — so legacy history still lands on the right file instead
+  // of leaking across all files. With no file selected, only untagged in-flight
+  // turns (a brand-new pattern still generating) show.
+  const visible = (transcript ?? []).filter(t => {
+    if (selected) {
+      return t.patternId === selected.id
+        || (t.patternId == null && !!t.editingSlug && t.editingSlug === selected.slug);
+    }
+    return t.patternId == null && !t.editingSlug;
+  });
   useEffect(() => {
     const el = scrollerRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [transcript]);
+  }, [visible.length]);
 
-  if (!transcript?.length) {
+  if (!visible.length) {
     return (
       <div style={{ maxHeight: 180, fontSize: 12.5, lineHeight: 1.55, color: ui.textMuted, fontStyle: 'italic' }}>
         {selected
-          ? <>Talk to Brandsync Make in the input below — every prompt + response will appear here.</>
+          ? <>Talk to Brandsync Make in the input below — this file&apos;s prompts + responses appear here.</>
           : <>No conversation yet. Describe a screen below to get started.</>}
       </div>
     );
@@ -1091,7 +996,7 @@ function TranscriptView({ transcript, selected }) {
         paddingRight: 4,
       }}
     >
-      {transcript.map(turn => <TranscriptTurn key={turn.id} turn={turn} />)}
+      {visible.map(turn => <TranscriptTurn key={turn.id} turn={turn} onRevert={onRevert} />)}
     </div>
   );
 }
@@ -1099,6 +1004,23 @@ function TranscriptView({ transcript, selected }) {
 // Translate a server-emitted phase event into the one-line spinner
 // label that replaces "Thinking…" in the transcript. Keeping the
 // mapping client-side means we can rephrase it without a route change.
+// Predict whether a request will be a slow, full/large generation, so the
+// in-flight UI can say so up front with an approximate time. We can't know the
+// model's actual scope until it responds, so this is a heuristic:
+//   • A NEW pattern (not an edit) is ALWAYS scope=full → the slow case.
+//   • A structural edit ("add a screen/view/flow/page", redesign, restructure)
+//     usually triggers section/full → also slow.
+//   • Everything else is a quick localized edit.
+// Times are rough, observed ranges for Sonnet via the streaming path.
+function forecastGeneration({ isEdit, prompt }) {
+  const p = (prompt || '').toLowerCase();
+  const STRUCTURAL =
+    /\b(add|new|create|build|design|generate)\b[\s\S]{0,40}\b(screen|page|view|flow|step|dashboard|section|tab|wizard|layout|form)\b|redesign|restructure|rebuild|from scratch|whole (page|app|screen)|entire (page|app|screen)/;
+  if (!isEdit) return { full: true, etaText: '~1–3 min', kind: 'Full build' };
+  if (STRUCTURAL.test(p)) return { full: true, etaText: '~1–2 min', kind: 'Large change' };
+  return { full: false, etaText: '~5–15s', kind: 'Quick edit' };
+}
+
 function phaseLabel(phase) {
   if (!phase || typeof phase !== 'object') return 'Thinking…';
   switch (phase.phase) {
@@ -1122,8 +1044,8 @@ function phaseLabel(phase) {
   }
 }
 
-function TranscriptTurn({ turn }) {
-  const { prompt, status, response, editingSlug, phase } = turn;
+function TranscriptTurn({ turn, onRevert }) {
+  const { prompt, editMeta, status, response, editingSlug, phase, forecast } = turn;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       {/* User prompt */}
@@ -1137,7 +1059,25 @@ function TranscriptTurn({ turn }) {
           padding: '8px 10px',
           wordBreak: 'break-word',
         }}>
-          {prompt}
+          {editMeta ? (
+            // Element edit — show a compact indicator of the targeted element
+            // plus the comment, instead of the full selector + markup prompt.
+            <>
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                fontSize: 10.5, fontWeight: 600, color: '#1f9cf0',
+                background: 'rgba(31,156,240,0.10)', border: '1px solid rgba(31,156,240,0.35)',
+                borderRadius: 6, padding: '2px 7px', marginBottom: 6, maxWidth: '100%',
+                fontFamily: 'ui-monospace, Menlo, monospace',
+              }}>
+                <span style={{ width: 6, height: 6, borderRadius: 2, background: '#1f9cf0', flexShrink: 0 }} />
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {editMeta.target || 'element'}
+                </span>
+              </span>
+              <div>{editMeta.comment}</div>
+            </>
+          ) : prompt}
           {editingSlug && (
             <div style={{ fontSize: 10.5, color: ui.textMuted, marginTop: 4 }}>
               editing <code style={{ background: ui.bg, padding: '0 4px', borderRadius: 3 }}>{editingSlug}</code>
@@ -1154,12 +1094,39 @@ function TranscriptTurn({ turn }) {
           padding: '4px 2px',
         }}>
           {status === 'pending' && (
-            <span style={{ fontStyle: 'italic' }}>{phaseLabel(phase)}</span>
+            <>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontStyle: 'italic' }}>
+                <CircleNotch size={12} weight="bold" style={{ animation: 'bs-spin 700ms linear infinite', flexShrink: 0 }} />
+                {phaseLabel(phase)}
+              </span>
+              {forecast?.full && (
+                <div style={{ fontSize: 10.5, color: ui.textFaint, marginTop: 3 }}>
+                  {forecast.kind} — usually takes {forecast.etaText}. Hang tight.
+                </div>
+              )}
+            </>
           )}
           {status === 'error' && (
             <span style={{ color: '#9b1c1c' }}>Failed: {response?.error}</span>
           )}
           {status === 'ok' && response && <TurnSummary response={response} />}
+          {status === 'ok' && response?.edited && response?.versionId && response?.patternId && (
+            <button
+              onClick={() => onRevert?.({ patternId: response.patternId, versionId: response.versionId })}
+              title="Revert the pattern to its state before this edit"
+              style={{
+                marginTop: 6,
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                padding: '3px 9px', borderRadius: 999, cursor: 'pointer',
+                fontSize: 11, fontWeight: 500, fontFamily: 'inherit',
+                background: ui.pill, color: ui.textMuted,
+                border: `1px solid ${ui.pillBorder}`,
+              }}
+            >
+              <ArrowsClockwise size={11} />
+              Revert
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -1177,11 +1144,13 @@ function TurnSummary({ response }) {
   let envelopeScope = null;
   let retried = false;
   let mcpToolCalls = 0;
+  let componentHtmlPulls = 0;
   if (contextUsed && typeof contextUsed === 'object') {
     projectFiles = contextUsed.siblingCount ?? 0;
     envelopeScope = contextUsed.envelopeScope ?? null;
     retried = !!contextUsed.retried;
     mcpToolCalls = contextUsed.mcpToolCalls ?? 0;
+    componentHtmlPulls = contextUsed.componentHtmlPulls ?? 0;
   } else if (typeof contextUsed === 'string') {
     const refsMatch = contextUsed.match(/reference[^()]*\(([^)]+)\)/);
     refs = refsMatch
@@ -1215,7 +1184,11 @@ function TurnSummary({ response }) {
         {envelopeScope && <> · scope <code style={codeStyle}>{envelopeScope}</code></>}
         {' · '}<code style={codeStyle}>{model}</code>
         {mcpToolCalls > 0 && (
-          <> · {mcpToolCalls} MCP call{mcpToolCalls === 1 ? '' : 's'}</>
+          <> · {mcpToolCalls} MCP call{mcpToolCalls === 1 ? '' : 's'}
+            {componentHtmlPulls > 0 && (
+              <> ({componentHtmlPulls} full pull{componentHtmlPulls === 1 ? '' : 's'})</>
+            )}
+          </>
         )}
         {projectFiles > 0 && (
           <> · {projectFiles} project file{projectFiles === 1 ? '' : 's'} in context</>
@@ -1336,11 +1309,28 @@ function LeftSidebar({
   brandPalette, setBrandPalette, colorMenuOpen, setColorMenuOpen,
   modelId, onModelIdChange,
   onSend, generating, generateError, onClearGenerateError,
-  transcript, usage,
+  transcript, usage, onRevert,
 }) {
   const selected = patterns.find(p => p.id === selectedId);
   const inProject = Boolean(activeProject);
   const [dragOver, setDragOver] = useState(false);
+
+  // Resizable Project Files panel: drag the handle below it to grow/shrink
+  // its height (the Reasoning panel below flexes to absorb the rest).
+  const [filesHeight, setFilesHeight] = useState(220);
+  const onResizeStart = (e) => {
+    e.preventDefault();
+    const startY = e.clientY;
+    const startH = filesHeight;
+    const onMove = (ev) => setFilesHeight(Math.max(96, Math.min(560, startH + (ev.clientY - startY))));
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  };
+
   return (
     <aside style={{
       width: 320, flexShrink: 0,
@@ -1349,82 +1339,72 @@ function LeftSidebar({
       borderRight: `1px solid ${ui.panelLine}`,
       color: ui.text,
     }}>
-      <BrandSection
-        selectedLogo={selectedLogo}
-        onPickLogo={onPickLogo}
-        logoMenuOpen={logoMenuOpen}
-        setLogoMenuOpen={setLogoMenuOpen}
-        logos={logos}
-        logosLoading={logosLoading}
-        onEnsureLogosLoaded={onEnsureLogosLoaded}
-        brandPalette={brandPalette}
-        setBrandPalette={setBrandPalette}
-        colorMenuOpen={colorMenuOpen}
-        setColorMenuOpen={setColorMenuOpen}
-      />
+      {/* Brand widget removed — brand (color + logo) is now per-project,
+          set in the create modal and editable via the top-bar "Brand" button. */}
 
-      {/* Header pill: project name when one is active (the files below
-          belong to it); selected pattern slug otherwise. */}
-      <div style={{ padding: '20px 20px 12px' }}>
-        <div style={{
-          ...pillStyle, padding: '8px 14px',
-          background: ui.pill,
-          width: 'fit-content', maxWidth: '100%',
-          textTransform: inProject ? 'none' : 'capitalize', fontWeight: 500,
-        }}>
-          {inProject
-            ? activeProject.name
-            : (selected ? prettifyName(selected.slug) : 'Design something…')}
-        </div>
+      {/* Project Files (resizable) — sits ABOVE Reasoning. */}
+      <div style={{ height: filesHeight, flexShrink: 0, overflowY: 'auto' }}>
+        {inProject ? (
+          <ProjectFilesSection
+            project={activeProject}
+            files={patterns}
+            allProjects={allProjects}
+            loading={projectFilesLoading}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            onRequestAdd={onRequestAddToProject}
+            onRemoveFile={onRemoveFileFromProject}
+            onMoveFile={onMoveFileToProject}
+            onDeletePattern={onDeletePattern}
+            onRenamePattern={onRenamePattern}
+            usage={usage}
+          />
+        ) : (
+          <div style={{ padding: '8px 12px' }}>
+            <div style={{
+              padding: '10px 8px 8px',
+              fontSize: 11, fontWeight: 600, letterSpacing: 0.6,
+              color: ui.textFaint, textTransform: 'uppercase',
+            }}>My Patterns ({patterns.length})</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {patterns.map(p => (
+                <PatternListItem
+                  key={p.id}
+                  pattern={p}
+                  selected={p.id === selectedId}
+                  onClick={() => onSelect(p.id)}
+                  menuItems={[
+                    { label: 'Rename', onClick: () => onRenamePattern?.(p.id, p.slug) },
+                    { divider: true },
+                    { label: 'Delete pattern', destructive: true, onClick: () => onDeletePattern(p.id) },
+                  ]}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Patterns list (or project files when a project is active) */}
-      {inProject ? (
-        <ProjectFilesSection
-          project={activeProject}
-          files={patterns}
-          allProjects={allProjects}
-          loading={projectFilesLoading}
-          selectedId={selectedId}
-          onSelect={onSelect}
-          onRequestAdd={onRequestAddToProject}
-          onRemoveFile={onRemoveFileFromProject}
-          onMoveFile={onMoveFileToProject}
-          onDeletePattern={onDeletePattern}
-          onRenamePattern={onRenamePattern}
-        />
-      ) : (
-        <div style={{ padding: '8px 12px' }}>
-          <div style={{
-            padding: '10px 8px 8px',
-            fontSize: 11, fontWeight: 600, letterSpacing: 0.6,
-            color: ui.textFaint, textTransform: 'uppercase',
-          }}>My Patterns ({patterns.length})</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {patterns.map(p => (
-              <PatternListItem
-                key={p.id}
-                pattern={p}
-                selected={p.id === selectedId}
-                onClick={() => onSelect(p.id)}
-                menuItems={[
-                  { label: 'Rename', onClick: () => onRenamePattern?.(p.id, p.slug) },
-                  { divider: true },
-                  { label: 'Delete pattern', destructive: true, onClick: () => onDeletePattern(p.id) },
-                ]}
-              />
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Drag handle — resize the files panel height */}
+      <div
+        onPointerDown={onResizeStart}
+        title="Drag to resize"
+        style={{
+          height: 7, flexShrink: 0, cursor: 'row-resize',
+          borderTop: `1px solid ${ui.panelLine}`,
+          borderBottom: `1px solid ${ui.panelLine}`,
+          background: ui.bg,
+          display: 'grid', placeItems: 'center',
+        }}
+      >
+        <span style={{ width: 26, height: 3, borderRadius: 2, background: ui.pillBorder }} />
+      </div>
 
       {/* Session transcript — chat-style log of every prompt + response.
-          Flexes to fill the remaining sidebar height so Reasoning uses the
-          whole available space (scrolls internally) instead of a short box. */}
+          Flexes to fill the entire sidebar height between the brand bar and
+          the composer (scrolls internally). */}
       <div style={{
         padding: '16px 20px',
-        borderTop: `1px solid ${ui.panelLine}`,
-        marginTop: 16,
         flex: 1, minHeight: 0,
         display: 'flex', flexDirection: 'column',
       }}>
@@ -1438,10 +1418,8 @@ function LeftSidebar({
           }}>Reasoning</div>
           <TokenChip usage={usage} />
         </div>
-        <TranscriptView transcript={transcript} selected={selected} />
+        <TranscriptView transcript={transcript} selected={selected} onRevert={onRevert} />
       </div>
-
-      <div style={{ flex: 1 }} />
 
       {generateError && (
         <div style={{
@@ -1572,12 +1550,69 @@ function LeftSidebar({
             </button>
           </div>
         </div>
+
+        {/* Per-project daily token budget, below the composer */}
+        {activeProject && (
+          <div style={{ marginTop: 10 }}>
+            <TokenMeter
+              used={usage?.by_project?.[activeProject.id] ?? 0}
+              limit={usage?.daily_limit}
+            />
+          </div>
+        )}
       </div>
     </aside>
   );
 }
 
-function CanvasPlaceholder({ message = 'Working out the details…' }) {
+// A slim indeterminate progress bar — the primary "something is happening"
+// motion cue. A short fill segment sweeps left→right on a loop.
+function IndeterminateBar({ width = 200 }) {
+  return (
+    <div style={{
+      position: 'relative', width, height: 3, borderRadius: 999,
+      overflow: 'hidden', background: ui.pillBorder,
+    }}>
+      <div style={{
+        position: 'absolute', top: 0, height: '100%', width: '40%',
+        borderRadius: 999, background: ui.accent,
+        animation: 'bs-indeterminate 1.05s ease-in-out infinite',
+      }} />
+    </div>
+  );
+}
+
+// Overlay shown ON TOP of the live preview while an edit is generating, so the
+// user sees the canvas is busy (rather than a frozen, unchanged screen).
+function GeneratingOverlay({ label, subLabel }) {
+  return (
+    <div style={{
+      position: 'absolute', inset: 0, zIndex: 6,
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      gap: 12,
+      background: 'rgba(245,246,248,0.55)',
+      backdropFilter: 'blur(1.5px)', WebkitBackdropFilter: 'blur(1.5px)',
+      animation: 'bs-fade-in 160ms ease-out',
+    }}>
+      <div style={{
+        display: 'inline-flex', alignItems: 'center', gap: 9,
+        padding: '9px 16px', borderRadius: 999,
+        background: ui.panel, border: `1px solid ${ui.panelLine}`,
+        boxShadow: '0 6px 20px rgba(0,0,0,0.14)',
+        color: ui.text, fontSize: 13, fontWeight: 500,
+      }}>
+        <CircleNotch size={16} weight="bold" style={{ animation: 'bs-spin 700ms linear infinite', color: ui.accent }} />
+        <span>{label}</span>
+      </div>
+      {subLabel && (
+        <div style={{ fontSize: 12, color: ui.textMuted, fontWeight: 500 }}>{subLabel}</div>
+      )}
+      <IndeterminateBar width={180} />
+    </div>
+  );
+}
+
+function CanvasPlaceholder({ message = 'Working out the details…', busy = false, subMessage = null }) {
   return (
     <div style={{ flex: 1, display: 'grid', placeItems: 'center', background: ui.canvas, color: ui.textMuted, padding: '48px 48px 72px' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18 }}>
@@ -1595,11 +1630,16 @@ function CanvasPlaceholder({ message = 'Working out the details…' }) {
           <span style={{ position: 'absolute', top: 32, right: 28 }}>
             <House size={22} weight="regular" />
           </span>
-          <span style={{ position: 'absolute', bottom: 8, left: '50%', transform: 'translateX(-50%)' }}>
-            <CircleNotch size={14} weight="regular" />
+          <span style={{
+            position: 'absolute', bottom: 8, left: '50%', transform: 'translateX(-50%)',
+            ...(busy ? { animation: 'bs-spin 700ms linear infinite', color: ui.accent } : null),
+          }}>
+            <CircleNotch size={14} weight={busy ? 'bold' : 'regular'} />
           </span>
         </div>
-        <span style={{ fontSize: 13 }}>{message}</span>
+        <span style={{ fontSize: 13, color: busy ? ui.text : ui.textMuted }}>{message}</span>
+        {subMessage && <span style={{ fontSize: 12, color: ui.textMuted }}>{subMessage}</span>}
+        {busy && <IndeterminateBar width={200} />}
       </div>
     </div>
   );
@@ -1728,6 +1768,7 @@ function Canvas({
   pattern, tokensCss, mode, viewport, theme, brandPalette, selectedLogo,
   onViewportChange, onThemeChange,
   edits, onEdit, onRequestEdit,
+  generating, genLabel, genEta, reloadNonce,
 }) {
   // Keep theme + brandPalette in refs so the memo can BAKE them into the
   // initial doc, but changing them doesn't trigger a re-memo (which
@@ -1757,6 +1798,40 @@ function Canvas({
     );
   }, [theme, brandPalette]);
 
+  // ── Preserve place across an edit reload ────────────────────────────────
+  // An edit changes pattern.content → srcDoc is replaced → the iframe reloads
+  // and resets scroll + active view. The shim continuously reports its scroll
+  // position and visible [data-view]; we stash the latest (tagged with the
+  // pattern id), and when the iframe reloads for the SAME pattern (an edit, not
+  // a pattern switch) we post it back so the shim restores the user's place.
+  const patternIdRef = useRef(pattern?.id);
+  patternIdRef.current = pattern?.id;
+  const previewStateRef = useRef(null); // { patternId, scrollY, view }
+  useEffect(() => {
+    function onReport(e) {
+      if (!e.data || e.data.type !== 'bs-preview-report') return;
+      previewStateRef.current = {
+        patternId: patternIdRef.current,
+        scrollY: e.data.scrollY ?? 0,
+        view: e.data.view ?? null,
+      };
+    }
+    window.addEventListener('message', onReport);
+    return () => window.removeEventListener('message', onReport);
+  }, []);
+  // On every iframe load, restore place ONLY if the doc that just loaded is the
+  // same pattern we have a snapshot for (i.e. an edit reloaded it) — never on a
+  // pattern switch, where restoring the prior scroll/view would be wrong.
+  const handleIframeLoad = () => {
+    const snap = previewStateRef.current;
+    if (snap && snap.patternId === patternIdRef.current && (snap.scrollY || snap.view)) {
+      iframeRef.current?.contentWindow?.postMessage(
+        { type: 'bs-preview-restore', scrollY: snap.scrollY, view: snap.view },
+        '*',
+      );
+    }
+  };
+
   // ── Click-to-edit ──────────────────────────────────────────────────────
   // Inspect mode: toggle it in the iframe shim; receive the clicked element;
   // show an inline popover; on submit, fire a scoped edit of that element.
@@ -1782,10 +1857,28 @@ function Canvas({
   const submitElementEdit = () => {
     const instruction = editText.trim();
     if (!instruction || !picked) return;
+    // The model gets the selector + the element's markup for context — but the
+    // markup is the RENDERED DOM (el.outerHTML), which is NOT byte-identical to
+    // the stored source (attributes get reordered, quotes normalized, {{logo}}
+    // substituted, whitespace re-serialized). A scope=edit `find` built from it
+    // therefore won't match the source, the patch is rejected, and the route
+    // falls back to a full-pattern regen (the expensive failure we saw).
+    // So: steer STYLING changes to scope=css-only (append a rule targeting the
+    // selector — no find needed, can't be rejected), and warn the model not to
+    // trust the markup for verbatim matching.
     const composed =
-      'Edit ONLY the element matching CSS selector "' + picked.selector + '". ' +
-      'Its current markup is:\n' + picked.html + '\n\nRequested change: ' + instruction;
-    onRequestEdit?.(composed);
+      `Edit ONLY the element matching CSS selector "${picked.selector}".\n` +
+      `Requested change: ${instruction}\n\n` +
+      `Its CURRENT RENDERED markup (for reference only) is:\n${picked.html}\n\n` +
+      'IMPORTANT — choose scope carefully:\n' +
+      '• The markup above is the live RENDERED DOM, NOT the stored source: attributes may be reordered, quotes normalized, {{logo}}/brand tokens already substituted, whitespace changed. Do NOT assume any of it appears verbatim in the source — a scope=edit `find` copied from it will FAIL to match.\n' +
+      `• If this is a STYLING change (alignment, spacing, size, color, layout, display, etc.) — which is most element tweaks — return scope="css-only" with a cssAppend rule targeting the selector "${picked.selector}" (or the element's existing class). This needs no find-match and is the cheapest, most reliable scope.\n` +
+      '• Only use scope="edit" if the MARKUP itself must change (text content, an attribute, adding/removing an element). In that case base your `find` on the STORED SOURCE in the message, copied character-for-character — never on the rendered markup above.\n' +
+      '• Do NOT return scope="full" for a single-element tweak.';
+    // …but the transcript shows a compact indicator (the targeted element) +
+    // the comment, NOT this whole markup dump. Short label = last selector segment.
+    const target = (picked.selector || '').split('>').pop().trim() || 'element';
+    onRequestEdit?.(composed, { comment: instruction, target });
     setPicked(null);
     setEditText('');
   };
@@ -1793,7 +1886,13 @@ function Canvas({
   const vp = VIEWPORTS[viewport];
   const iframeBg = theme === 'light' ? '#ffffff' : '#191c22';
 
-  if (!pattern) return <CanvasPlaceholder message="Select a pattern from the sidebar to preview." />;
+  // While a brand-new pattern is generating there's nothing to preview yet —
+  // show the busy placeholder so the canvas reflects the in-flight work.
+  if (!pattern) {
+    return generating
+      ? <CanvasPlaceholder busy message={genLabel || 'Generating your screen…'} subMessage={genEta} />
+      : <CanvasPlaceholder message="Select a pattern from the sidebar to preview." />;
+  }
   if (mode === 'source') {
     return (
       <SourceEditor
@@ -1818,6 +1917,8 @@ function Canvas({
         onViewportChange={onViewportChange}
         theme={theme}
         onThemeChange={onThemeChange}
+        inspectOn={inspectOn}
+        onToggleInspect={() => { setInspectOn(v => !v); setPicked(null); }}
       />
 
       <div style={{
@@ -1832,8 +1933,13 @@ function Canvas({
       }}>
         <iframe
           ref={iframeRef}
+          // Bumping reloadNonce changes the key → React remounts the iframe →
+          // a fresh srcDoc load (pattern JS re-runs, interactive state resets).
+          // Keyed on pattern id too so switching patterns also remounts cleanly.
+          key={`${pattern.id}-${reloadNonce ?? 0}`}
           title={`${pattern.slug} — ${vp.label} ${theme}`}
           srcDoc={preview}
+          onLoad={handleIframeLoad}
           // allow-scripts lets pattern-internal JS run (login→dashboard
           // transitions, accordion toggles, etc.). No allow-same-origin
           // → iframe still can't reach this page's DOM or storage.
@@ -1843,22 +1949,10 @@ function Canvas({
           }}
         />
 
-        {/* Click-to-edit toggle */}
-        <button
-          onClick={() => { setInspectOn(v => !v); setPicked(null); }}
-          title="Click an element in the preview to edit it"
-          style={{
-            position: 'absolute', top: 10, right: 10, zIndex: 5,
-            padding: '6px 11px', borderRadius: 8, cursor: 'pointer',
-            fontSize: 12, fontFamily: 'inherit', fontWeight: 500,
-            border: `1px solid ${inspectOn ? '#1f9cf0' : ui.panelLine}`,
-            background: inspectOn ? '#1f9cf0' : ui.panel,
-            color: inspectOn ? '#fff' : ui.text,
-            boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
-          }}
-        >
-          {inspectOn ? 'Click an element…' : 'Edit element'}
-        </button>
+        {/* Click-to-edit toggle now lives in the control bar (see CanvasControlBar). */}
+
+        {/* Busy overlay while an edit to THIS pattern is generating. */}
+        {generating && <GeneratingOverlay label={genLabel || 'Applying your change…'} subLabel={genEta} />}
 
         {/* Inline change popover anchored at the picked element */}
         {picked && (
@@ -1872,8 +1966,11 @@ function Canvas({
               borderRadius: 10, boxShadow: '0 8px 24px rgba(0,0,0,0.18)', padding: 10,
             }}
           >
-            <div style={{ fontSize: 11, color: ui.textMuted, marginBottom: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              Editing: {picked.selector || 'element'}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 10.5, fontWeight: 600, color: '#1f9cf0', background: 'rgba(31,156,240,0.10)', border: '1px solid rgba(31,156,240,0.35)', borderRadius: 6, padding: '2px 7px', marginBottom: 8, maxWidth: '100%', fontFamily: 'ui-monospace, Menlo, monospace' }}>
+              <span style={{ width: 6, height: 6, borderRadius: 2, background: '#1f9cf0', flexShrink: 0 }} />
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {(picked.selector || 'element').split('>').pop().trim()}
+              </span>
             </div>
             <textarea
               autoFocus
@@ -1898,6 +1995,30 @@ function Canvas({
   );
 }
 
+// ───────────────────── transcript persistence ─────────────────────
+// The session "Reasoning" transcript is kept per project in localStorage so a
+// reload restores the conversation. Private-mode safe (try/catch). An in-flight
+// (pending) turn at save time is shown as interrupted on the next load rather
+// than a stuck spinner.
+const transcriptKeyFor = (projectId) => `bs-make:transcript:${projectId || '__all__'}`;
+
+function loadTranscript(projectId) {
+  try {
+    const raw = localStorage.getItem(transcriptKeyFor(projectId));
+    const arr = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(arr)) return [];
+    return arr.map(t => t?.status === 'pending'
+      ? { ...t, status: 'error', response: { error: 'Interrupted — page was reloaded.' } }
+      : t);
+  } catch { return []; }
+}
+
+function saveTranscript(projectId, transcript) {
+  try {
+    localStorage.setItem(transcriptKeyFor(projectId), JSON.stringify(transcript ?? []));
+  } catch { /* private mode / quota — non-critical */ }
+}
+
 // ───────────────────── page ─────────────────────
 
 export default function MyPatternsPage() {
@@ -1910,6 +2031,9 @@ export default function MyPatternsPage() {
   const [selectedId, setSelectedId] = useState(null);
   const [mode, setMode] = useState('preview'); // 'preview' | 'source'
   const [viewport, setViewport] = useState('desktop'); // 'desktop' | 'tablet' | 'mobile'
+  // Bumped by the TopBar "Refresh preview" button to force a fresh iframe reload
+  // (re-runs the pattern's JS, resets interactive state) WITHOUT reloading the page.
+  const [previewReloadNonce, setPreviewReloadNonce] = useState(0);
   const [theme, setTheme] = useState('dark');           // 'dark' | 'light'
   const [componentsDrawerOpen, setComponentsDrawerOpen] = useState(false);
 
@@ -2021,7 +2145,30 @@ export default function MyPatternsPage() {
   // model's response metadata. Lives only in memory; cleared on reload.
   // Each turn: { id, prompt, at, status: 'pending' | 'ok' | 'error',
   //              response: { slug, edited, model, contextUsed, usage } | { error } }
+  // Persist the transcript per project so a reload restores the conversation.
+  // Start empty (SSR-safe), then restore from localStorage in an effect:
+  // on MOUNT we prepend stored history before any landing-handoff turn that
+  // already auto-fired; on a project SWITCH we replace with that project's.
   const [transcript, setTranscript] = useState([]);
+  const transcriptKeyRef = useRef(activeProjectId || '__all__');
+  transcriptKeyRef.current = activeProjectId || '__all__';
+  const firstTranscriptLoad = useRef(true);
+  const skipTranscriptSave = useRef(false);
+  useEffect(() => {
+    skipTranscriptSave.current = true;
+    if (firstTranscriptLoad.current) {
+      firstTranscriptLoad.current = false;
+      setTranscript(prev => [...loadTranscript(activeProjectId), ...prev].slice(-50));
+    } else {
+      setTranscript(loadTranscript(activeProjectId));
+    }
+  }, [activeProjectId]);
+  useEffect(() => {
+    if (skipTranscriptSave.current) { skipTranscriptSave.current = false; return; }
+    saveTranscript(transcriptKeyRef.current, transcript);
+    // Save keyed by the CURRENT project (ref); only on real transcript changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transcript]);
 
   // When a file is selected the send modifies that file in place ("add a
   // logout button"). Otherwise it creates a new pattern. To start fresh
@@ -2035,7 +2182,7 @@ export default function MyPatternsPage() {
   // in-page input bar takes. The landing hand-off passes an explicit
   // editEntryId=null so an auto-selected pattern doesn't accidentally
   // turn the first prompt into an edit.
-  const handleSend = async (overridePrompt = null, overrideModel = null, overrideEditEntryId) => {
+  const handleSend = async (overridePrompt = null, overrideModel = null, overrideEditEntryId, editMeta = null) => {
     // Guard against accidentally being called as an event handler —
     // e.g. <button onClick={handleSend}> passes a SyntheticEvent as
     // the first arg, which would otherwise blow up on .trim() below.
@@ -2062,9 +2209,25 @@ export default function MyPatternsPage() {
       const next = [...prev, {
         id: turnId,
         prompt: trimmed,
+        // For element edits, a compact display payload (targeted element +
+        // the comment) so the transcript doesn't show the full markup dump.
+        editMeta,
         at: new Date().toISOString(),
         status: 'pending',
         editingSlug,
+        // Forecast the scope so the in-flight UI can warn "full build · ~time".
+        // We only know the REAL scope once the model responds, but a new build
+        // is always full, and big structural edits usually are — enough to set
+        // expectations during the wait. Use the user's instruction (editMeta
+        // comment) for element edits, not the composed markup dump.
+        forecast: forecastGeneration({
+          isEdit: !!effectiveEditEntryId,
+          prompt: editMeta?.comment || trimmed,
+        }),
+        // The file this turn belongs to (for per-file reasoning display).
+        // For an edit it's the edited file; for a brand-new pattern it's null
+        // until completion, when we tag it with the created pattern's id.
+        patternId: effectiveEditEntryId ?? null,
       }];
       // Cap the in-memory log so a long session doesn't grow unbounded.
       return next.length > 50 ? next.slice(-50) : next;
@@ -2157,6 +2320,7 @@ export default function MyPatternsPage() {
       setTranscript(prev => prev.map(t => t.id === turnId ? {
         ...t,
         status: 'ok',
+        patternId: updatedPattern.id, // tag with the created/edited file
         response: {
           slug: updatedPattern.slug,
           edited: !!body.edited,
@@ -2164,14 +2328,19 @@ export default function MyPatternsPage() {
           model: body.model,
           contextUsed: body.contextUsed,
           usage: body.usage,
+          // For per-turn Revert: the pre-edit snapshot id + the pattern it
+          // belongs to. Persisted with the transcript so Revert survives reload.
+          versionId: body.versionId ?? null,
+          patternId: updatedPattern.id,
         },
       } : t));
 
       if (body.edited) {
-        // Same file id — replace in-place across all relevant lists.
-        setPatterns(prev => prev.map(p => p.id === updatedPattern.id ? { ...p, content: updatedPattern.content } : p));
+        // Same file id — replace in-place across all relevant lists. The edit
+        // cleared saved_at server-side, so reflect that (Save button returns).
+        setPatterns(prev => prev.map(p => p.id === updatedPattern.id ? { ...p, content: updatedPattern.content, saved_at: updatedPattern.saved_at } : p));
         setProjectFiles(prev => prev.map(f =>
-          f.corpus_entry_id === updatedPattern.id ? { ...f, content: updatedPattern.content } : f,
+          f.corpus_entry_id === updatedPattern.id ? { ...f, content: updatedPattern.content, saved_at: updatedPattern.saved_at } : f,
         ));
         // Drop any in-memory source edits for this pattern so the new
         // server content shows up cleanly in Source view.
@@ -2331,10 +2500,44 @@ export default function MyPatternsPage() {
       }
       const savedAt = body.pattern.saved_at;
       setPatterns(prev => prev.map(p => p.id === selectedId ? { ...p, saved_at: savedAt } : p));
+      setProjectFiles(prev => prev.map(f => f.corpus_entry_id === selectedId ? { ...f, saved_at: savedAt } : f));
     } catch (e) {
       alert('Save failed: ' + e.message);
     } finally {
       setSavingPattern(false);
+    }
+  };
+
+  // Revert a pattern to the snapshot taken before a given edit turn.
+  const [reverting, setReverting] = useState(false);
+  const handleRevert = async ({ patternId, versionId }) => {
+    if (!patternId || !versionId || reverting) return;
+    setReverting(true);
+    try {
+      const res = await fetch(`/api/my-patterns/${patternId}/revert`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userEmail: 'vivka@eg.dk', versionId }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
+      const reverted = body.pattern;
+      setPatterns(prev => prev.map(p => p.id === patternId ? { ...p, content: reverted.content } : p));
+      setProjectFiles(prev => prev.map(f => f.corpus_entry_id === patternId ? { ...f, content: reverted.content } : f));
+      setEditedSources(prev => { const n = { ...prev }; delete n[patternId]; return n; });
+      setSelectedId(patternId);
+      setTranscript(prev => [...prev, {
+        id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()),
+        at: new Date().toISOString(),
+        status: 'ok',
+        prompt: 'Revert',
+        patternId,
+        response: { summary: 'Reverted to the previous version.', edited: false },
+      }].slice(-50));
+    } catch (e) {
+      setGenerateError(e.message);
+    } finally {
+      setReverting(false);
     }
   };
 
@@ -2347,16 +2550,45 @@ export default function MyPatternsPage() {
     router.replace(`/brandsync-make/my-patterns${qs ? `?${qs}` : ''}`);
   };
 
-  const handleCreateProject = async (name) => {
-    const res = await fetch('/api/projects', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userEmail: 'vivka@eg.dk', name, orgId: getStoredOrgId() }),
-    });
-    const body = await res.json();
-    if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
-    setProjects(prev => [{ ...body.project }, ...prev]);
-    handleSwitchProject(body.project.id);
+  // Per-project brand modal. Opened at creation (mode 'create' — also asks for
+  // a name) and to edit the active project's brand later (mode 'edit').
+  const [brandDialog, setBrandDialog] = useState({ open: false, mode: 'create' });
+  const [brandSaving, setBrandSaving] = useState(false);
+
+  const handleBrandSubmit = async ({ name, brandPalette: pal, logoName }) => {
+    setBrandSaving(true);
+    try {
+      if (brandDialog.mode === 'create') {
+        const res = await fetch('/api/projects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userEmail: 'vivka@eg.dk', name, orgId: getStoredOrgId(), brandPalette: pal, logoName }),
+        });
+        const body = await res.json();
+        if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
+        setProjects(prev => [{ ...body.project }, ...prev]);
+        applyBrand(pal, logoName);
+        setBrandDialog({ open: false, mode: 'create' });
+        handleSwitchProject(body.project.id);
+      } else {
+        // edit the active project's brand
+        const res = await fetch(`/api/projects/${activeProjectId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userEmail: 'vivka@eg.dk', brandPalette: pal, logoName }),
+        });
+        const body = await res.json();
+        if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
+        setProjects(prev => prev.map(p => p.id === activeProjectId
+          ? { ...p, brand_palette: pal, logo_name: logoName } : p));
+        applyBrand(pal, logoName);
+        setBrandDialog({ open: false, mode: 'edit' });
+      }
+    } catch (e) {
+      setGenerateError(e.message);
+    } finally {
+      setBrandSaving(false);
+    }
   };
 
   // Project-level brand identity. Logo + brand color palette. Logo comes from
@@ -2370,6 +2602,27 @@ export default function MyPatternsPage() {
   const [colorMenuOpen, setColorMenuOpen] = useState(false);
 
   const [logosError, setLogosError] = useState(null);
+
+  // Apply a brand (palette + logo resolved by name) to the live session state.
+  const applyBrand = (pal, logoName) => {
+    if (pal) setBrandPalette(pal);
+    if (logoName) {
+      setSelectedLogo(prev => logos.find(l => l.name === logoName) ?? prev);
+    }
+  };
+
+  // When a project is open, drive the session brand from its persisted
+  // brand_palette + logo_name. Re-runs when logos finish loading so the logo
+  // object resolves even if the project opened before logos were ready.
+  useEffect(() => {
+    if (!activeProject) return;
+    if (activeProject.brand_palette) setBrandPalette(activeProject.brand_palette);
+    if (activeProject.logo_name && logos.length) {
+      const l = logos.find(x => x.name === activeProject.logo_name);
+      if (l) setSelectedLogo(l);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeProject?.id, activeProject?.brand_palette, activeProject?.logo_name, logos]);
 
   // Lazy-load logos on first sidebar interaction. Avoids hitting Strapi at
   // page load when no one needs it yet.
@@ -2479,6 +2732,7 @@ export default function MyPatternsPage() {
           slug: f.slug,
           type: f.type,
           content: f.content,
+          saved_at: f.saved_at,
           created_by_email: undefined,
           created_by_name: undefined,
         }));
@@ -2505,6 +2759,18 @@ export default function MyPatternsPage() {
     ? prettifyName(selected.slug)
     : (activeProject ? activeProject.name : 'My Patterns');
 
+  // Live status line for the canvas busy overlay — driven by the same
+  // streamed phase events that label the transcript spinner, so the canvas
+  // shows the current step ("Fetching Buttons…", "Saving pattern…") rather
+  // than a generic message.
+  const inflightTurn = generating ? transcript.find(t => t.status === 'pending') : null;
+  const genLabel = inflightTurn ? phaseLabel(inflightTurn.phase) : 'Generating…';
+  // When the in-flight request is forecast as a full/large build, surface a
+  // "Full build · ~30–60s" expectation line in the busy overlay.
+  const genEta = inflightTurn?.forecast?.full
+    ? `${inflightTurn.forecast.kind} · usually ${inflightTurn.forecast.etaText}`
+    : null;
+
   return (
     <div style={{
       // Sit inside the brandsync-make layout (which already has site header
@@ -2516,7 +2782,7 @@ export default function MyPatternsPage() {
       fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
       display: 'flex', flexDirection: 'column',
     }}>
-      <style dangerouslySetInnerHTML={{ __html: '@keyframes bs-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }' }} />
+      <style dangerouslySetInnerHTML={{ __html: '@keyframes bs-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes bs-indeterminate { 0% { left: -40%; } 100% { left: 100%; } } @keyframes bs-dots { 0%, 80%, 100% { opacity: 0.25; } 40% { opacity: 1; } } @keyframes bs-fade-in { from { opacity: 0; } to { opacity: 1; } }' }} />
       <TopBar
         title={title}
         mode={mode}
@@ -2528,10 +2794,25 @@ export default function MyPatternsPage() {
         projectMenuOpen={projectMenuOpen}
         setProjectMenuOpen={setProjectMenuOpen}
         onSwitchProject={handleSwitchProject}
-        onCreateProject={handleCreateProject}
+        onCreateProject={() => setBrandDialog({ open: true, mode: 'create' })}
+        onEditBrand={() => setBrandDialog({ open: true, mode: 'edit' })}
+        brandPalette={brandPalette}
         selectedPattern={selected}
         onSavePattern={handleSavePattern}
         saving={savingPattern}
+        usage={usage}
+        onRefreshPreview={() => setPreviewReloadNonce((n) => n + 1)}
+      />
+
+      <ProjectBrandDialog
+        open={brandDialog.open}
+        mode={brandDialog.mode}
+        initialName=""
+        initialPalette={brandDialog.mode === 'edit' ? brandPalette : null}
+        initialLogoName={brandDialog.mode === 'edit' ? (selectedLogo?.name ?? activeProject?.logo_name ?? null) : null}
+        submitting={brandSaving}
+        onSubmit={handleBrandSubmit}
+        onClose={() => setBrandDialog(d => ({ ...d, open: false }))}
       />
 
       <ComponentsDrawer
@@ -2561,6 +2842,7 @@ export default function MyPatternsPage() {
           onClearGenerateError={() => setGenerateError(null)}
           transcript={transcript}
           usage={usage}
+          onRevert={handleRevert}
           selectedId={selectedId}
           onSelect={setSelectedId}
           prompt={prompt}
@@ -2598,7 +2880,11 @@ export default function MyPatternsPage() {
             selectedLogo={selectedLogo}
             edits={selected ? editedSources[selected.id] : null}
             onEdit={handleSourceEdit}
-            onRequestEdit={(p) => handleSend(p)}
+            onRequestEdit={(p, meta) => handleSend(p, null, undefined, meta)}
+            generating={generating}
+            genLabel={genLabel}
+            genEta={genEta}
+            reloadNonce={previewReloadNonce}
           />
         )}
       </div>

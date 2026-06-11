@@ -19,6 +19,8 @@ import {
 } from "@mui/material";
 import { X, Plus, FileText, FolderPlus } from "phosphor-react";
 import { getStoredOrgId } from "@/lib/useActiveOrg";
+import TokenMeter from "./TokenMeter";
+import ProjectBrandDialog from "./ProjectBrandDialog";
 
 // LOCAL DEV ONLY — same hardcoded user as /brandsync-make/my-patterns/page.js.
 // When real auth lands, both files should switch in lockstep.
@@ -165,7 +167,7 @@ function ProjectPreviewGrid({ projectId, fileCount, tokensCss }) {
   );
 }
 
-function ProjectCard({ project, ownerEmail, tokensCss, onOpen }) {
+function ProjectCard({ project, ownerEmail, tokensCss, onOpen, usage }) {
   return (
     <ButtonBase
       onClick={() => onOpen(project)}
@@ -219,6 +221,14 @@ function ProjectCard({ project, ownerEmail, tokensCss, onOpen }) {
           </Avatar>
         </Tooltip>
       </Stack>
+
+      {/* Daily token budget meter for this project */}
+      <Box sx={{ width: "100%" }}>
+        <TokenMeter
+          used={usage?.by_project?.[project.id] ?? 0}
+          limit={usage?.daily_limit}
+        />
+      </Box>
     </ButtonBase>
   );
 }
@@ -377,6 +387,7 @@ export default function ProjectsDialog({ open, onClose }) {
   const [projects, setProjects] = useState(null); // null = not loaded yet
   const [loadError, setLoadError] = useState(null);
   const [creating, setCreating] = useState(false);
+  const [usage, setUsage] = useState(null);
   // App-local design tokens, inlined into each card preview so --bs-* resolve.
   const [tokensCss, setTokensCss] = useState("");
 
@@ -398,6 +409,10 @@ export default function ProjectsDialog({ open, onClose }) {
       setCreating(false);
       setProjects(null);
       load();
+      fetch(`/api/brandsync-make/usage?userEmail=${encodeURIComponent(USER_EMAIL)}`)
+        .then((r) => r.json())
+        .then((body) => { if (body && !body.error) setUsage(body); })
+        .catch(() => {});
       if (!tokensCss) {
         fetch("/brandsync-tokens.css")
           .then((r) => r.text())
@@ -416,6 +431,27 @@ export default function ProjectsDialog({ open, onClose }) {
     setProjects((prev) => [{ ...project, file_count: 0 }, ...(prev || [])]);
     setCreating(false);
     openProject(project);
+  };
+
+  // Create a project with its brand (color + logo) from the brand modal.
+  const [createSubmitting, setCreateSubmitting] = useState(false);
+  const handleBrandCreate = async ({ name, brandPalette, logoName }) => {
+    setCreateSubmitting(true);
+    try {
+      const res = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userEmail: USER_EMAIL, name, orgId: getStoredOrgId(), brandPalette, logoName }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
+      handleCreated(body.project);
+    } catch (e) {
+      setLoadError(e.message);
+      setCreating(false);
+    } finally {
+      setCreateSubmitting(false);
+    }
   };
 
   const showEmpty = projects && projects.length === 0 && !creating;
@@ -491,11 +527,17 @@ export default function ProjectsDialog({ open, onClose }) {
         </Stack>
       </DialogTitle>
 
+      {/* Create flow now collects brand (color + logo) up front. */}
+      <ProjectBrandDialog
+        open={creating}
+        mode="create"
+        submitting={createSubmitting}
+        onSubmit={handleBrandCreate}
+        onClose={() => setCreating(false)}
+      />
+
       <DialogContent sx={{ px: 4, pt: 6, pb: 4 }}>
         <Stack spacing={1.5}>
-          {creating && (
-            <NewProjectForm onCancel={() => setCreating(false)} onCreated={handleCreated} />
-          )}
 
           {projects === null && !loadError && (
             <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
@@ -520,7 +562,7 @@ export default function ProjectsDialog({ open, onClose }) {
               }}
             >
               {projects.map((p) => (
-                <ProjectCard key={p.id} project={p} ownerEmail={USER_EMAIL} tokensCss={tokensCss} onOpen={openProject} />
+                <ProjectCard key={p.id} project={p} ownerEmail={USER_EMAIL} tokensCss={tokensCss} onOpen={openProject} usage={usage} />
               ))}
             </Box>
           )}

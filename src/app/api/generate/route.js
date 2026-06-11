@@ -1,4 +1,5 @@
 import { getPool, resolveUserId, userOwnsProject, resolveUserOrgId, userVisibleOrgIds } from '@/lib/db';
+import { DAILY_TOKEN_LIMIT } from '@/constants/tokenBudget';
 import { applyScopedPatch, PatchError } from '@/lib/patch';
 import { openSession, listAllowedTools, callTool, closeSession } from '@/lib/mcp-client';
 import { normalizeImages, userContentWithImages } from '@/lib/images';
@@ -23,6 +24,11 @@ import { normalizeImages, userContentWithImages } from '@/lib/images';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+// Vercel caps serverless execution: 60s (Hobby) / 300s (Pro), higher on Fluid.
+// Generation streams and can run minutes on big builds, so request the max the
+// plan allows. The internal GENERATION_DEADLINE_MS must stay BELOW this so WE
+// fail gracefully (clear message) before Vercel hard-kills the function.
+export const maxDuration = 300;
 
 const DEFAULT_MODEL = 'claude-sonnet-4-6';
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
@@ -34,6 +40,18 @@ const ANTHROPIC_VERSION = '2023-06-01';
 // (Funnels, multi-component layouts), so 16 leaves comfortable
 // margin without being so high that a runaway costs serious money.
 const MAX_TOOL_USE_ITERATIONS = 16;
+
+// Overall wall-clock CEILING for a single generation. Now that we STREAM and
+// detect a genuine hang via the idle watchdog (no bytes for ANTHROPIC_IDLE_
+// TIMEOUT_MS), "stuck" is caught by lack-of-progress, not by elapsed time — so
+// this can be generous. It's just a hard backstop against pathological loops.
+// A large multi-view build legitimately streams ~20–30k output tokens, which
+// at Sonnet's rate is ~4–6 min; 300s used to abort those right before they
+// finished. As long as data keeps flowing, let it complete.
+// Env-overridable so it can fit the host: default 285s stays just under Vercel
+// Pro's 300s maxDuration (above) so we abort with a clear message first. On a
+// persistent host (or Vercel Fluid) set GENERATION_DEADLINE_MS=600000 for 10 min.
+const GENERATION_DEADLINE_MS = Number(process.env.GENERATION_DEADLINE_MS) || 285_000;
 
 // Cap how much of a sibling pattern we include as "design system context"
 // to keep input tokens predictable when a project has many files.
@@ -106,16 +124,17 @@ function buildSystemPrompt({
       '',
       'Available tools:',
       '  • list_components() — enumerate available components when you don\'t know the exact name.',
-      '  • get_component(component) — fetch a single component\'s markup, class names, and usage rules. Pass include_html=true only on the final lookup before generating code; omit during discovery.',
+      '  • get_component(component) — fetch a single component\'s full markup, class names, and usage rules. This is the MOST EXPENSIVE lookup (it pulls whole markup into context). Pass include_html=true ONLY when the component is NOT already in the "Component kit" catalog below, OR when you genuinely need its exact nested element structure to compose it. If the catalog already lists the component with its classes, you have everything you need — DO NOT call get_component for it.',
       '  • get_pattern(name) — fetch a full reference pattern\'s HTML/CSS by slug or name.',
       '  • search_guidelines(query) — discover patterns/components by topic when the right name isn\'t obvious.',
       '  • get_tokens(filter?) — fetch design tokens (colors, spacing, typography, radii). Filter by category prefix.',
       '',
-      'When to call tools (DO NOT skip these):',
-      '  • The user names a specific component (Button, Input, Card, etc.) → call get_component for each one with include_html=true.',
+      'Tool-use economy (this is billed input — be deliberate):',
+      '  • The Component kit catalog below is ALREADY in your context. Treat it as the source of truth for which classes exist. A component listed there needs NO tool call — just use its classes.',
+      '  • The user names a specific component (Button, Input, Card, etc.) → FIRST look for it in the catalog. Only if it is absent (or you need its internal structure) call get_component(include_html=true). Pulling markup you already have the classes for is wasted spend.',
       '  • The user names a specific pattern (dashboard, pricing page, sign-in screen) → call search_guidelines or get_pattern first.',
-      '  • You need a color/spacing/typography value → call get_tokens before inventing hex codes.',
-      'Inventing class names or styles that don\'t exist in the design system is the failure mode this prompt is designed to prevent.',
+      '  • You need a color/spacing/typography value not covered by the brand context → call get_tokens before inventing hex codes.',
+      'Inventing class names or styles that don\'t exist in the design system is the failure mode this prompt is designed to prevent — but the catalog below already prevents it for listed components without any tool call.',
       '',
     );
   }
@@ -183,6 +202,7 @@ function buildSystemPrompt({
       '  • USE these classes for their UI primitive (buttons, cards, inputs, tabs, badges, etc.) instead of hand-rolling markup+CSS.',
       '  • DO NOT emit CSS rules for these classes — they are already defined. Redefining them is wasted output AND overrides the brand kit. Never write a `.bs-btn { ... }` rule; just use `class="bs-btn bs-btn-primary"`.',
       '  • Only write CSS for page LAYOUT/glue (grid, flex containers, page-specific sections). Keep that minimal and prefer kit components inside it.',
+      '  • Every component listed here is already fully specified for your purposes — do NOT call get_component for any of them. The names + classes below are all you need to compose them. Reserve get_component for components that are genuinely absent from this list.',
       'Available kit components → classes:',
       '```',
       ...kitCatalog.map((c) => `${c.name}: ${(c.classes || []).join(', ')}`),
@@ -208,11 +228,18 @@ function buildSystemPrompt({
   if (existingContent) {
     lines.push(
       '',
-      '## Existing pattern you are editing',
+      '## Editing an existing pattern',
       `Slug: ${editingSlug ?? '(unknown)'}`,
-      'Below is the current markdown (with ```html / ```css fenced blocks). When you return a section: or css-only envelope, it will be merged into THIS content — so refer to existing class names, view names, and CSS variables.',
+      // The pattern body itself is sent in the user message (NOT here) so
+      // this system prompt stays byte-stable across edits and keeps getting
+      // a prompt-cache hit — the body changes every edit and would otherwise
+      // bust the cache. See the user message for the current markdown.
+      'The current pattern (markdown with ```html / ```css fenced blocks) is provided in the message below. When you return a section: or css-only envelope it will be merged into THAT content — so refer to its existing class names, view names, and CSS variables.',
       '',
-      existingContent,
+      'Brand placeholders — the client swaps these in per workspace, so NEVER inline an SVG, data: URI, or external image URL for a logo or product name:',
+      '  • {{logo}} — wherever a logo image src belongs, e.g. <img src="{{logo}}" alt="{{product-name}}">.',
+      '  • {{product-name}} — wherever the product name appears as text.',
+      'IMPORTANT: "add/place the logo" is a LOCALIZED, single-element change. Return scope=edit inserting <img src="{{logo}}" alt="{{product-name}}"> at the right spot (or scope=section for just the affected view). Do NOT return scope=full to add a logo — regenerating the whole pattern for one <img> is a 30-50× billing waste.',
     );
   } else {
     lines.push(
@@ -323,7 +350,53 @@ function summarizeToolInput(input) {
 //
 // Cache breakpoints used: 2 (system + tools). Anthropic allows up to
 // 4 — leaving headroom for future caching of the messages history.
-async function callAnthropic({ apiKey, model, system, messages, tools }) {
+// Transient upstream failures worth retrying. 429 (rate limit), 5xx, and
+// 529 (Anthropic "overloaded") are temporary; a connection reset before
+// headers (the Envoy "upstream connect error" 503) is the classic flaky
+// blip. 4xx client errors (400/401/403/404) are NOT retried — retrying a
+// bad request just wastes time and money.
+const RETRYABLE_ANTHROPIC_STATUS = new Set([408, 409, 429, 500, 502, 503, 504, 529]);
+const MAX_ANTHROPIC_ATTEMPTS = 4; // 1 try + 3 retries
+// We STREAM the Anthropic response and bound each attempt two ways instead of
+// a single absolute cap:
+//   • IDLE timeout — abort if no bytes arrive for this long. A stalled / half-
+//     open socket (the "14–36 min stuck generation" pathology) trips this fast,
+//     while a long-but-progressing generation keeps the timer reset and runs on.
+//   • the overall GENERATION_DEADLINE_MS — the hard ceiling across all attempts.
+// This is the key difference from the old non-streaming 120s absolute cap: a big
+// new-screen generation that legitimately takes >120s now COMPLETES (as long as
+// tokens keep flowing) instead of being killed mid-output.
+const ANTHROPIC_IDLE_TIMEOUT_MS = 90_000;
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Incremental message caching for the MCP tool-use loop. Each iteration
+// appends tool_use + tool_result blocks and the whole growing history is
+// re-sent; without this it's re-billed at full input price every iteration
+// (O(n²) over a multi-tool generation). We keep a SINGLE rolling
+// cache_control breakpoint on the last block of the last message — prior
+// turns stay cached and are matched by longest-prefix, so iterations 2..n
+// read the accumulated history at ~0.1× instead of full price. Clearing
+// prior breakpoints first keeps us at 3 total (system + last tool + this),
+// under Anthropic's limit of 4.
+function applyRollingMessageCache(messages) {
+  if (!Array.isArray(messages) || !messages.length) return;
+  for (const m of messages) {
+    if (Array.isArray(m.content)) {
+      for (const b of m.content) if (b && typeof b === 'object') delete b.cache_control;
+    }
+  }
+  const last = messages[messages.length - 1];
+  // Normalize plain-string content to a text block so we can mark it.
+  if (typeof last.content === 'string') {
+    last.content = [{ type: 'text', text: last.content }];
+  }
+  if (Array.isArray(last.content) && last.content.length) {
+    const block = last.content[last.content.length - 1];
+    if (block && typeof block === 'object') block.cache_control = { type: 'ephemeral' };
+  }
+}
+
+async function callAnthropic({ apiKey, model, system, messages, tools, deadline }) {
   const systemBlocks = system
     ? [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }]
     : undefined;
@@ -334,33 +407,194 @@ async function callAnthropic({ apiKey, model, system, messages, tools }) {
         : t))
     : undefined;
 
+  // Cache the conversation prefix (see helper above) before sending.
+  applyRollingMessageCache(messages);
+
   const requestBody = {
     model,
-    // Sonnet 4.6 supports up to 64k output. We were capped at 16k
-    // before, which truncated multi-section dashboard gens once the
-    // system prompt started requiring per-view structure + brand
-    // placeholders. Bumping to 32k leaves comfortable headroom
-    // without enabling pathologically long outputs.
-    max_tokens: 32000,
+    // Sonnet 4.6 supports up to 64k output. Full multi-view dashboards
+    // (per-view sections + brand placeholders) can exceed 32k and get
+    // truncated mid-JSON ("Unterminated string"), so use the full 64k.
+    // Truncation is still detected below (stop_reason='max_tokens') and
+    // surfaced clearly rather than as a cryptic JSON parse error.
+    max_tokens: 64000,
     messages,
+    // Stream so a long-but-progressing generation isn't killed by an absolute
+    // per-call timeout. We reconstruct the same { content, usage, model,
+    // stop_reason } shape the non-streaming endpoint returned, so the rest of
+    // the loop is unchanged.
+    stream: true,
   };
   if (systemBlocks) requestBody.system = systemBlocks;
   if (toolsWithCache) requestBody.tools = toolsWithCache;
 
-  const res = await fetch(ANTHROPIC_URL, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': ANTHROPIC_VERSION,
-    },
-    body: JSON.stringify(requestBody),
-  });
-  if (!res.ok) {
-    const errText = await res.text().catch(() => '');
-    throw new Error(`Anthropic ${res.status}: ${errText.slice(0, 500)}`);
+  // Retry transient upstream errors (overload, 5xx, rate limit, connection
+  // resets) with exponential backoff so a momentary Anthropic blip doesn't
+  // fail the whole generation. Mirrors what the official SDK does.
+  let lastErr;
+  for (let attempt = 0; attempt < MAX_ANTHROPIC_ATTEMPTS; attempt++) {
+    // Respect the overall generation deadline ACROSS retries. Each attempt is
+    // bounded by an IDLE timer (reset on every chunk) and a hard timer set to
+    // whatever budget remains; once the budget is gone, fail immediately.
+    const remaining = deadline ? deadline - Date.now() : Infinity;
+    if (remaining <= 0) {
+      throw lastErr ?? new Error(`Generation timed out after ${Math.round(GENERATION_DEADLINE_MS / 1000)}s.`);
+    }
+
+    if (attempt > 0) {
+      const backoff = [600, 1800, 4500][attempt - 1] ?? 4500;
+      await sleep(backoff + Math.floor(Math.random() * 400)); // + jitter
+    }
+
+    // One controller drives both abort sources: the idle watchdog and the
+    // overall-budget ceiling. Either firing aborts the in-flight fetch/stream.
+    const controller = new AbortController();
+    const fail = (msg) => controller.abort(new DOMException(msg, 'TimeoutError'));
+    const budgetTimer = setTimeout(() => fail('overall budget exhausted'), remaining);
+    let idleTimer;
+    const resetIdle = () => {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => fail('no data for ' + ANTHROPIC_IDLE_TIMEOUT_MS / 1000 + 's'), ANTHROPIC_IDLE_TIMEOUT_MS);
+    };
+    const clearTimers = () => { clearTimeout(budgetTimer); clearTimeout(idleTimer); };
+
+    let res;
+    try {
+      resetIdle();
+      res = await fetch(ANTHROPIC_URL, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': ANTHROPIC_VERSION,
+        },
+        body: JSON.stringify(requestBody),
+        signal: controller.signal,
+      });
+    } catch (err) {
+      clearTimers();
+      const timedOut = err?.name === 'TimeoutError' || err?.name === 'AbortError';
+      lastErr = new Error(
+        `Anthropic request failed: ${timedOut ? 'timed out / stalled' : (err?.message ?? 'network error')}`,
+      );
+      continue;
+    }
+
+    if (!res.ok || !res.body) {
+      clearTimers();
+      const errText = await res.text().catch(() => '');
+      lastErr = new Error(`Anthropic ${res.status}: ${errText.slice(0, 500)}`);
+      // Permanent (client) error — don't waste retries.
+      if (!RETRYABLE_ANTHROPIC_STATUS.has(res.status)) throw lastErr;
+      continue; // transient — loop and back off
+    }
+
+    try {
+      const result = await readAnthropicStream(res, resetIdle);
+      clearTimers();
+      return result;
+    } catch (err) {
+      clearTimers();
+      const timedOut = err?.name === 'TimeoutError' || err?.name === 'AbortError';
+      lastErr = new Error(
+        `Anthropic stream failed: ${timedOut ? 'timed out / stalled mid-response' : (err?.message ?? 'stream error')}`,
+      );
+      continue;
+    }
   }
-  return res.json();
+  // Exhausted retries on a transient error.
+  throw lastErr ?? new Error('Anthropic request failed after retries');
+}
+
+// Consume Anthropic's SSE stream and reconstruct the SAME object the
+// non-streaming endpoint returned: { content, usage, model, stop_reason }.
+// `onActivity` is called on every received chunk so the caller can reset its
+// idle watchdog — that's what lets a long-but-progressing generation run past
+// any single-shot timeout while a truly stalled socket still aborts.
+//
+// Event model (https://docs.anthropic.com/en/api/messages-streaming):
+//   message_start        → { message: { model, usage } }
+//   content_block_start  → { index, content_block: {type:'text'|'tool_use', …} }
+//   content_block_delta  → { index, delta: text_delta | input_json_delta }
+//   content_block_stop   → { index }
+//   message_delta        → { delta: { stop_reason }, usage: { output_tokens } }
+//   message_stop / ping / error
+async function readAnthropicStream(res, onActivity) {
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  const blocks = [];      // index → { type, text? | id,name,jsonBuf }
+  let usage = {};
+  let model;
+  let stopReason = null;
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    onActivity?.();
+    buffer += decoder.decode(value, { stream: true });
+
+    let sep;
+    while ((sep = buffer.indexOf('\n\n')) !== -1) {
+      const raw = buffer.slice(0, sep);
+      buffer = buffer.slice(sep + 2);
+      if (!raw || raw.startsWith(':')) continue; // ping / comment
+      let evt = 'message';
+      const dataLines = [];
+      for (const line of raw.split('\n')) {
+        if (line.startsWith('event:')) evt = line.slice(6).trim();
+        else if (line.startsWith('data:')) dataLines.push(line.slice(5).replace(/^ /, ''));
+      }
+      if (!dataLines.length) continue;
+      let p;
+      try { p = JSON.parse(dataLines.join('\n')); } catch { continue; }
+
+      switch (evt) {
+        case 'message_start':
+          model = p.message?.model ?? model;
+          if (p.message?.usage) usage = { ...usage, ...p.message.usage };
+          break;
+        case 'content_block_start': {
+          const cb = p.content_block ?? {};
+          if (cb.type === 'tool_use') blocks[p.index] = { type: 'tool_use', id: cb.id, name: cb.name, jsonBuf: '' };
+          else if (cb.type === 'text') blocks[p.index] = { type: 'text', text: cb.text ?? '' };
+          else blocks[p.index] = { ...cb };
+          break;
+        }
+        case 'content_block_delta': {
+          const b = blocks[p.index];
+          if (!b) break;
+          const d = p.delta ?? {};
+          if (d.type === 'text_delta') b.text = (b.text ?? '') + (d.text ?? '');
+          else if (d.type === 'input_json_delta') b.jsonBuf = (b.jsonBuf ?? '') + (d.partial_json ?? '');
+          break;
+        }
+        case 'message_delta':
+          if (p.delta?.stop_reason) stopReason = p.delta.stop_reason;
+          // message_delta.usage carries the final (cumulative) output_tokens.
+          if (p.usage) usage = { ...usage, ...p.usage };
+          break;
+        case 'error':
+          throw new Error(p.error?.message || 'Anthropic stream error event');
+        default:
+          break; // content_block_stop, message_stop, ping
+      }
+    }
+  }
+
+  // Finalize: parse each tool_use block's accumulated partial JSON.
+  const content = blocks.filter(Boolean).map((b) => {
+    if (b.type === 'tool_use') {
+      let input = {};
+      const s = (b.jsonBuf ?? '').trim();
+      if (s) { try { input = JSON.parse(s); } catch { input = {}; } }
+      return { type: 'tool_use', id: b.id, name: b.name, input };
+    }
+    if (b.type === 'text') return { type: 'text', text: b.text ?? '' };
+    return b;
+  });
+
+  return { content, usage, model, stop_reason: stopReason };
 }
 
 // Drive a full Claude exchange — including any MCP tool calls — until
@@ -379,12 +613,19 @@ async function callAnthropic({ apiKey, model, system, messages, tools }) {
 //
 // Capped at MAX_TOOL_USE_ITERATIONS so a runaway tool-calling loop
 // can't burn the user's token budget indefinitely.
-async function runConversation({ apiKey, model, system, userPrompt, images, retryHint, mcpSession, tools, emit }) {
+async function runConversation({ apiKey, model, system, userPrompt, editContext, images, retryHint, mcpSession, tools, emit, deadline }) {
   const fire = typeof emit === 'function' ? emit : () => {};
+  // The pattern being edited (`editContext`) rides in the user message, NOT
+  // the system prompt, so `system` stays byte-stable and keeps its prompt-cache
+  // hit across edits. The body changes every edit; keeping it out of the cached
+  // prefix is the single biggest input-cost win for iterative editing.
+  const firstUserText = editContext
+    ? `${editContext}\n\n---\n\nRequest: ${userPrompt}`
+    : userPrompt;
   // When images are attached, the first user turn becomes a content-block
   // array (image blocks first, then the text) so Claude sees them as visual
   // reference. Without images we keep the plain-string form.
-  const messages = [{ role: 'user', content: userContentWithImages(userPrompt, images) }];
+  const messages = [{ role: 'user', content: userContentWithImages(firstUserText, images) }];
   if (retryHint) {
     messages.push({
       role: 'assistant',
@@ -392,21 +633,35 @@ async function runConversation({ apiKey, model, system, userPrompt, images, retr
     });
     messages.push({
       role: 'user',
-      content: `Your previous envelope was rejected: ${retryHint}. Reply again with scope="full" so the entire pattern is regenerated cleanly. JSON only.`,
+      content: `Your previous envelope was rejected: ${retryHint}. You MUST reply with scope="full" and the complete regenerated pattern (full html, plus css/js). Do NOT use scope="edit", "section:", or "css-only" again — they were just rejected. JSON only.`,
     });
   }
 
   const totalUsage = {};
   let mcpToolCalls = 0;
+  // How many times the model pulled a component's FULL markup
+  // (get_component with include_html=true). This is the priciest input —
+  // we count it so cold-start cost can be observed and the "lean on the
+  // catalog" guidance verified.
+  let componentHtmlPulls = 0;
   const toolNames = [];
   let finalModel = model;
 
   for (let iter = 0; iter < MAX_TOOL_USE_ITERATIONS; iter++) {
+    // Overall wall-clock guard: a slow/flaky network can make the tool loop +
+    // retries stack into a 20+ minute "stuck" generation even with per-call
+    // timeouts. Bail with a clear, non-retryable message once over budget.
+    if (deadline && Date.now() > deadline) {
+      throw new Error(
+        `Generation timed out after ${Math.round(GENERATION_DEADLINE_MS / 1000)}s. ` +
+        'The model or network is slow right now — try again, or make a smaller, more focused change.',
+      );
+    }
     // Fire BEFORE the Anthropic call so the UI shows "Thinking…"
     // while the model is generating, and `tool` events arrive after
     // each tool the model chooses to use.
     fire('phase', { phase: 'thinking', iteration: iter, toolsSoFar: mcpToolCalls });
-    const json = await callAnthropic({ apiKey, model, system, messages, tools });
+    const json = await callAnthropic({ apiKey, model, system, messages, tools, deadline });
     if (json.usage) {
       for (const [k, v] of Object.entries(json.usage)) {
         if (typeof v === 'number') totalUsage[k] = (totalUsage[k] ?? 0) + v;
@@ -424,7 +679,18 @@ async function runConversation({ apiKey, model, system, userPrompt, images, retr
         .filter((c) => c.type === 'text' && typeof c.text === 'string')
         .map((c) => c.text)
         .join('');
-      return { text, usage: totalUsage, model: finalModel, mcpToolCalls, toolNames };
+      // The model ran out of output budget mid-response, so `text` is a
+      // truncated (unterminated) JSON envelope. Surface this plainly
+      // instead of a cryptic "Unterminated string in JSON" parse error.
+      // Thrown as a plain Error (not PatchError) so the route does NOT
+      // retry — a re-run would just truncate again.
+      if (json.stop_reason === 'max_tokens') {
+        throw new Error(
+          'The design was too large to finish in one response (hit the model output limit). ' +
+          'Try a more focused change, or split it into smaller screens.',
+        );
+      }
+      return { text, usage: totalUsage, model: finalModel, mcpToolCalls, componentHtmlPulls, toolNames };
     }
 
     // Append the assistant's tool-use turn verbatim — Anthropic requires
@@ -437,6 +703,9 @@ async function runConversation({ apiKey, model, system, userPrompt, images, retr
     for (const t of toolUses) {
       toolNames.push(t.name);
       mcpToolCalls++;
+      if (t.name === 'get_component' && t.input && t.input.include_html) {
+        componentHtmlPulls++;
+      }
       // Surface the in-flight tool call to the SSE stream so the UI
       // can show "Fetching Buttons…" instead of a generic spinner.
       // We pass a short summary of the input rather than the full JSON
@@ -531,13 +800,13 @@ async function loadSiblingContext(client, projectId, excludeEntryId) {
 // We intentionally swallow logging failures — the user-visible request
 // shouldn't fail just because telemetry hiccuped.
 // ──────────────────────────────────────────────────────────────────────
-async function logUsage({ userEmail, startedAt, usage, success, errorMessage }) {
+async function logUsage({ userEmail, projectId, startedAt, usage, success, errorMessage }) {
   try {
     await getPool().query(
       `INSERT INTO tool_usage_logs
          (id, user_email, tool_name, duration_ms, success, error,
-          input_tokens, output_tokens, cache_read_tokens)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+          input_tokens, output_tokens, cache_read_tokens, project_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
       [
         // Anthropic-style cuid would be nicer but uuid is fine — the
         // column is plain text and the existing rows are a mix of
@@ -553,6 +822,9 @@ async function logUsage({ userEmail, startedAt, usage, success, errorMessage }) 
         // Anthropic returns cache_read_input_tokens; the schema column
         // is just cache_read_tokens.
         usage?.cache_read_input_tokens ?? null,
+        // Attributes this generation to a project so per-project daily
+        // token meters can sum it. Null when generating outside a project.
+        projectId ?? null,
       ],
     );
   } catch (err) {
@@ -731,6 +1003,41 @@ async function handlePost(request, ctx, emit) {
   if (projectId && !(await userOwnsProject(client, projectId, userId))) {
     return Response.json({ error: 'project not found' }, { status: 404 });
   }
+  // Attribute this generation's token usage to the (validated) project so
+  // the per-project daily meter can sum it. Flows into logUsage via ...ctx.
+  ctx.projectId = projectId;
+
+  // Hard daily cap (per project). Mirror the usage route's accounting exactly
+  // — successful generations only, today (server/UTC), input+output — so the
+  // number we gate on is the same number the meter shows. We refuse BEFORE any
+  // model/MCP work so an over-budget project costs nothing. Generations with
+  // no project aren't metered, so they're not capped.
+  if (projectId) {
+    const { rows: spent } = await client.query(
+      `SELECT COALESCE(SUM(input_tokens + output_tokens), 0)::int AS used
+         FROM tool_usage_logs
+        WHERE user_email = $1
+          AND tool_name = 'brandsync_make.generate'
+          AND success = true
+          AND project_id = $2
+          AND created_at >= date_trunc('day', now())`,
+      [userEmail, projectId],
+    );
+    const usedToday = spent[0]?.used ?? 0;
+    if (usedToday >= DAILY_TOKEN_LIMIT) {
+      return Response.json(
+        {
+          error:
+            `Daily token budget reached for this project (${DAILY_TOKEN_LIMIT.toLocaleString()} tokens, ` +
+            `${usedToday.toLocaleString()} used). It resets at midnight — switch projects or try again tomorrow.`,
+          dailyLimitReached: true,
+          used: usedToday,
+          limit: DAILY_TOKEN_LIMIT,
+        },
+        { status: 429 },
+      );
+    }
+  }
 
   // Edit-mode setup — fetch the target so we can pass it to the model
   // AND pass it to applyScopedPatch for scope=section/css-only merges.
@@ -776,6 +1083,27 @@ async function handlePost(request, ctx, emit) {
     kitCatalog,
   });
 
+  // The volatile pattern body travels in the user message (see runConversation)
+  // so the cached system prompt stays stable across edits.
+  const editContext = editTarget?.content
+    ? `## Current pattern (the one you are editing)\nSlug: ${editTarget.slug ?? '(unknown)'}\n\n${editTarget.content}`
+    : null;
+
+  // Turn-specific scope nudge for logo/brand placement edits. The static
+  // system prompt already covers this, but a recency-strong reminder ON THE
+  // REQUEST ITSELF measurably stops the model from picking scope=full to add a
+  // single <img> (the 5.5k-output-token waste we observed). Only applied to
+  // edits, and only on the first pass — patch-failure retries deliberately
+  // force scope=full, so we must not contradict them.
+  const LOGO_INTENT = /\b(logos?|brand[\s-]?mark|wordmark|product[\s-]?name)\b/i;
+  const firstPassPrompt = (editTarget && LOGO_INTENT.test(prompt))
+    ? `${prompt.trim()}\n\n[Scope: this is a localized logo/brand change. Use the brand placeholders ({{logo}}, {{product-name}}) and return the CHEAPEST scope that fits — scope="edit" to insert/move/remove the <img src="{{logo}}">, or scope="css-only" for a pure size/position tweak. Do NOT return scope="full" — regenerating the whole pattern for a logo is a 30-50× billing waste.]`
+    : prompt.trim();
+
+  // Wall-clock deadline shared across the initial call AND every retry, so the
+  // whole generation (tool loop + retries) is bounded — not just each call.
+  const deadline = (ctx.startedAt ?? Date.now()) + GENERATION_DEADLINE_MS;
+
   fire('phase', { phase: 'connecting', message: 'Connecting to Brandsync MCP…' });
 
   // Open an MCP session for this generation. The session lifetime is
@@ -805,17 +1133,18 @@ async function handlePost(request, ctx, emit) {
 
   // Everything from here through the DB write is wrapped so we always
   // best-effort close the MCP session, even on error paths.
-  let pattern, edited, summary, envelopeScope, retried, mcpToolCalls, usageTotals, finalModel;
+  let pattern, edited, summary, envelopeScope, retried, mcpToolCalls, componentHtmlPulls, usageTotals, finalModel;
   try {
     // First exchange (with tools — Claude may call MCP tools 0+ times
     // before producing the final envelope JSON).
     let llm = await runConversation({
-      apiKey, model, system: systemPrompt, userPrompt: prompt.trim(), images: images.list,
+      apiKey, model, system: systemPrompt, userPrompt: firstPassPrompt, editContext, deadline, images: images.list,
       mcpSession, tools: mcpTools, emit: fire,
     });
     usageTotals = { ...(llm.usage ?? {}) };
     ctx.usage = usageTotals;
     mcpToolCalls = llm.mcpToolCalls ?? 0;
+    componentHtmlPulls = llm.componentHtmlPulls ?? 0;
     finalModel = llm.model;
     let envelope;
     retried = false;
@@ -826,12 +1155,16 @@ async function handlePost(request, ctx, emit) {
       if (!(err instanceof PatchError)) throw err;
       retried = true;
       llm = await runConversation({
-        apiKey, model, system: systemPrompt, userPrompt: prompt.trim(), images: images.list,
+        apiKey, model, system: systemPrompt, userPrompt: prompt.trim(), editContext, deadline, images: images.list,
         retryHint: err.message,
-        mcpSession, tools: mcpTools, emit: fire,
+        // Retry is a clean full regen grounded in editContext — it doesn't need
+        // fresh MCP lookups, so drop tools to avoid re-running the whole
+        // tool-use loop (which would multiply the cost of a single prompt).
+        mcpSession: null, tools: [], emit: fire,
       });
       if (llm.usage) { usageTotals = sumUsage(usageTotals, llm.usage); ctx.usage = usageTotals; }
       mcpToolCalls += llm.mcpToolCalls ?? 0;
+      componentHtmlPulls += llm.componentHtmlPulls ?? 0;
       finalModel = llm.model;
       envelope = parseEnvelopeText(llm.text);
     }
@@ -856,49 +1189,83 @@ async function handlePost(request, ctx, emit) {
           envelopeScope: 'chat',
           retried,
           mcpToolCalls,
+          componentHtmlPulls,
         },
         usage: usageTotals,
       });
     }
 
-    // Apply the patch. If the envelope's structure is invalid, retry
-    // once with a hard scope=full instruction; the merger never
-    // silently recovers, but the LLM can on a second pass.
+    // Apply the patch. If the merge fails (e.g. a scope=edit `find` can't
+    // be located), retry with a hard scope=full instruction — scope=full
+    // bypasses find/replace entirely so it can't fail the same way. We
+    // allow up to MAX_PATCH_RETRIES so a stubborn model that keeps picking
+    // scope=edit still gets nudged to a clean full regeneration rather than
+    // surfacing a raw "find not found" to the user.
+    const MAX_PATCH_RETRIES = 2;
     let mergedContent;
-    try {
-      mergedContent = applyScopedPatch(editTarget?.content ?? '', envelope);
-    } catch (err) {
-      if (!(err instanceof PatchError) || retried) throw err;
-      retried = true;
-      llm = await runConversation({
-        apiKey, model, system: systemPrompt, userPrompt: prompt.trim(), images: images.list,
-        retryHint: err.message,
-        mcpSession, tools: mcpTools, emit: fire,
-      });
-      if (llm.usage) { usageTotals = sumUsage(usageTotals, llm.usage); ctx.usage = usageTotals; }
-      mcpToolCalls += llm.mcpToolCalls ?? 0;
-      finalModel = llm.model;
-      envelope = parseEnvelopeText(llm.text);
-      if (envelope.scope === 'chat') {
-        summary = typeof envelope.summary === 'string' && envelope.summary.trim()
-          ? envelope.summary.trim()
-          : '(no reply)';
-        return Response.json({
-          pattern: editTarget ?? null,
-          edited: false,
-          summary,
-          model: finalModel,
-          contextUsed: {
-            useDesignSystem,
-            siblingCount: siblingContext.length,
-            envelopeScope: 'chat',
-            retried,
-            mcpToolCalls,
-          },
-          usage: usageTotals,
+    for (let attempt = 0; ; attempt++) {
+      try {
+        mergedContent = applyScopedPatch(editTarget?.content ?? '', envelope);
+        break;
+      } catch (err) {
+        if (!(err instanceof PatchError) || attempt >= MAX_PATCH_RETRIES) throw err;
+        retried = true;
+        llm = await runConversation({
+          apiKey, model, system: systemPrompt, userPrompt: prompt.trim(), editContext, deadline, images: images.list,
+          retryHint: err.message,
+          // Toolless retry — see note above; avoids re-running the MCP loop.
+          mcpSession: null, tools: [], emit: fire,
         });
+        if (llm.usage) { usageTotals = sumUsage(usageTotals, llm.usage); ctx.usage = usageTotals; }
+        mcpToolCalls += llm.mcpToolCalls ?? 0;
+        componentHtmlPulls += llm.componentHtmlPulls ?? 0;
+        finalModel = llm.model;
+        envelope = parseEnvelopeText(llm.text);
+        if (envelope.scope === 'chat') {
+          summary = typeof envelope.summary === 'string' && envelope.summary.trim()
+            ? envelope.summary.trim()
+            : '(no reply)';
+          return Response.json({
+            pattern: editTarget ?? null,
+            edited: false,
+            summary,
+            model: finalModel,
+            contextUsed: {
+              useDesignSystem,
+              siblingCount: siblingContext.length,
+              envelopeScope: 'chat',
+              retried,
+              mcpToolCalls,
+            },
+            usage: usageTotals,
+          });
+        }
+        // loop: re-apply with the freshly regenerated envelope
       }
-      mergedContent = applyScopedPatch(editTarget?.content ?? '', envelope);
+    }
+
+    // No-change guard: if an edit merged to byte-identical content (the
+    // model emitted a no-op edit, or every find/replace was a no-op), don't
+    // write to the DB and don't claim an update. The model call already
+    // cost tokens, but the result is honest — the transcript says "no
+    // changes" instead of a phantom "Updated".
+    if (editTarget && mergedContent === editTarget.content) {
+      return Response.json({
+        pattern: editTarget,
+        edited: false,
+        summary: 'No changes were applied — the requested change appears to already be in place.',
+        model: finalModel,
+        contextUsed: {
+          useDesignSystem,
+          siblingCount: siblingContext.length,
+          envelopeScope: envelope.scope,
+          retried,
+          mcpToolCalls,
+          componentHtmlPulls,
+          noChange: true,
+        },
+        usage: usageTotals,
+      });
     }
 
     fire('phase', { phase: 'saving', message: 'Saving pattern…' });
@@ -907,10 +1274,27 @@ async function handlePost(request, ctx, emit) {
     // optionally attach to the project's file list so the sidebar
     // picks them up.
     edited = false;
+    let versionId = null;
     if (editTarget) {
+      // Snapshot the PRE-edit content so this turn can be reverted. The
+      // snapshot represents "state before this edit"; reverting restores it.
+      try {
+        const snap = await client.query(
+          `INSERT INTO pattern_versions (corpus_entry_id, content)
+           VALUES ($1, $2) RETURNING id`,
+          [editTarget.id, editTarget.content],
+        );
+        versionId = snap.rows[0]?.id ?? null;
+      } catch (e) {
+        // Versioning is best-effort — never fail the edit because the
+        // snapshot couldn't be written.
+        console.error('[pattern_versions] snapshot failed:', e.message);
+      }
       const { rows } = await client.query(
+        // Clear saved_at: an edit produces unsaved changes, so the "Save as
+        // pattern" button should reappear until the user saves again.
         `UPDATE corpus_entries
-            SET content = $1
+            SET content = $1, saved_at = NULL
           WHERE id = $2
           RETURNING id, slug, type, path, content, user_id, created_at, saved_at`,
         [mergedContent, editTarget.id],
@@ -942,6 +1326,16 @@ async function handlePost(request, ctx, emit) {
     }
 
     envelopeScope = envelope.scope;
+    // Observability: how much did this generation lean on the catalog vs.
+    // pull full component markup? `componentHtmlPulls` is the priciest input;
+    // ideally it's 0 for edits and low for cold starts now that the prompt
+    // pushes the model to use the pre-loaded catalog.
+    console.log(
+      `[generate] scope=${envelope.scope} edited=${!!editTarget} ` +
+      `mcpToolCalls=${mcpToolCalls} componentHtmlPulls=${componentHtmlPulls} ` +
+      `in=${usageTotals.input_tokens ?? 0} cacheRead=${usageTotals.cache_read_input_tokens ?? 0} ` +
+      `out=${usageTotals.output_tokens ?? 0}`,
+    );
     // Defensive: the model is told to always include `summary`, but if
     // it forgets (or the second-pass retry strips it), fall back to
     // something human-readable rather than rendering "undefined".
@@ -952,6 +1346,7 @@ async function handlePost(request, ctx, emit) {
     return Response.json({
       pattern,
       edited,
+      versionId, // pre-edit snapshot id (for per-turn Revert); null for new patterns
       summary,
       model: finalModel,
       contextUsed: {
@@ -960,6 +1355,7 @@ async function handlePost(request, ctx, emit) {
         envelopeScope,
         retried,
         mcpToolCalls,
+        componentHtmlPulls,
       },
       usage: usageTotals,
     });
