@@ -16,6 +16,13 @@
 
 const PROTOCOL_VERSION = '2025-06-18';
 
+// Hard deadline per MCP HTTP call. Without it a hung MCP connection waits for
+// the OS socket timeout (minutes), which showed up as `read ETIMEDOUT` and
+// multi-minute stuck generations. On timeout the call throws and the route
+// degrades gracefully (a failed tool becomes a tool_result error; a failed
+// session open falls back to no-tools mode).
+const MCP_TIMEOUT_MS = 60_000;
+
 // Tools we expose to Claude during Make generations. The MCP server
 // has many more (write_corpus_entry, save_handoff, graph traversal,
 // etc.) but for UI generation we only want read-side discovery —
@@ -67,6 +74,7 @@ async function rpc(session, body) {
     method: 'POST',
     headers: buildHeaders(session.token, session.sessionId, session),
     body: JSON.stringify(body),
+    signal: AbortSignal.timeout(MCP_TIMEOUT_MS),
   });
   if (!res.ok) {
     const errText = await res.text().catch(() => '');
@@ -98,6 +106,7 @@ export async function openSession({ url, token, actingUserEmail = null, orgId = 
         clientInfo: { name: 'brandsync-make', version: '0.1' },
       },
     }),
+    signal: AbortSignal.timeout(MCP_TIMEOUT_MS),
   });
   if (!initRes.ok) {
     const errText = await initRes.text().catch(() => '');
@@ -168,6 +177,7 @@ export async function closeSession(session) {
     await fetch(session.url, {
       method: 'DELETE',
       headers: buildHeaders(session.token, session.sessionId),
+      signal: AbortSignal.timeout(10_000),
     });
   } catch {
     // Best-effort. The server will GC stale sessions anyway.

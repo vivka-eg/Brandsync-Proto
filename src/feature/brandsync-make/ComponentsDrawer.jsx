@@ -8,11 +8,9 @@ import { getStoredOrgId } from '@/lib/useActiveOrg';
 import { replaceEmojisWithPhosphor } from '@/lib/icons';
 
 const DRAWER_USER_EMAIL = 'vivka@eg.dk';
-// We used to call getComponentsForSidebar/getComponentByName which proxied
-// through the local Strapi at localhost:1337. Switched to /api/components
-// which hits prod Strapi server-side via STRAPI_API_PROD_TOKEN — no local
-// Strapi required, and CodeExamples are always populated (the local client
-// excluded them in non-"dev" env).
+// Components come from /api/components, which now reads Supabase
+// (`kit_components`, migrated off Strapi). The stored detail includes
+// CodeExamples, so live previews render the same as before.
 
 // Right-side drawer that browses the Brandsync component library inline,
 // without leaving the project workspace. Read-only for now: user previews

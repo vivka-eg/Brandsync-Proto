@@ -1,649 +1,139 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  Box,
-  Container,
-  Stack,
-  Typography,
-  IconButton,
-  InputBase,
-  Button,
-  Menu,
-  MenuItem,
-  ListSubheader,
-  Divider,
+  Box, Container, Stack, Typography, IconButton, InputBase, Button, Avatar, Divider,
 } from "@mui/material";
-import { Plus, PaperPlaneRight, GridFour, CaretDown, Ticket, SquaresFour, Check, FolderOpen, X, UsersThree, Cube } from "phosphor-react";
+import {
+  PaperPlaneRight, ArrowRight, Ticket, FolderOpen, SquaresFour, ArrowsClockwise,
+  Star, DiamondsFour, CaretDown,
+} from "phosphor-react";
 import PatternsDialog from "./PatternsDialog";
 import HandoffDialog from "./HandoffDialog";
 import ProjectsDialog from "./ProjectsDialog";
 import OrgDialog from "./OrgDialog";
 import OrgSwitcher from "./OrgSwitcher";
-import { getStoredOrgId } from "@/lib/useActiveOrg";
+import { useActiveOrg } from "@/lib/useActiveOrg";
 
-const MODELS = [
-  { id: "default", label: "Default", description: "Recommended" },
-  { id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6", description: "Balanced, efficient" },
-  { id: "claude-opus-4-7", label: "Claude Opus 4.7", description: "Thorough, uses more credits" },
-  { id: "gemini-3-flash", label: "Gemini 3 Flash", description: "Fast, iterative" },
-  { id: "gemini-3-1-pro", label: "Gemini 3.1 Pro", description: "Deep, creative" },
+const USER_EMAIL = "vivka@eg.dk";
+
+// Larger pool of starter prompts; the shuffle button rotates which four show.
+const CHIP_POOL = [
+  { label: "Data dashboard", prompt: "A data dashboard with KPI cards, a revenue chart, and a recent-activity table." },
+  { label: "Settings page", prompt: "A settings page with profile, notifications, and security sections." },
+  { label: "Onboarding flow", prompt: "A multi-step onboarding flow with a progress indicator and validation." },
+  { label: "Form with validation", prompt: "A form with inline validation, required fields, and an error summary." },
+  { label: "Admin table", prompt: "An admin data table with filters, sorting, pagination, and row actions." },
+  { label: "Empty state", prompt: "An empty state with an illustration, a short message, and a primary call to action." },
+  { label: "Pricing page", prompt: "A pricing page with three tiers, a feature comparison, and a highlighted plan." },
+  { label: "Sign-in screen", prompt: "A sign-in screen with email/password, SSO buttons, and a forgot-password link." },
 ];
 
-function PromptBar({
-  contextProject, onClearContext,
-  projects = [], onPickProject, onCreateProject,
-  onSend,
-}) {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [projectsAnchor, setProjectsAnchor] = useState(null);
-  const [modelId, setModelId] = useState("default");
-  const [prompt, setPrompt] = useState("");
-  const selectedModel = MODELS.find((m) => m.id === modelId);
+const CATEGORIES = ["All", "Dashboards", "Forms", "Tables"];
+const CAT_MATCH = {
+  Dashboards: /dashboard|analytics|overview|metric|chart|kpi/i,
+  Forms: /form|onboard|sign|login|wizard|input|field|feedback/i,
+  Tables: /table|list|grid|data|request/i,
+};
 
-  const closeProjects = () => setProjectsAnchor(null);
+// Soft thumbnail accents, rotated per card so the gallery reads like the mock.
+const THUMB = ["#0073e1", "#b06f00", "#00855b", "#c2185b", "#6c4bd1", "#0e8a8a"];
 
-  const handleSubmit = () => {
-    const text = prompt.trim();
-    if (!text) return;
-    // Resolve the picker's "default" to a concrete model id so the
-    // /api/generate route doesn't have to know about UI sentinels.
-    const resolvedModel = modelId === "default" ? "claude-sonnet-4-6" : modelId;
-    onSend?.({ prompt: text, model: resolvedModel });
-  };
-
-  return (
-    <Box
-      sx={{
-        width: "100%",
-        display: "flex",
-        alignItems: "center",
-        gap: 1,
-        bgcolor: "var(--bs-surface-raised)",
-        border: "1px solid var(--bs-border-default)",
-        borderRadius: "var(--bs-border-radius-full)",
-        px: 1,
-        py: 1,
-      }}
-    >
-      <IconButton
-        size="small"
-        aria-label="Attach"
-        sx={{
-          bgcolor: "transparent",
-          border: "1px solid var(--bs-border-default)",
-          color: "var(--bs-text-default)",
-          width: 40,
-          height: 40,
-        }}
-      >
-        <Plus size={18} weight="bold" />
-      </IconButton>
-
-      <InputBase
-        fullWidth
-        value={prompt}
-        onChange={(e) => setPrompt(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            handleSubmit();
-          }
-        }}
-        placeholder="Describe your idea. Attach a design to guide the result."
-        sx={{
-          flex: 1,
-          color: "var(--bs-text-default)",
-          fontSize: "var(--bs-font-size-md)",
-          "& input::placeholder": {
-            color: "var(--bs-text-muted)",
-            opacity: 1,
-          },
-        }}
-        inputProps={{ "aria-label": "Describe your idea" }}
-      />
-
-      <Button
-        size="small"
-        endIcon={<CaretDown size={14} weight="bold" />}
-        onClick={(e) => setAnchorEl(e.currentTarget)}
-        sx={{
-          color: "var(--bs-text-default)",
-          textTransform: "none",
-          fontWeight: 500,
-          px: 1.5,
-          "&:hover": { bgcolor: "var(--bs-surface-hover)" },
-        }}
-      >
-        {selectedModel.label}
-      </Button>
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={() => setAnchorEl(null)}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        transformOrigin={{ vertical: "bottom", horizontal: "right" }}
-        slotProps={{
-          paper: {
-            sx: {
-              minWidth: 280,
-              mt: -1,
-              bgcolor: "var(--bs-surface-raised)",
-              border: "1px solid var(--bs-border-default)",
-              borderRadius: "var(--bs-border-radius-200)",
-              boxShadow: "var(--bs-shadow-lg)",
-              overflow: "hidden",
-            },
-          },
-          list: { sx: { py: 0.5 } },
-        }}
-      >
-        <ListSubheader
-          disableSticky
-          sx={{
-            bgcolor: "transparent",
-            color: "var(--bs-text-muted)",
-            fontSize: "var(--bs-font-size-xs)",
-            fontWeight: 500,
-            lineHeight: 1,
-            px: 2,
-            py: 1.25,
-          }}
-        >
-          Select model
-        </ListSubheader>
-        {MODELS.map((m) => {
-          const isSelected = m.id === modelId;
-          return (
-            <MenuItem
-              key={m.id}
-              selected={isSelected}
-              onClick={() => {
-                setModelId(m.id);
-                setAnchorEl(null);
-              }}
-              sx={{
-                px: 2,
-                py: 1,
-                gap: 1.5,
-                alignItems: "flex-start",
-                "&.Mui-selected, &.Mui-selected:hover": {
-                  bgcolor: "transparent",
-                },
-                "&:hover": { bgcolor: "var(--bs-surface-hover)" },
-              }}
-            >
-              <Box sx={{ width: 16, pt: 0.25, flexShrink: 0 }}>
-                {isSelected && <Check size={14} weight="bold" color="var(--bs-text-default)" />}
-              </Box>
-              <Stack spacing={0.25}>
-                <Typography
-                  variant="body2"
-                  fontWeight={600}
-                  sx={{ color: "var(--bs-text-default)", lineHeight: 1.3 }}
-                >
-                  {m.label}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{ color: "var(--bs-text-muted)", lineHeight: 1.3 }}
-                >
-                  {m.description}
-                </Typography>
-              </Stack>
-            </MenuItem>
-          );
-        })}
-      </Menu>
-
-      {contextProject ? (
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={0.25}
-          sx={{
-            pl: 1.25,
-            pr: 0.5,
-            py: 0.5,
-            bgcolor: "var(--bs-color-accent-container)",
-            color: "var(--bs-color-accent-default)",
-            border: "1px solid var(--bs-color-accent-default)",
-            borderRadius: "var(--bs-border-radius-full)",
-            maxWidth: 220,
-            cursor: "pointer",
-            "&:hover": { opacity: 0.92 },
-          }}
-          onClick={(e) => setProjectsAnchor(e.currentTarget)}
-          role="button"
-          aria-label="Switch project"
-          aria-haspopup="menu"
-          aria-expanded={Boolean(projectsAnchor)}
-        >
-          <FolderOpen size={14} weight="fill" />
-          <Typography
-            variant="caption"
-            fontWeight={600}
-            sx={{
-              color: "inherit",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              maxWidth: 130,
-              px: 0.5,
-            }}
-          >
-            {contextProject.name}
-          </Typography>
-          <CaretDown size={10} weight="bold" />
-          <IconButton
-            size="small"
-            aria-label="Clear project context"
-            onClick={(e) => { e.stopPropagation(); onClearContext(); }}
-            sx={{
-              width: 20,
-              height: 20,
-              ml: 0.5,
-              color: "inherit",
-              "&:hover": { bgcolor: "transparent", opacity: 0.7 },
-            }}
-          >
-            <X size={11} weight="bold" />
-          </IconButton>
-        </Stack>
-      ) : (
-        <IconButton
-          size="small"
-          aria-label="Open project"
-          title="Open a project"
-          onClick={(e) => setProjectsAnchor(e.currentTarget)}
-          sx={{
-            border: "1px solid var(--bs-border-default)",
-            color: "var(--bs-text-default)",
-            width: 40,
-            height: 40,
-            "&:hover": { bgcolor: "var(--bs-surface-hover)" },
-          }}
-        >
-          <GridFour size={18} weight="regular" />
-        </IconButton>
-      )}
-
-      <Menu
-        anchorEl={projectsAnchor}
-        open={Boolean(projectsAnchor)}
-        onClose={closeProjects}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        transformOrigin={{ vertical: "bottom", horizontal: "right" }}
-        slotProps={{
-          paper: {
-            sx: {
-              minWidth: 260,
-              mt: -1,
-              bgcolor: "var(--bs-surface-raised)",
-              border: "1px solid var(--bs-border-default)",
-              borderRadius: "var(--bs-border-radius-200)",
-              boxShadow: "var(--bs-shadow-lg)",
-              overflow: "hidden",
-            },
-          },
-          list: { sx: { py: 0.5 } },
-        }}
-      >
-        <ListSubheader
-          disableSticky
-          sx={{
-            bgcolor: "transparent",
-            color: "var(--bs-text-muted)",
-            fontSize: "var(--bs-font-size-xs)",
-            fontWeight: 600,
-            letterSpacing: "0.04em",
-            textTransform: "uppercase",
-            lineHeight: 1,
-            px: 2,
-            py: 1.25,
-          }}
-        >
-          {contextProject ? "Switch project" : "Your projects"}
-        </ListSubheader>
-
-        {projects.length === 0 && (
-          <MenuItem disabled sx={{ px: 2, py: 1, fontSize: 13, color: "var(--bs-text-muted)" }}>
-            No projects yet
-          </MenuItem>
-        )}
-
-        {projects.slice(0, 8).map((p) => {
-          const isActive = p.id === contextProject?.id;
-          return (
-            <MenuItem
-              key={p.id}
-              onClick={() => { onPickProject?.(p); closeProjects(); }}
-              sx={{
-                px: 2,
-                py: 1,
-                gap: 1.25,
-                bgcolor: isActive ? "var(--bs-color-accent-container)" : "transparent",
-                "&:hover": {
-                  bgcolor: isActive
-                    ? "var(--bs-color-accent-container)"
-                    : "var(--bs-surface-hover)",
-                },
-              }}
-            >
-              <FolderOpen
-                size={14}
-                weight={isActive ? "fill" : "regular"}
-                color="var(--bs-color-accent-default)"
-              />
-              <Typography
-                variant="body2"
-                sx={{
-                  color: isActive ? "var(--bs-color-accent-default)" : "var(--bs-text-default)",
-                  fontWeight: isActive ? 600 : 400,
-                  flex: 1,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {p.name}
-              </Typography>
-              {isActive && <Check size={12} weight="bold" color="var(--bs-color-accent-default)" />}
-              <Typography variant="caption" sx={{ color: "var(--bs-text-muted)", flexShrink: 0 }}>
-                {p.file_count ?? 0}
-              </Typography>
-            </MenuItem>
-          );
-        })}
-
-        <Divider sx={{ my: 0.5, borderColor: "var(--bs-border-default)" }} />
-
-        <MenuItem
-          onClick={() => { onCreateProject?.(); closeProjects(); }}
-          sx={{
-            px: 2, py: 1, gap: 1.25,
-            color: "var(--bs-color-accent-default)",
-            fontWeight: 500,
-            "&:hover": { bgcolor: "var(--bs-surface-hover)" },
-          }}
-        >
-          <Plus size={14} weight="bold" />
-          <Typography variant="body2" sx={{ color: "inherit", fontWeight: 600 }}>
-            New project
-          </Typography>
-        </MenuItem>
-      </Menu>
-
-      <IconButton
-        aria-label="Send"
-        onClick={handleSubmit}
-        disabled={!prompt.trim()}
-        sx={{
-          bgcolor: "var(--bs-text-default)",
-          color: "var(--bs-surface-base)",
-          width: 40,
-          height: 40,
-          "&:hover": { bgcolor: "var(--bs-text-default)", opacity: 0.85 },
-          "&.Mui-disabled": {
-            bgcolor: "var(--bs-text-default)",
-            color: "var(--bs-surface-base)",
-            opacity: 0.35,
-          },
-        }}
-      >
-        <PaperPlaneRight size={18} weight="fill" />
-      </IconButton>
-    </Box>
-  );
+function prettify(slug = "") {
+  let s = slug.split("/").pop() || slug;   // last path segment ("corpus/patterns/x" → "x")
+  s = s.replace(/\.md$/i, "");             // drop .md extension
+  s = s.replace(/-[a-z0-9]{4,6}$/i, "");   // drop random suffix
+  s = s.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()).trim();
+  return s || "Untitled";
+}
+function initials(name, email) {
+  if (name && name.trim()) {
+    const p = name.trim().split(/\s+/);
+    return ((p[0]?.[0] || "") + (p[1]?.[0] || "")).toUpperCase();
+  }
+  return (email || "?").slice(0, 2).toUpperCase();
+}
+function authorLabel(name, email) {
+  if (name && name.trim()) return name.trim();
+  const local = (email || "").split("@")[0];
+  return local ? local.replace(/\b\w/g, (c) => c.toUpperCase()) : "—";
+}
+// Deterministic placeholder star count (stable per pattern) until a real
+// rating/usage signal exists. Flagged in the UI commentary, not invented data.
+function pseudoStars(slug = "") {
+  let n = 0;
+  for (const ch of slug) n += ch.charCodeAt(0);
+  return (n % 33) + 8;
 }
 
-function OptionCard({ title, subtitle, preview, onClick }) {
+function PatternThumb({ accent }) {
+  const soft = `${accent}1f`;
   return (
-    <Box
-      role="button"
-      tabIndex={0}
-      onClick={onClick}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onClick?.();
-        }
-      }}
-      sx={{
-        position: "relative",
-        bgcolor: "var(--bs-surface-raised)",
-        border: "1px solid var(--bs-border-default)",
-        borderRadius: "var(--bs-border-radius-200)",
-        overflow: "hidden",
-        cursor: "pointer",
-        transition: "border-color 0.15s, transform 0.15s",
-        "&:hover": {
-          borderColor: "var(--bs-border-neutral-hover)",
-          transform: "translateY(-2px)",
-        },
-        "&:focus-visible": {
-          outline: "2px solid var(--bs-border-primary)",
-          outlineOffset: 2,
-        },
-      }}
-    >
-      <Stack spacing={0.5} sx={{ p: 3, textAlign: "center" }}>
-        <Typography
-          variant="h6"
-          fontWeight={600}
-          sx={{ color: "var(--bs-text-default)" }}
-        >
-          {title}
-        </Typography>
-        <Typography variant="body2" sx={{ color: "var(--bs-text-muted)" }}>
-          {subtitle}
-        </Typography>
-      </Stack>
-      <Box
-        sx={{
-          height: 180,
-          display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "center",
-          px: 4,
-          pb: 0,
-        }}
-      >
-        {preview}
+    <Box sx={{ p: 1.25, display: "flex", flexDirection: "column", gap: 0.75, bgcolor: "var(--bs-surface-container)", height: 132 }}>
+      <Box sx={{ height: 6, width: "55%", borderRadius: 1, bgcolor: accent }} />
+      <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0.75, flex: 1 }}>
+        {[0, 1, 2, 3].map((i) => (
+          <Box key={i} sx={{ borderRadius: 1, bgcolor: i % 3 === 0 ? soft : "var(--bs-surface-raised)", border: "1px solid var(--bs-border-default)" }} />
+        ))}
       </Box>
     </Box>
   );
 }
 
-function HandoffPreview() {
+function PatternCard({ p, accent, onClick }) {
   return (
     <Box
+      role="button" tabIndex={0} onClick={onClick}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick?.(); } }}
       sx={{
-        width: "100%",
-        maxWidth: 280,
-        height: 140,
-        borderRadius: "var(--bs-border-radius-150) var(--bs-border-radius-150) 0 0",
-        bgcolor: "var(--bs-surface-base)",
-        border: "1px solid var(--bs-border-default)",
-        borderBottom: "none",
-        p: 2,
-        display: "flex",
-        flexDirection: "column",
-        gap: 1.25,
+        border: "1px solid var(--bs-border-default)", borderRadius: "var(--bs-border-radius-200)",
+        overflow: "hidden", cursor: "pointer", bgcolor: "var(--bs-surface-raised)",
+        transition: "border-color .15s, transform .15s",
+        "&:hover": { borderColor: "var(--bs-border-neutral-hover)", transform: "translateY(-2px)" },
+        "&:focus-visible": { outline: "2px solid var(--bs-border-primary)", outlineOffset: 2 },
       }}
     >
-      <Stack direction="row" alignItems="center" gap={1}>
-        <Box
-          sx={{
-            px: 1,
-            py: 0.25,
-            bgcolor: "var(--bs-color-info-container)",
-            color: "var(--bs-color-info-default)",
-            borderRadius: "var(--bs-border-radius-50)",
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: "0.04em",
-          }}
-        >
-          APT-202
-        </Box>
-        <Ticket size={14} color="var(--bs-text-muted)" />
-        <Box sx={{ flex: 1, height: 4, bgcolor: "var(--bs-color-neutral-container)", borderRadius: 4 }} />
-      </Stack>
-      <Stack spacing={0.75}>
-        <Box sx={{ height: 4, bgcolor: "var(--bs-color-neutral-container)", borderRadius: 4 }} />
-        <Box sx={{ height: 4, bgcolor: "var(--bs-color-neutral-container)", borderRadius: 4, width: "85%" }} />
-        <Box sx={{ height: 4, bgcolor: "var(--bs-color-neutral-container)", borderRadius: 4, width: "60%" }} />
-      </Stack>
-      <Stack direction="row" gap={0.75} sx={{ mt: "auto" }}>
-        {["#0073e1", "#715afc", "#00855b"].map((c) => (
-          <Box
-            key={c}
-            sx={{
-              px: 0.75,
-              py: 0.25,
-              fontSize: 9,
-              fontWeight: 600,
-              borderRadius: "var(--bs-border-radius-full)",
-              bgcolor: `${c}22`,
-              color: c,
-              border: `1px solid ${c}44`,
-            }}
-          >
-            tag
-          </Box>
-        ))}
-      </Stack>
-    </Box>
-  );
-}
-
-function PatternsPreview() {
-  const patterns = [
-    { label: "Dashboard", accent: "#0073e1" },
-    { label: "Form", accent: "#715afc" },
-    { label: "Settings", accent: "#00855b" },
-    { label: "Wizard", accent: "#b18100" },
-  ];
-  return (
-    <Box
-      sx={{
-        width: "100%",
-        maxWidth: 280,
-        height: 140,
-        borderRadius: "var(--bs-border-radius-150) var(--bs-border-radius-150) 0 0",
-        bgcolor: "var(--bs-surface-base)",
-        border: "1px solid var(--bs-border-default)",
-        borderBottom: "none",
-        p: 1.5,
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: 1,
-      }}
-    >
-      {patterns.map(({ label, accent }) => (
-        <Box
-          key={label}
-          sx={{
-            bgcolor: "var(--bs-surface-container)",
-            border: "1px solid var(--bs-border-default)",
-            borderRadius: "var(--bs-border-radius-75)",
-            p: 0.75,
-            display: "flex",
-            flexDirection: "column",
-            gap: 0.5,
-            position: "relative",
-          }}
-        >
-          <Box
-            sx={{
-              position: "absolute",
-              top: 6,
-              right: 6,
-              width: 6,
-              height: 6,
-              borderRadius: "50%",
-              bgcolor: accent,
-            }}
-          />
-          <SquaresFour size={12} color="var(--bs-text-muted)" />
-          <Box sx={{ height: 3, bgcolor: "var(--bs-color-neutral-container)", borderRadius: 3, width: "70%" }} />
-          <Box
-            sx={{
-              flex: 1,
-              bgcolor: `${accent}1f`,
-              borderRadius: "var(--bs-border-radius-50)",
-              minHeight: 18,
-            }}
-          />
-          <Box
-            sx={{
-              fontSize: 8,
-              fontWeight: 600,
-              color: "var(--bs-text-muted)",
-              letterSpacing: "0.04em",
-              textTransform: "uppercase",
-            }}
-          >
-            {label}
-          </Box>
-        </Box>
-      ))}
-    </Box>
-  );
-}
-
-function ProjectsPreview() {
-  return (
-    <Box
-      sx={{
-        width: "100%",
-        maxWidth: 280,
-        height: 140,
-        borderRadius: "var(--bs-border-radius-150) var(--bs-border-radius-150) 0 0",
-        bgcolor: "var(--bs-surface-base)",
-        border: "1px solid var(--bs-border-default)",
-        borderBottom: "none",
-        p: 1.5,
-        display: "flex",
-        flexDirection: "column",
-        gap: 0.75,
-      }}
-    >
-      {[
-        { name: "Vigilo onboarding", count: 6 },
-        { name: "Sensum dashboard", count: 4 },
-        { name: "Brand guidelines", count: 9 },
-      ].map((p, i) => (
-        <Stack
-          key={p.name}
-          direction="row"
-          alignItems="center"
-          gap={1}
-          sx={{
-            bgcolor: "var(--bs-surface-container)",
-            border: "1px solid var(--bs-border-default)",
-            borderRadius: "var(--bs-border-radius-75)",
-            px: 1,
-            py: 0.75,
-          }}
-        >
-          <FolderOpen size={12} color="var(--bs-color-accent-default)" weight="fill" />
-          <Box sx={{ flex: 1, height: 4, bgcolor: "var(--bs-color-neutral-container)", borderRadius: 3, width: `${70 - i * 10}%` }} />
-          <Box
-            sx={{
-              fontSize: 9,
-              fontWeight: 600,
-              color: "var(--bs-text-muted)",
-              minWidth: 14,
-              textAlign: "right",
-            }}
-          >
-            {p.count}
-          </Box>
+      <PatternThumb accent={accent} />
+      <Box sx={{ p: 1.5, borderTop: "1px solid var(--bs-border-default)" }}>
+        <Typography variant="body2" fontWeight={600} sx={{ color: "var(--bs-text-default)", mb: 1 }} noWrap>
+          {prettify(p.slug)}
+        </Typography>
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Stack direction="row" alignItems="center" gap={0.75} sx={{ minWidth: 0 }}>
+            <Avatar sx={{ width: 18, height: 18, fontSize: 9, bgcolor: "var(--bs-color-primary-container)", color: "var(--bs-color-primary-default)" }}>
+              {initials(p.creator_name, p.creator_email)}
+            </Avatar>
+            <Typography variant="caption" sx={{ color: "var(--bs-text-muted)" }} noWrap>
+              {authorLabel(p.creator_name, p.creator_email)}
+            </Typography>
+          </Stack>
+          {p.approved ? (
+            <Box sx={{ px: 0.75, py: 0.25, fontSize: 10, fontWeight: 600, borderRadius: "var(--bs-border-radius-50)", bgcolor: "var(--bs-color-success-container)", color: "var(--bs-color-success-default)", display: "inline-flex", alignItems: "center", gap: 0.5, flexShrink: 0 }}>
+              ✓ Promoted
+            </Box>
+          ) : (
+            <Stack direction="row" alignItems="center" gap={0.5} sx={{ color: "var(--bs-text-muted)", flexShrink: 0 }}>
+              <Star size={12} weight="fill" />
+              <Typography variant="caption" sx={{ color: "inherit" }}>{pseudoStars(p.slug)}</Typography>
+            </Stack>
+          )}
         </Stack>
-      ))}
+      </Box>
+    </Box>
+  );
+}
+
+function StartCard({ title, viewAll, onViewAll, children }) {
+  return (
+    <Box sx={{ border: "1px solid var(--bs-border-default)", borderRadius: "var(--bs-border-radius-200)", bgcolor: "var(--bs-surface-raised)", p: 2.25, display: "flex", flexDirection: "column" }}>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1.5 }}>
+        <Typography variant="overline" sx={{ color: "var(--bs-text-muted)", fontWeight: 600, letterSpacing: "0.04em" }}>{title}</Typography>
+        <Button onClick={onViewAll} endIcon={<ArrowRight size={13} weight="bold" />} sx={{ textTransform: "none", color: "var(--bs-color-primary-default)", fontWeight: 500, fontSize: 13, minWidth: 0, p: 0.5, "&:hover": { bgcolor: "transparent", opacity: 0.8 } }}>
+          {viewAll}
+        </Button>
+      </Stack>
+      {children}
     </Box>
   );
 }
@@ -652,131 +142,226 @@ export default function BrandsyncMakePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const projectId = searchParams.get("projectId");
+  const { activeOrgId, loading: orgLoading } = useActiveOrg();
 
   const [patternsOpen, setPatternsOpen] = useState(false);
   const [handoffOpen, setHandoffOpen] = useState(false);
   const [projectsOpen, setProjectsOpen] = useState(false);
   const [orgOpen, setOrgOpen] = useState(false);
   const [projects, setProjects] = useState([]);
+  const [usage, setUsage] = useState(null);
+  const [patterns, setPatterns] = useState([]);
+  const [promptText, setPromptText] = useState("");
+  const [chipSeed, setChipSeed] = useState(0);
+  const [category, setCategory] = useState("All");
 
-  // Load the user's projects once on mount so the in-prompt picker has
-  // them ready, and so we can resolve `projectId` from the URL into a
-  // human-readable contextProject without an extra fetch.
+  // Re-scope projects + patterns whenever the active org changes (the top-bar
+  // switcher broadcasts via useActiveOrg). Wait for org resolution so we don't
+  // briefly fetch with the wrong/empty org on first paint.
   useEffect(() => {
-    fetch(`/api/projects?userEmail=${encodeURIComponent("vivka@eg.dk")}${getStoredOrgId() ? `&orgId=${encodeURIComponent(getStoredOrgId())}` : ""}`)
-      .then((r) => r.json())
-      .then((body) => setProjects(body.projects ?? []))
-      .catch(() => setProjects([]));
+    if (orgLoading) return;
+    const org = activeOrgId ? `&orgId=${encodeURIComponent(activeOrgId)}` : "";
+    fetch(`/api/projects?userEmail=${encodeURIComponent(USER_EMAIL)}${org}`)
+      .then((r) => r.json()).then((b) => setProjects(b.projects ?? [])).catch(() => setProjects([]));
+    fetch(`/api/patterns?userEmail=${encodeURIComponent(USER_EMAIL)}${org}&scope=approved`)
+      .then((r) => r.json()).then((b) => setPatterns(b.patterns ?? [])).catch(() => setPatterns([]));
+  }, [activeOrgId, orgLoading]);
+
+  // Usage is per-user (not org-scoped) — fetch once.
+  useEffect(() => {
+    fetch(`/api/brandsync-make/usage?userEmail=${encodeURIComponent(USER_EMAIL)}`)
+      .then((r) => r.json()).then((b) => { if (b && !b.error) setUsage(b); }).catch(() => {});
   }, []);
 
   const contextProject = projectId ? projects.find((p) => p.id === projectId) ?? null : null;
 
-  // Landing-page send hand-off. We stash the prompt in sessionStorage
-  // and route into /brandsync-make/my-patterns, where on mount the
-  // page drains the stash and auto-fires its existing handleSend.
-  // Using sessionStorage instead of URL params keeps long prompts out
-  // of the browser history and out of the address bar.
-  const handleLandingSend = ({ prompt, model }) => {
+  // Budget pill: today's spend across projects vs the daily allotment.
+  const budgetPct = useMemo(() => {
+    if (!usage?.daily_limit) return null;
+    const today = (usage.in_today ?? 0) + (usage.out_today ?? 0);
+    return Math.min(999, Math.round((today / usage.daily_limit) * 100));
+  }, [usage]);
+
+  // Four chips drawn from the pool; the shuffle button advances the window.
+  const chips = useMemo(() => {
+    const start = (chipSeed * 4) % CHIP_POOL.length;
+    return Array.from({ length: 4 }, (_, i) => CHIP_POOL[(start + i) % CHIP_POOL.length]);
+  }, [chipSeed]);
+
+  const visiblePatterns = useMemo(() => {
+    const list = category === "All" ? patterns : patterns.filter((p) => CAT_MATCH[category]?.test(p.slug));
+    return list.slice(0, 6);
+  }, [patterns, category]);
+
+  const handleSend = () => {
+    const text = promptText.trim();
+    if (!text) return;
     try {
-      sessionStorage.setItem(
-        "brandsync-make:pending-prompt",
-        JSON.stringify({
-          prompt,
-          model,
-          projectId: contextProject?.id ?? null,
-          at: Date.now(),
-        }),
-      );
-    } catch {
-      // sessionStorage can throw in private-mode iframes; the worst
-      // case is the next page starts blank, which is fine.
-    }
-    const qs = contextProject?.id
-      ? `?projectId=${encodeURIComponent(contextProject.id)}`
-      : "";
+      sessionStorage.setItem("brandsync-make:pending-prompt", JSON.stringify({
+        prompt: text, model: "claude-sonnet-4-6", projectId: contextProject?.id ?? null, at: Date.now(),
+      }));
+    } catch { /* private mode */ }
+    const qs = contextProject?.id ? `?projectId=${encodeURIComponent(contextProject.id)}` : "";
     router.push(`/brandsync-make/my-patterns${qs}`);
   };
 
   return (
-    <Box sx={{ minHeight: "calc(100vh - 64px)", display: "flex", alignItems: "center", py: 8 }}>
-      <Container maxWidth="lg">
-        <Stack spacing={5} alignItems="center">
-          <Stack direction="row" alignItems="center" gap={1}>
-            <Typography variant="caption" sx={{ color: "var(--bs-text-muted)" }}>
-              Working in
-            </Typography>
-            <OrgSwitcher />
-          </Stack>
+    <Box sx={{ minHeight: "100vh", bgcolor: "var(--bs-surface-base)" }}>
+      {/* Top bar */}
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: { xs: 5, md: 8 }, py: 4, borderBottom: "1px solid var(--bs-border-default)", bgcolor: "var(--bs-surface-raised)" }}>
+        <Stack direction="row" alignItems="center" gap={1.5}>
+          <Box sx={{ width: 30, height: 30, borderRadius: "var(--bs-border-radius-75)", bgcolor: "var(--bs-color-primary-default)", color: "var(--bs-text-on-action, #fff)", display: "grid", placeItems: "center", fontSize: 13, fontWeight: 800 }}>BS</Box>
+          <Typography fontWeight={700} sx={{ color: "var(--bs-text-default)" }}>BrandSync Proto</Typography>
+          <Divider orientation="vertical" flexItem sx={{ mx: 0.5, borderColor: "var(--bs-border-default)" }} />
+          <OrgSwitcher />
+        </Stack>
+        <Stack direction="row" alignItems="center" gap={1.5}>
+          {budgetPct != null && (
+            <Stack direction="row" alignItems="center" gap={0.75} sx={{ px: 1.25, py: 0.5, borderRadius: "var(--bs-border-radius-full)", border: "1px solid var(--bs-border-default)", bgcolor: "var(--bs-surface-base)" }}>
+              <Box sx={{ width: 10, height: 10, borderRadius: "50%", border: `2px solid ${budgetPct >= 100 ? "var(--bs-color-error-default)" : budgetPct >= 80 ? "var(--bs-color-warning-default)" : "var(--bs-color-success-default)"}` }} />
+              <Typography variant="caption" sx={{ color: "var(--bs-text-muted)", fontWeight: 500 }}>{budgetPct}% of budget</Typography>
+            </Stack>
+          )}
+          <Avatar sx={{ width: 30, height: 30, fontSize: 12, fontWeight: 700, bgcolor: "var(--bs-color-primary-container)", color: "var(--bs-color-primary-default)" }}>
+            {initials(null, USER_EMAIL)}
+          </Avatar>
+        </Stack>
+      </Box>
 
-          <Typography
-            variant="h3"
-            fontWeight={600}
-            textAlign="center"
-            sx={{ color: "var(--bs-text-default)" }}
-          >
-            What do you want to make?
+      <Container maxWidth="md" sx={{ pt: { xs: 14, md: 32}, pb: { xs: 6, md: 10 } }}>
+        <Stack spacing={4}>
+          {/* Headline */}
+          <Typography variant="h3" fontWeight={700} textAlign="center" sx={{ color: "var(--bs-text-default)" }}>
+            What do you want to{" "}
+            <Box component="span" sx={{ color: "var(--bs-color-primary-default)" }}>prototype</Box>?
           </Typography>
 
-          <PromptBar
-            contextProject={contextProject}
-            onClearContext={() => router.push("/brandsync-make")}
-            projects={projects}
-            onPickProject={(p) => router.push(`/brandsync-make?projectId=${p.id}`)}
-            onCreateProject={() => setProjectsOpen(true)}
-            onSend={handleLandingSend}
-          />
-
-          <Box
-            sx={{
-              width: "100%",
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "repeat(3, 1fr)" },
-              gap: 3,
-            }}
-          >
-            <OptionCard
-              title="Open project"
-              subtitle="Pick up where you left off"
-              preview={<ProjectsPreview />}
-              onClick={() => setProjectsOpen(true)}
+          {/* Prompt box */}
+          <Box sx={{
+            border: "2px solid var(--bs-color-primary-default)", borderRadius: "var(--bs-border-radius-300)",
+            bgcolor: "var(--bs-surface-raised)", boxShadow: "0 0 0 4px var(--bs-color-primary-container)", p: 2,
+          }}>
+            <InputBase
+              fullWidth multiline minRows={2} maxRows={6}
+              value={promptText} onChange={(e) => setPromptText(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); handleSend(); } }}
+              placeholder="Describe a screen, component, or flow…"
+              sx={{ fontSize: "var(--bs-font-size-md)", color: "var(--bs-text-default)", "& textarea::placeholder": { color: "var(--bs-text-muted)", opacity: 1 } }}
             />
-            <OptionCard
-              title="Load handoff"
-              subtitle="Load handoff for a Jira ticket"
-              preview={<HandoffPreview />}
-              onClick={() => setHandoffOpen(true)}
-            />
-            <OptionCard
-              title="Start from BrandSync patterns"
-              subtitle="Browse patterns from the AI & MCP library"
-              preview={<PatternsPreview />}
-              onClick={() => setPatternsOpen(true)}
-            />
+            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1.5 }}>
+              <Button onClick={() => setHandoffOpen(true)} startIcon={<Ticket size={15} />} sx={{ textTransform: "none", fontWeight: 500, color: "var(--bs-text-default)", bgcolor: "var(--bs-surface-container)", border: "1px solid var(--bs-border-default)", borderRadius: "var(--bs-border-radius-full)", px: 1.5, "&:hover": { bgcolor: "var(--bs-surface-hover)" } }}>
+                Import from Jira
+              </Button>
+              <IconButton onClick={handleSend} disabled={!promptText.trim()} sx={{ bgcolor: "var(--bs-color-primary-default)", color: "var(--bs-text-on-action, #fff)", width: 40, height: 40, borderRadius: "var(--bs-border-radius-100)", "&:hover": { bgcolor: "var(--bs-color-primary-hover)" }, "&.Mui-disabled": { bgcolor: "var(--bs-color-primary-default)", color: "var(--bs-text-on-action, #fff)", opacity: 0.4 } }}>
+                <ArrowRight size={18} weight="bold" />
+              </IconButton>
+            </Stack>
           </Box>
 
-          <Stack direction="row" spacing={1}>
-            <Button
-              startIcon={<Cube size={16} weight="fill" />}
-              onClick={() => router.push("/brandsync-make/kit")}
-              sx={{
-                textTransform: "none",
-                color: "var(--bs-text-muted)",
-                "&:hover": { color: "var(--bs-text-default)", bgcolor: "var(--bs-surface-hover)" },
-              }}
-            >
-              Component kit
-            </Button>
-            <Button
-              startIcon={<UsersThree size={16} weight="fill" />}
-              onClick={() => setOrgOpen(true)}
-              sx={{
-                textTransform: "none",
-                color: "var(--bs-text-muted)",
-                "&:hover": { color: "var(--bs-text-default)", bgcolor: "var(--bs-surface-hover)" },
-              }}
-            >
-              Organizations &amp; members
-            </Button>
+          {/* Quick-start chips + shuffle */}
+          <Stack direction="row" gap={1} flexWrap="wrap" justifyContent="center" alignItems="center">
+            {chips.map((c) => (
+              <Button key={c.label} onClick={() => setPromptText(c.prompt)} sx={{ textTransform: "none", fontWeight: 500, color: "var(--bs-text-default)", bgcolor: "var(--bs-surface-raised)", border: "1px solid var(--bs-border-default)", borderRadius: "var(--bs-border-radius-full)", px: 1.75, "&:hover": { borderColor: "var(--bs-border-neutral-hover)", bgcolor: "var(--bs-surface-hover)" } }}>
+                {c.label}
+              </Button>
+            ))}
+            <IconButton onClick={() => setChipSeed((s) => s + 1)} aria-label="Shuffle suggestions" sx={{ color: "var(--bs-text-muted)", "&:hover": { color: "var(--bs-text-default)" } }}>
+              <ArrowsClockwise size={16} />
+            </IconButton>
+          </Stack>
+
+          {/* Divider */}
+          <Stack direction="row" alignItems="center" gap={2}>
+            <Divider sx={{ flex: 1, borderColor: "var(--bs-border-default)" }} />
+            <Typography variant="caption" sx={{ color: "var(--bs-text-muted)", whiteSpace: "nowrap" }}>or pick a starting point</Typography>
+            <Divider sx={{ flex: 1, borderColor: "var(--bs-border-default)" }} />
+          </Stack>
+
+          {/* Two starting-point cards */}
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
+            <StartCard title="Open project" viewAll="View all" onViewAll={() => setProjectsOpen(true)}>
+              <Stack spacing={1}>
+                {projects.length === 0 && <Typography variant="caption" sx={{ color: "var(--bs-text-muted)" }}>No projects yet.</Typography>}
+                {projects.slice(0, 3).map((p) => (
+                  <Stack key={p.id} direction="row" alignItems="center" gap={1.25} onClick={() => router.push(`/brandsync-make/my-patterns?projectId=${p.id}`)}
+                    sx={{ px: 1.5, py: 1, borderRadius: "var(--bs-border-radius-100)", bgcolor: "var(--bs-color-primary-container)", cursor: "pointer", "&:hover": { opacity: 0.9 } }}>
+                    <FolderOpen size={15} weight="fill" color="var(--bs-color-primary-default)" />
+                    <Typography variant="body2" sx={{ flex: 1, color: "var(--bs-text-default)" }} noWrap>{p.name}</Typography>
+                    <Typography variant="caption" sx={{ color: "var(--bs-text-muted)" }}>{p.file_count ?? 0}</Typography>
+                  </Stack>
+                ))}
+              </Stack>
+            </StartCard>
+
+            <StartCard title="Jira import" viewAll="View all" onViewAll={() => setHandoffOpen(true)}>
+              <Box onClick={() => setHandoffOpen(true)} sx={{ cursor: "pointer", border: "1px solid var(--bs-border-default)", borderRadius: "var(--bs-border-radius-150)", p: 1.5, "&:hover": { borderColor: "var(--bs-border-neutral-hover)" } }}>
+                <Stack direction="row" alignItems="center" gap={1} sx={{ mb: 1.25 }}>
+                  <Box sx={{ px: 1, py: 0.25, bgcolor: "var(--bs-color-primary-container)", color: "var(--bs-color-primary-default)", borderRadius: "var(--bs-border-radius-50)", fontSize: 11, fontWeight: 700 }}>APT-202</Box>
+                  <Ticket size={14} color="var(--bs-text-muted)" />
+                  <Box sx={{ flex: 1, height: 5, bgcolor: "var(--bs-surface-container)", borderRadius: 3 }} />
+                </Stack>
+                <Stack spacing={0.75} sx={{ mb: 1.25 }}>
+                  <Box sx={{ height: 5, bgcolor: "var(--bs-surface-container)", borderRadius: 3 }} />
+                  <Box sx={{ height: 5, width: "70%", bgcolor: "var(--bs-surface-container)", borderRadius: 3 }} />
+                </Stack>
+                <Stack direction="row" gap={0.75}>
+                  {["#0073e1", "#6c4bd1", "#00855b"].map((c) => (
+                    <Box key={c} sx={{ px: 1, py: 0.25, fontSize: 10, fontWeight: 600, borderRadius: "var(--bs-border-radius-full)", bgcolor: `${c}22`, color: c, border: `1px solid ${c}44` }}>tag</Box>
+                  ))}
+                </Stack>
+              </Box>
+            </StartCard>
+          </Box>
+
+          {/* Component kit */}
+          <Box>
+            <Typography variant="subtitle2" fontWeight={700} sx={{ color: "var(--bs-text-default)", mb: 1 }}>Component kit</Typography>
+            <Box onClick={() => router.push("/brandsync-make/kit")}
+              sx={{ display: "flex", alignItems: "center", gap: 1.5, border: "1px solid var(--bs-border-default)", borderRadius: "var(--bs-border-radius-200)", bgcolor: "var(--bs-color-primary-container)", px: 2.25, py: 1.75, cursor: "pointer", "&:hover": { opacity: 0.92 } }}>
+              <DiamondsFour size={20} weight="fill" color="var(--bs-color-primary-default)" />
+              <Typography variant="body1" fontWeight={600} sx={{ flex: 1, color: "var(--bs-text-default)" }}>Explore Component Kit</Typography>
+              <Stack direction="row" alignItems="center" gap={0.5} sx={{ color: "var(--bs-color-primary-default)", fontWeight: 500, fontSize: 13 }}>
+                View all <ArrowRight size={14} weight="bold" />
+              </Stack>
+            </Box>
+          </Box>
+
+          {/* Patterns */}
+          <Box>
+            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1.5 }}>
+              <Typography variant="subtitle2" fontWeight={700} sx={{ color: "var(--bs-text-default)" }}>Patterns</Typography>
+              <Stack direction="row" alignItems="center" gap={1}>
+                {CATEGORIES.map((c) => (
+                  <Button key={c} onClick={() => setCategory(c)} sx={{
+                    textTransform: "none", fontWeight: 500, fontSize: 13, px: 1.5, py: 0.25, minWidth: 0,
+                    borderRadius: "var(--bs-border-radius-full)",
+                    color: category === c ? "var(--bs-color-primary-default)" : "var(--bs-text-muted)",
+                    bgcolor: category === c ? "var(--bs-color-primary-container)" : "transparent",
+                    border: `1px solid ${category === c ? "transparent" : "var(--bs-border-default)"}`,
+                    "&:hover": { bgcolor: category === c ? "var(--bs-color-primary-container)" : "var(--bs-surface-hover)" },
+                  }}>{c}</Button>
+                ))}
+                <Button onClick={() => setPatternsOpen(true)} endIcon={<ArrowRight size={13} weight="bold" />} sx={{ textTransform: "none", color: "var(--bs-text-muted)", fontWeight: 500, fontSize: 13, minWidth: 0, "&:hover": { bgcolor: "transparent", color: "var(--bs-text-default)" } }}>Browse all</Button>
+              </Stack>
+            </Stack>
+
+            {visiblePatterns.length === 0 ? (
+              <Typography variant="body2" sx={{ color: "var(--bs-text-muted)", py: 3, textAlign: "center" }}>
+                No patterns in this category yet.
+              </Typography>
+            ) : (
+              <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "repeat(3, 1fr)" }, gap: 2 }}>
+                {visiblePatterns.map((p, i) => (
+                  <PatternCard key={p.id} p={p} accent={THUMB[i % THUMB.length]} onClick={() => setPatternsOpen(true)} />
+                ))}
+              </Box>
+            )}
+          </Box>
+
+          {/* Footer links */}
+          <Stack direction="row" spacing={1} justifyContent="center" sx={{ pt: 1 }}>
+            <Button onClick={() => setOrgOpen(true)} sx={{ textTransform: "none", color: "var(--bs-text-muted)", "&:hover": { color: "var(--bs-text-default)", bgcolor: "var(--bs-surface-hover)" } }}>Organizations &amp; members</Button>
+            <Button onClick={() => router.push("/brandsync-make/usage")} sx={{ textTransform: "none", color: "var(--bs-text-muted)", "&:hover": { color: "var(--bs-text-default)", bgcolor: "var(--bs-surface-hover)" } }}>Cost &amp; savings</Button>
           </Stack>
         </Stack>
       </Container>

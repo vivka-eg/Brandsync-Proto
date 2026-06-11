@@ -1,4 +1,5 @@
 import { getPool, resolveUserId, resolveUserOrgId, userVisibleOrgIds } from '@/lib/db';
+import { BRAND_PALETTES } from '@/lib/brand-substitute';
 
 // userEmail-driven access control is a local-dev placeholder; production
 // path is described in /api/my-patterns.
@@ -34,6 +35,8 @@ export async function GET(request) {
          p.id,
          p.name,
          p.org_id,
+         p.brand_palette,
+         p.logo_name,
          p.created_at,
          p.updated_at,
          COUNT(pf.id)::int AS file_count
@@ -65,6 +68,11 @@ export async function POST(request) {
   const userEmail = body?.userEmail;
   const name = typeof body?.name === 'string' ? body.name.trim() : '';
   const requestedOrgId = body?.orgId ?? null;
+  // Per-project brand. Validate the palette against the known set; logo is a
+  // free-form name resolved against /api/product-logos at load time.
+  const brandPalette = BRAND_PALETTES.includes(body?.brandPalette) ? body.brandPalette : null;
+  const logoName = typeof body?.logoName === 'string' && body.logoName.trim()
+    ? body.logoName.trim() : null;
   if (!userEmail) return Response.json({ error: 'userEmail required' }, { status: 400 });
   if (!name) return Response.json({ error: 'name required' }, { status: 400 });
 
@@ -80,10 +88,10 @@ export async function POST(request) {
       ? requestedOrgId
       : await resolveUserOrgId(client, userId);
     const { rows } = await client.query(
-      `INSERT INTO projects (name, user_id, org_id)
-       VALUES ($1, $2, $3)
-       RETURNING id, name, org_id, created_at, updated_at`,
-      [name, userId, orgId],
+      `INSERT INTO projects (name, user_id, org_id, brand_palette, logo_name)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id, name, org_id, brand_palette, logo_name, created_at, updated_at`,
+      [name, userId, orgId, brandPalette, logoName],
     );
     return Response.json({ project: { ...rows[0], file_count: 0 } }, { status: 201 });
   } catch (err) {

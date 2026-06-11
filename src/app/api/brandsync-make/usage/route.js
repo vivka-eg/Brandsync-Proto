@@ -1,4 +1,5 @@
 import { getPool } from '@/lib/db';
+import { DAILY_TOKEN_LIMIT } from '@/constants/tokenBudget';
 
 // GET /api/brandsync-make/usage?userEmail=...
 //
@@ -24,15 +25,18 @@ export async function GET(request) {
   }
 
   try {
-    const { rows } = await getPool().query(
+    const pool = getPool();
+    // "Today" = calendar day (server/UTC) so the meters reset at midnight,
+    // matching the per-project daily allotment.
+    const { rows } = await pool.query(
       `SELECT
-         COALESCE(SUM(input_tokens)  FILTER (WHERE created_at >= now() - interval '24 hours'), 0)::int AS in_today,
-         COALESCE(SUM(output_tokens) FILTER (WHERE created_at >= now() - interval '24 hours'), 0)::int AS out_today,
+         COALESCE(SUM(input_tokens)  FILTER (WHERE created_at >= date_trunc('day', now())), 0)::int AS in_today,
+         COALESCE(SUM(output_tokens) FILTER (WHERE created_at >= date_trunc('day', now())), 0)::int AS out_today,
          COALESCE(SUM(input_tokens)  FILTER (WHERE created_at >= now() - interval '7 days'),   0)::int AS in_7d,
          COALESCE(SUM(output_tokens) FILTER (WHERE created_at >= now() - interval '7 days'),   0)::int AS out_7d,
          COALESCE(SUM(input_tokens),  0)::int                                                          AS in_total,
          COALESCE(SUM(output_tokens), 0)::int                                                          AS out_total,
-         COUNT(*) FILTER (WHERE created_at >= now() - interval '24 hours')::int                        AS gens_today,
+         COUNT(*) FILTER (WHERE created_at >= date_trunc('day', now()))::int                           AS gens_today,
          COUNT(*) FILTER (WHERE created_at >= now() - interval '7 days')::int                          AS gens_7d,
          COUNT(*)::int                                                                                 AS gens_total
        FROM tool_usage_logs
@@ -40,7 +44,27 @@ export async function GET(request) {
          AND tool_name = 'brandsync_make.generate'`,
       [userEmail],
     );
-    return Response.json(rows[0]);
+
+    // Per-project token consumption for today (input+output), so each
+    // project's meter can fill against DAILY_TOKEN_LIMIT.
+    // Only SUCCESSFUL generations count — a provider 503 or a rejected
+    // edit shouldn't drain the project's daily allotment.
+    const { rows: projRows } = await pool.query(
+      `SELECT project_id,
+              COALESCE(SUM(input_tokens + output_tokens), 0)::int AS used
+         FROM tool_usage_logs
+        WHERE user_email = $1
+          AND tool_name = 'brandsync_make.generate'
+          AND success = true
+          AND project_id IS NOT NULL
+          AND created_at >= date_trunc('day', now())
+        GROUP BY project_id`,
+      [userEmail],
+    );
+    const by_project = {};
+    for (const r of projRows) by_project[r.project_id] = r.used;
+
+    return Response.json({ ...rows[0], daily_limit: DAILY_TOKEN_LIMIT, by_project });
   } catch (err) {
     console.error('[api/brandsync-make/usage] query error:', err);
     return Response.json({ error: err.message ?? 'unknown error' }, { status: 500 });

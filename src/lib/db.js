@@ -4,11 +4,30 @@ import { Pool } from 'pg';
 // route (projects, project files, my-patterns, generate). All callers
 // connect to the same Supabase via DATABASE_URL, so one pool is enough
 // — and lazy-init means missing env at build time doesn't crash.
-
-let pool;
+//
+// The pool is stashed on globalThis so Next.js dev hot-reloads REUSE the
+// same pool. A plain module-level `let` resets on every hot-reload, which
+// leaks the old pool's open connections — they accumulate against
+// Supabase's pooler client cap (pool_size 15, session mode) and eventually
+// throw "EMAXCONNSESSION: max clients reached". `max` keeps us well under
+// that cap and idleTimeoutMillis returns idle connections to the pooler.
+//
+// SERVERLESS (Vercel): each warm function instance keeps its own pool, so many
+// instances × max connections blows past the pooler cap fast. There, set
+// PG_POOL_MAX=1 and point DATABASE_URL at Supabase's TRANSACTION pooler (port
+// 6543), which is built for many short-lived serverless connections. Locally /
+// on a persistent host, the default of 5 against the session pooler is fine.
+const PG_POOL_MAX = Number(process.env.PG_POOL_MAX) || 5;
 export function getPool() {
-  if (!pool) pool = new Pool({ connectionString: process.env.DATABASE_URL });
-  return pool;
+  if (!globalThis.__bsPgPool) {
+    globalThis.__bsPgPool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      max: PG_POOL_MAX,
+      idleTimeoutMillis: 10_000,     // release idle connections back to the pooler
+      connectionTimeoutMillis: 10_000,
+    });
+  }
+  return globalThis.__bsPgPool;
 }
 
 export async function resolveUserId(client, userEmail) {
