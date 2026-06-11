@@ -10,6 +10,11 @@ import { useEffect, useState, useCallback } from "react";
 
 const KEY = "brandsync-make:active-org-id";
 const USER_EMAIL = "vivka@eg.dk";
+// Same-tab broadcast: localStorage writes don't fire `storage` events in the
+// tab that made them, so switching org in one component (e.g. the top-bar
+// OrgSwitcher) wouldn't reach others (e.g. the landing's data fetches). We
+// dispatch this event on every change so all useActiveOrg() instances sync.
+const ORG_EVENT = "brandsync-make:org-changed";
 
 // Synchronous read for non-React callers (e.g. building a fetch body).
 export function getStoredOrgId() {
@@ -52,9 +57,28 @@ export function useActiveOrg() {
     return () => { cancelled = true; };
   }, []);
 
+  // Keep every useActiveOrg() instance in sync when the org changes anywhere —
+  // via our same-tab custom event and the cross-tab `storage` event.
+  useEffect(() => {
+    const onOrgEvent = (e) => {
+      const id = e?.detail ?? getStoredOrgId();
+      setActiveOrgIdState((prev) => (prev === id ? prev : id));
+    };
+    const onStorage = (e) => {
+      if (e.key === KEY) setActiveOrgIdState(getStoredOrgId());
+    };
+    window.addEventListener(ORG_EVENT, onOrgEvent);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener(ORG_EVENT, onOrgEvent);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, []);
+
   const setActiveOrgId = useCallback((id) => {
     setActiveOrgIdState(id);
     try { localStorage.setItem(KEY, id); } catch { /* private mode */ }
+    try { window.dispatchEvent(new CustomEvent(ORG_EVENT, { detail: id })); } catch { /* SSR */ }
   }, []);
 
   const activeOrg = orgs.find((o) => o.id === activeOrgId) ?? null;

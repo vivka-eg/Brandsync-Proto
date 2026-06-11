@@ -141,9 +141,9 @@ function validateEnvelope(env) {
       if (typeof e.replace !== 'string') {
         throw new PatchError(`edits[${i}].replace must be a string`, 'invalid_envelope');
       }
-      if (e.find === e.replace) {
-        throw new PatchError(`edits[${i}] find and replace are identical — no-op`, 'invalid_envelope');
-      }
+      // An identical find/replace is a no-op, not an error — the model
+      // occasionally emits one. applyScopedPatch skips it silently rather
+      // than failing the whole generation.
     }
     return { kind: 'edit' };
   }
@@ -188,6 +188,39 @@ function insertBeforeLastMainClose(html, block) {
   return html.slice(0, lastMainClose) + block + '\n\n    ' + html.slice(lastMainClose);
 }
 
+// Locate a scope=edit `find` snippet within `haystack`.
+// Tries an exact match first (fast, and preserves the uniqueness
+// guarantee). If that misses, falls back to a whitespace-tolerant match:
+// every run of whitespace in `find` is treated as "one or more whitespace
+// chars", so differences in indentation / line wrapping between the model's
+// snippet and the stored markup don't fail the edit — the #1 cause of the
+// old "find string not found" failures.
+// Returns { index, length } for a unique match, or { notFound } / { ambiguous }.
+function locateFind(haystack, find) {
+  // 1) Exact, unique match.
+  const i = haystack.indexOf(find);
+  if (i !== -1) {
+    return haystack.indexOf(find, i + 1) === -1
+      ? { index: i, length: find.length }
+      : { ambiguous: true };
+  }
+  // 2) Whitespace-tolerant match.
+  const source = find
+    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // escape regex metachars
+    .replace(/\s+/g, '\\s+');                // collapse whitespace runs
+  let re;
+  try { re = new RegExp(source, 'g'); } catch { return { notFound: true }; }
+  let m, hit = null, count = 0;
+  while ((m = re.exec(haystack)) !== null) {
+    if (m[0].length === 0) { re.lastIndex++; continue; }
+    if (++count === 1) hit = { index: m.index, length: m[0].length };
+    else break;
+  }
+  if (count === 0) return { notFound: true };
+  if (count > 1) return { ambiguous: true };
+  return hit;
+}
+
 export function applyScopedPatch(existingContent, envelope) {
   const kind = validateEnvelope(envelope);
 
@@ -221,6 +254,9 @@ export function applyScopedPatch(existingContent, envelope) {
     const blocks = { html: parsed.html, css: parsed.css, js: parsed.js };
     for (let i = 0; i < envelope.edits.length; i++) {
       const e = envelope.edits[i];
+      // Identical find/replace changes nothing — skip it (no-op) instead of
+      // failing the whole generation.
+      if (e.find === e.replace) continue;
       const haystack = blocks[e.block];
       if (typeof haystack !== 'string' || !haystack.length) {
         throw new PatchError(
@@ -228,21 +264,20 @@ export function applyScopedPatch(existingContent, envelope) {
           'parse_failure',
         );
       }
-      const firstIdx = haystack.indexOf(e.find);
-      if (firstIdx === -1) {
+      const loc = locateFind(haystack, e.find);
+      if (loc.notFound) {
         throw new PatchError(
           `edits[${i}] find string not found in ${e.block} block`,
           'parse_failure',
         );
       }
-      const secondIdx = haystack.indexOf(e.find, firstIdx + 1);
-      if (secondIdx !== -1) {
+      if (loc.ambiguous) {
         throw new PatchError(
           `edits[${i}] find string is ambiguous in ${e.block} block — appears multiple times. Add more surrounding context to make the match unique.`,
           'parse_failure',
         );
       }
-      blocks[e.block] = haystack.slice(0, firstIdx) + e.replace + haystack.slice(firstIdx + e.find.length);
+      blocks[e.block] = haystack.slice(0, loc.index) + e.replace + haystack.slice(loc.index + loc.length);
     }
     return renderMarkdown({ html: blocks.html, css: blocks.css, js: blocks.js });
   }
