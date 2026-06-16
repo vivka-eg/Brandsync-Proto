@@ -1,17 +1,19 @@
 "use client";
-import { getKeycloakInstance, getUserProfile, logout as kcLogout } from "@/lib/keycloak";
+import { getKeycloakInstance, getUserProfile, initKeycloak, logout as kcLogout } from "@/lib/keycloak";
 import { setUserEmail, clearUserEmail } from "@/lib/userEmail";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-// Set to true to run on a fixed mock SUPERADMIN user (no Keycloak). Real EG
-// SSO login is the default; flip this for offline/local work.
+// Real EG SSO is the default. The 'brandsync-proto-dev' client redirect URIs +
+// web origins are confirmed working for the hosted origin, so login() (hardened
+// to init before redirecting) drives the real flow. Flip BYPASS_AUTH to true
+// only for offline/local work — it runs on the fixed mock DB user below.
 const BYPASS_AUTH = false;
 const MOCK_USER = {
   id: "dev-user",
-  email: "dev@local",
-  username: "dev",
-  fullName: "Dev User",
+  email: "vivka@eg.dk",
+  username: "vivka",
+  fullName: "Vignesh V Kamath",
   role: "SUPERADMIN",
 };
 
@@ -20,6 +22,10 @@ function useAuth() {
   const [loading, setLoading] = useState(!BYPASS_AUTH);
   const [authError, setAuthError] = useState(null);
   const router = useRouter();
+
+  // In bypass mode, publish the mock email during render (before any child
+  // data-fetch effect runs) so getUserEmail() resolves the DB user.
+  if (BYPASS_AUTH) setUserEmail(MOCK_USER.email);
 
   // Pull the Keycloak profile into app state AND publish the email so the
   // Make data calls (projects/patterns/usage/orgs/generate) resolve the DB
@@ -49,15 +55,10 @@ function useAuth() {
         return;
       }
 
-      // check-sso: silently detect an existing SSO session without forcing a
-      // redirect. Public pages stay open; AuthWrapper sends protected routes
-      // to /login when there's no session.
-      const authenticated = await keycloak.init({
-        onLoad: "check-sso",
-        checkLoginIframe: false,
-        silentCheckSsoRedirectUri:
-          window.location.origin + "/silent-check-sso.html",
-      });
+      // check-sso (via the shared idempotent init): silently detect an
+      // existing SSO session without forcing a redirect. Public pages stay
+      // open; AuthWrapper sends protected routes to /login when there's none.
+      const authenticated = await initKeycloak();
 
       if (authenticated) await handleUpdateAuth();
       setLoading(false);
@@ -71,6 +72,7 @@ function useAuth() {
   const redirectToLogin = () => router.push("/login");
 
   const signOut = () => {
+    if (BYPASS_AUTH) return; // no real session to end while SSO is disabled
     clearUserEmail();
     kcLogout();
   };

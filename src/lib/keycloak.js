@@ -19,9 +19,54 @@ export const getKeycloakInstance = () => {
   return keycloakInstance;
 };
 
-/** Trigger the Keycloak login redirect, returning to the Make app on success. */
-export const login = (options = {}) => {
+/**
+ * Initialize Keycloak exactly once (check-sso: silently detect a session
+ * without forcing a redirect). Idempotent — repeated calls return the same
+ * in-flight/settled promise, so init() is never run twice (keycloak-js throws
+ * if it is). Both useAuth and login() funnel through this.
+ */
+export const initKeycloak = () => {
   const keycloak = getKeycloakInstance();
+  if (keycloak.didInitialize) return Promise.resolve(keycloak.authenticated);
+  if (!initPromise) {
+    initPromise = keycloak
+      .init({
+        onLoad: "check-sso",
+        checkLoginIframe: false,
+        silentCheckSsoRedirectUri:
+          typeof window !== "undefined"
+            ? window.location.origin + "/silent-check-sso.html"
+            : undefined,
+      })
+      .catch((err) => {
+        initPromise = null; // allow a later retry
+        throw err;
+      });
+  }
+  return initPromise;
+};
+
+/**
+ * Trigger the Keycloak login redirect, returning to the Make app on success.
+ * Ensures the instance is initialized first — calling keycloak.login() before
+ * init() leaves the adapter undefined and throws (the white-screen we hit).
+ * If Keycloak is unreachable/misconfigured we log and bail instead of crashing.
+ */
+export const login = async (options = {}) => {
+  const keycloak = getKeycloakInstance();
+  if (!keycloak.didInitialize) {
+    try {
+      await initKeycloak();
+    } catch (err) {
+      console.error("Keycloak init failed; cannot start login:", err);
+    }
+  }
+  if (!keycloak.didInitialize) {
+    console.error(
+      "Keycloak unavailable — check NEXT_PUBLIC_KEYCLOAK_* and that this origin is an allowed redirect URI / web origin on the 'brandsync-proto-dev' client. Login aborted."
+    );
+    return;
+  }
   return keycloak.login({
     redirectUri:
       typeof window !== "undefined"
@@ -34,6 +79,10 @@ export const login = (options = {}) => {
 /** Log out, returning to the login page. */
 export const logout = (options = {}) => {
   const keycloak = getKeycloakInstance();
+  if (!keycloak.didInitialize) {
+    console.error("Keycloak not initialized; logout skipped.");
+    return;
+  }
   return keycloak.logout({
     redirectUri:
       typeof window !== "undefined"
