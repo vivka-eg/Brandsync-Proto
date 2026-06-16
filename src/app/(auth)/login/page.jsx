@@ -14,7 +14,13 @@ function LoginContent() {
   useEffect(() => {
     if (loading) return;
 
-    const redirect = searchParams.get("redirect") || "/brandsync-make";
+    // Never land the OAuth callback on "/" — app/page.js does a server-side
+    // redirect("/brandsync-make") that strips the Keycloak code/state params,
+    // so the token exchange never runs and login loops forever. Coerce "/"
+    // (and empty) to the real app home, which renders under AuthWrapper and
+    // lets keycloak-js process the callback.
+    const raw = searchParams.get("redirect");
+    const redirect = !raw || raw === "/" ? "/brandsync-make" : raw;
 
     if (isAuthenticated) {
       // Already logged in — go to the original destination.
