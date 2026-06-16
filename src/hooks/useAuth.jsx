@@ -4,11 +4,11 @@ import { setUserEmail, clearUserEmail } from "@/lib/userEmail";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-// Real EG SSO is the default. The 'brandsync-proto-dev' client redirect URIs +
-// web origins are confirmed working for the hosted origin, so login() (hardened
-// to init before redirecting) drives the real flow. Flip BYPASS_AUTH to true
-// only for offline/local work — it runs on the fixed mock DB user below.
-const BYPASS_AUTH = false;
+// Keycloak SSO is DISABLED — the app runs on the fixed mock DB user below, with
+// no Keycloak init/login/redirect (so no login loop). All the SSO wiring stays
+// in place; flip BYPASS_AUTH back to false to re-enable real EG login once the
+// IAM client redirect URIs and the deploy pipeline are fully sorted.
+const BYPASS_AUTH = true;
 const MOCK_USER = {
   id: "dev-user",
   email: "vivka@eg.dk",
