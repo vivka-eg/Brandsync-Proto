@@ -667,7 +667,20 @@ async function runConversation({ apiKey, model, system, userPrompt, editContext,
     // while the model is generating, and `tool` events arrive after
     // each tool the model chooses to use.
     fire('phase', { phase: 'thinking', iteration: iter, toolsSoFar: mcpToolCalls });
-    const json = await callAnthropic({ apiKey, model, system, messages, tools, deadline });
+    // Heartbeat: a single Anthropic call can run >60s with no bytes on our SSE
+    // stream, which trips an idle proxy/ALB timeout (the "Load failed"/504 seen
+    // on the hosted env). Emit a keep-alive every 15s so data keeps flowing;
+    // cleared the moment the call returns. No-op for the non-SSE path (fire is
+    // a noop there).
+    const heartbeat = setInterval(() => {
+      fire('phase', { phase: 'thinking', iteration: iter, toolsSoFar: mcpToolCalls, keepAlive: true });
+    }, 15000);
+    let json;
+    try {
+      json = await callAnthropic({ apiKey, model, system, messages, tools, deadline });
+    } finally {
+      clearInterval(heartbeat);
+    }
     if (json.usage) {
       for (const [k, v] of Object.entries(json.usage)) {
         if (typeof v === 'number') totalUsage[k] = (totalUsage[k] ?? 0) + v;
