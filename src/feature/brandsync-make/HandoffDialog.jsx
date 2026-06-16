@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -12,70 +12,48 @@ import {
   InputBase,
   ButtonBase,
   Avatar,
+  CircularProgress,
 } from "@mui/material";
 import { X, MagnifyingGlass, Ticket, Clock, ArrowRight } from "phosphor-react";
+import { getUserEmail } from "@/lib/userEmail";
 
+// Maps a manifest head.status (snake_case) to a label + badge colors.
 const STATUS_STYLES = {
-  "In progress": { fg: "#0073e1", bg: "rgba(0,115,225,0.12)" },
-  "In review": { fg: "#b18100", bg: "rgba(177,129,0,0.14)" },
-  "Ready for dev": { fg: "#00855b", bg: "rgba(0,133,91,0.14)" },
-  Backlog: { fg: "#6d7585", bg: "rgba(109,117,133,0.14)" },
+  draft: { label: "Draft", fg: "#0073e1", bg: "rgba(0,115,225,0.12)" },
+  ready_for_dev: { label: "Ready for dev", fg: "#00855b", bg: "rgba(0,133,91,0.14)" },
+  superseded: { label: "Superseded", fg: "#6d7585", bg: "rgba(109,117,133,0.14)" },
 };
 
-const HANDOFFS = [
-  {
-    ticket: "APT-202",
-    title: "Refresh asset filter chips for Catalog",
-    lastEditedAt: "2h ago",
-    lastEditedBy: "Maya Singh",
-    initials: "MS",
-    status: "In progress",
-  },
-  {
-    ticket: "APT-189",
-    title: "Onboarding wizard – step indicator polish",
-    lastEditedAt: "Yesterday",
-    lastEditedBy: "Jonas Vinther",
-    initials: "JV",
-    status: "In review",
-  },
-  {
-    ticket: "BS-148",
-    title: "Settings → API tokens table layout",
-    lastEditedAt: "2 days ago",
-    lastEditedBy: "Priya Rao",
-    initials: "PR",
-    status: "Ready for dev",
-  },
-  {
-    ticket: "BS-141",
-    title: "Empty state for digital assets search",
-    lastEditedAt: "3 days ago",
-    lastEditedBy: "Alex Chen",
-    initials: "AC",
-    status: "In progress",
-  },
-  {
-    ticket: "APT-176",
-    title: "Brand guideline – typography page redesign",
-    lastEditedAt: "5 days ago",
-    lastEditedBy: "Maya Singh",
-    initials: "MS",
-    status: "Backlog",
-  },
-  {
-    ticket: "BS-132",
-    title: "Notification feed grouping by date",
-    lastEditedAt: "1 week ago",
-    lastEditedBy: "Tomás Ribeiro",
-    initials: "TR",
-    status: "In review",
-  },
-];
+function statusStyleFor(status) {
+  return STATUS_STYLES[status] || { label: status || "Handoff", fg: "#6d7585", bg: "rgba(109,117,133,0.14)" };
+}
+
+function initialsFor(email) {
+  const handle = String(email || "").split("@")[0] || "?";
+  const parts = handle.split(/[.\-_]+/).filter(Boolean);
+  const letters = (parts.length >= 2 ? parts[0][0] + parts[1][0] : handle.slice(0, 2));
+  return letters.toUpperCase();
+}
+
+function relativeTime(iso) {
+  if (!iso) return "";
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return "";
+  const diff = Date.now() - then;
+  const mins = Math.round(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.round(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.round(hrs / 24);
+  return days === 1 ? "Yesterday" : `${days} days ago`;
+}
 
 function HandoffRow({ item, onSelect }) {
-  const { ticket, title, lastEditedAt, lastEditedBy, initials, status } = item;
-  const statusStyle = STATUS_STYLES[status] || STATUS_STYLES.Backlog;
+  const { ticket, title, version, lastEditedBy, status } = item;
+  const statusStyle = statusStyleFor(status);
+  const initials = initialsFor(lastEditedBy);
+  const lastEditedAt = relativeTime(item.lastEditedAt);
 
   return (
     <ButtonBase
@@ -131,6 +109,15 @@ function HandoffRow({ item, onSelect }) {
           >
             {ticket}
           </Typography>
+          {version && (
+            <Typography
+              variant="caption"
+              fontWeight={700}
+              sx={{ color: "var(--bs-text-muted)", fontFamily: "monospace" }}
+            >
+              v{version}
+            </Typography>
+          )}
           <Box
             sx={{
               px: 0.875,
@@ -142,7 +129,7 @@ function HandoffRow({ item, onSelect }) {
               color: statusStyle.fg,
             }}
           >
-            {status}
+            {statusStyle.label}
           </Box>
         </Stack>
         <Typography
@@ -199,20 +186,50 @@ function HandoffRow({ item, onSelect }) {
 
 export default function HandoffDialog({ open, onClose, onSelect }) {
   const [query, setQuery] = useState("");
+  const [handoffs, setHandoffs] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    fetch(`/api/handoff/list?userEmail=${encodeURIComponent(getUserEmail() || "")}`)
+      .then((res) => res.json())
+      .then((body) => {
+        if (cancelled) return;
+        if (body.error) setError(body.error);
+        else setHandoffs(Array.isArray(body.handoffs) ? body.handoffs : []);
+      })
+      .catch((e) => { if (!cancelled) setError(e.message); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [open]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return HANDOFFS;
-    return HANDOFFS.filter(
+    if (!q) return handoffs;
+    return handoffs.filter(
       (h) =>
-        h.ticket.toLowerCase().includes(q) ||
-        h.title.toLowerCase().includes(q) ||
-        h.lastEditedBy.toLowerCase().includes(q)
+        (h.ticket || "").toLowerCase().includes(q) ||
+        (h.title || "").toLowerCase().includes(q) ||
+        (h.lastEditedBy || "").toLowerCase().includes(q)
     );
-  }, [query]);
+  }, [query, handoffs]);
 
-  const handleSelect = (item) => {
-    onSelect?.(item);
+  // Loading a handoff is a round-trip via /api/handoff/load; surface the full
+  // manifest to the caller so the page can act on it.
+  const handleSelect = async (item) => {
+    try {
+      const res = await fetch(
+        `/api/handoff/load?userEmail=${encodeURIComponent(getUserEmail() || "")}&ticket=${encodeURIComponent(item.ticket)}`,
+      );
+      const body = await res.json();
+      onSelect?.({ ...item, manifest: body.manifest, error: body.error });
+    } catch (e) {
+      onSelect?.({ ...item, error: e.message });
+    }
     onClose?.();
   };
 
@@ -287,9 +304,19 @@ export default function HandoffDialog({ open, onClose, onSelect }) {
           />
         </Box>
 
-        {filtered.length === 0 ? (
+        {loading ? (
+          <Stack alignItems="center" sx={{ py: 4 }}>
+            <CircularProgress size={20} />
+          </Stack>
+        ) : error ? (
+          <Typography variant="body2" sx={{ color: "var(--bs-color-error-default)", textAlign: "center", py: 4 }}>
+            {error}
+          </Typography>
+        ) : filtered.length === 0 ? (
           <Typography variant="body2" sx={{ color: "var(--bs-text-muted)", textAlign: "center", py: 4 }}>
-            No handoffs match &ldquo;{query}&rdquo;
+            {query
+              ? `No handoffs match “${query}”`
+              : "No handoffs yet — generate one from a project with “Hand off”."}
           </Typography>
         ) : (
           <Stack spacing={1}>

@@ -1,4 +1,5 @@
 "use client";
+import { getUserEmail } from "@/lib/userEmail";
 
 import { useEffect, useMemo, useState } from "react";
 
@@ -9,8 +10,6 @@ import { useEffect, useMemo, useState } from "react";
 //   Figma Make:  $14.97 · 18.9M tokens · 211,736 output · 15 prompts
 //   BrandSync:   $1.07  · 0.37M tokens · 65,435 output · 17 generations
 // → ~14× cheaper, ~51× fewer tokens. The benchmark figures are editable.
-
-const USER_EMAIL = "vivka@eg.dk";
 const BENCHMARK_KEY = "brandsync-make:figma-benchmark-v1";
 
 // Measured, same-app benchmark (June 2026 Figma Make session report).
@@ -75,7 +74,7 @@ export default function CostDashboard() {
       const s = JSON.parse(localStorage.getItem(BENCHMARK_KEY) || "null");
       if (s && typeof s === "object") setBm({ ...BENCHMARK_DEFAULTS, ...s });
     } catch { /* private mode */ }
-    fetch(`/api/brandsync-make/cost?userEmail=${encodeURIComponent(USER_EMAIL)}`)
+    fetch(`/api/brandsync-make/cost?userEmail=${encodeURIComponent(getUserEmail())}`)
       .then((r) => r.json())
       .then((b) => { if (b?.error) setError(b.error); else setData(b); })
       .catch((e) => setError(e.message));
@@ -114,6 +113,7 @@ export default function CostDashboard() {
   const cacheShare = w30.inTokens + w30.cacheTokens > 0 ? Math.round((w30.cacheTokens / (w30.inTokens + w30.cacheTokens)) * 100) : 0;
   const outputCost = w30.outTokens * 15 / 1e6;
   const cacheCost = w30.cacheTokens * 0.3 / 1e6;
+  const cacheWriteCost = (w30.cacheWriteTokens || 0) * 3.75 / 1e6;
   const inputCost = w30.inTokens * 3 / 1e6;
   const outputShare = w30.cost > 0 ? Math.round((outputCost / w30.cost) * 100) : 0;
   const cacheSaved = w30.cacheTokens * (3 - 0.3) / 1e6;
@@ -175,6 +175,9 @@ export default function CostDashboard() {
           </div>
           <div style={{ fontSize: 13, color: "var(--bs-text-muted)", lineHeight: 1.6 }}>
             <strong style={{ color: "var(--bs-text-default)" }}>Uncached input is {fmtUSD(inputCost)}</strong> — effectively free. Input is never the problem here; output is.
+          </div>
+          <div style={{ fontSize: 13, color: "var(--bs-text-muted)", lineHeight: 1.6 }}>
+            <strong style={{ color: "var(--bs-text-default)" }}>Cache writes are {fmtUSD(cacheWriteCost)}</strong> — the cold-start cost of seeding the cache at 1.25× input ({fmtTok(w30.cacheWriteTokens || 0)} tokens). Now counted in spend, so this figure is true cost, not an estimate.
           </div>
         </div>
       </div>

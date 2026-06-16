@@ -1,4 +1,5 @@
 "use client";
+import { getUserEmail } from "@/lib/userEmail";
 
 import { useEffect, useState, useCallback } from "react";
 
@@ -9,7 +10,6 @@ import { useEffect, useState, useCallback } from "react";
 // the first time. LOCAL DEV: user is hardcoded, same as the other Make code.
 
 const KEY = "brandsync-make:active-org-id";
-const USER_EMAIL = "vivka@eg.dk";
 // Same-tab broadcast: localStorage writes don't fire `storage` events in the
 // tab that made them, so switching org in one component (e.g. the top-bar
 // OrgSwitcher) wouldn't reach others (e.g. the landing's data fetches). We
@@ -31,7 +31,7 @@ export function useActiveOrg() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`/api/orgs?userEmail=${encodeURIComponent(USER_EMAIL)}`);
+        const res = await fetch(`/api/orgs?userEmail=${encodeURIComponent(getUserEmail())}`);
         const body = await res.json();
         const list = body.orgs || [];
         if (cancelled) return;

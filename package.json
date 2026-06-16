@@ -16,6 +16,7 @@
     "@mui/material": "^7.1.0",
     "@phosphor-icons/react": "^2.1.10",
     "brandsync-tokens": "^1.0.27",
+    "keycloak-js": "^26.2.4",
     "lottie-react": "^2.4.1",
     "next": "^15.5.9",
     "nextjs-toploader": "^3.9.17",

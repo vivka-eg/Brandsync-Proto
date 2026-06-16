@@ -1,4 +1,5 @@
 'use client';
+import { getUserEmail } from "@/lib/userEmail";
 
 // ─────────────────────────────────────────────────────────────────────────
 // Component Kit — the brand's pre-built component set that powers AI
@@ -19,8 +20,6 @@ import {
   PencilSimple, Check, ArrowCounterClockwise, Paperclip,
 } from '@phosphor-icons/react';
 import { getStoredOrgId } from '@/lib/useActiveOrg';
-
-const USER_EMAIL = 'vivka@eg.dk';
 
 const VIEWPORTS = {
   desktop: { label: 'Desktop', width: 1280, height: 800, icon: Desktop },
@@ -487,7 +486,7 @@ export default function ComponentKitPage() {
   // Refetch the org-scoped kit (+ css). Reused after every mutation so the
   // catalog, combined css, and per-component status stay consistent.
   const reloadKit = useCallback(async (oid) => {
-    const qs = `orgId=${encodeURIComponent(oid ?? '')}&userEmail=${encodeURIComponent(USER_EMAIL)}`;
+    const qs = `orgId=${encodeURIComponent(oid ?? '')}&userEmail=${encodeURIComponent(getUserEmail())}`;
     const [kitRes, cssRes] = await Promise.all([
       fetch(`/api/kit?${qs}`),
       fetch(`/api/kit?css=1&${qs}`),
@@ -507,7 +506,7 @@ export default function ComponentKitPage() {
     Promise.all([
       reloadKit(oid),
       fetch('/api/tokens').then((r) => (r.ok ? r.text() : '')),
-      fetch(`/api/orgs?userEmail=${encodeURIComponent(USER_EMAIL)}`)
+      fetch(`/api/orgs?userEmail=${encodeURIComponent(getUserEmail())}`)
         .then((r) => (r.ok ? r.json() : { orgs: [] }))
         .catch(() => ({ orgs: [] })),
     ])
@@ -537,7 +536,7 @@ export default function ComponentKitPage() {
     try {
       const res = await fetch('/api/kit/edit', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orgId, userEmail: USER_EMAIL, name: selected.name, instruction, images }),
+        body: JSON.stringify({ orgId, userEmail: getUserEmail(), name: selected.name, instruction, images }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body?.error ?? `HTTP ${res.status}`);
@@ -555,7 +554,7 @@ export default function ComponentKitPage() {
     try {
       const res = await fetch('/api/kit/override', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orgId, userEmail: USER_EMAIL, name: selected.name, approved: true }),
+        body: JSON.stringify({ orgId, userEmail: getUserEmail(), name: selected.name, approved: true }),
       });
       if (!res.ok) { const b = await res.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${res.status}`); }
       await reloadKit(orgId);
@@ -565,7 +564,7 @@ export default function ComponentKitPage() {
   const handleRevert = useCallback(async () => {
     if (!selected) return;
     try {
-      const qs = `orgId=${encodeURIComponent(orgId ?? '')}&userEmail=${encodeURIComponent(USER_EMAIL)}&name=${encodeURIComponent(selected.name)}`;
+      const qs = `orgId=${encodeURIComponent(orgId ?? '')}&userEmail=${encodeURIComponent(getUserEmail())}&name=${encodeURIComponent(selected.name)}`;
       const res = await fetch(`/api/kit/override?${qs}`, { method: 'DELETE' });
       if (!res.ok) { const b = await res.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${res.status}`); }
       await reloadKit(orgId);

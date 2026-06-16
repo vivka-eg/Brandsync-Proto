@@ -1,4 +1,5 @@
 'use client';
+import { getUserEmail } from "@/lib/userEmail";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -28,11 +29,15 @@ import {
   FolderOpen,
   Check,
   Paperclip,
+  Export,
+  Tray,
 } from '@phosphor-icons/react';
 import ComponentsDrawer from '@/feature/brandsync-make/ComponentsDrawer';
 import OrgSwitcher from '@/feature/brandsync-make/OrgSwitcher';
 import TokenMeter from '@/feature/brandsync-make/TokenMeter';
 import ProjectBrandDialog from '@/feature/brandsync-make/ProjectBrandDialog';
+import HandoffDialog from '@/feature/brandsync-make/HandoffDialog';
+import HandoffGenerateDialog from '@/feature/brandsync-make/HandoffGenerateDialog';
 import { getStoredOrgId } from '@/lib/useActiveOrg';
 import { BRAND_PALETTES, brandOverrideCss, substituteBrand } from '@/lib/brand-substitute';
 
@@ -422,6 +427,7 @@ function TopBar({
   onSwitchProject, onCreateProject,
   selectedPattern, onSavePattern, saving, usage,
   onEditBrand, brandPalette, onRefreshPreview,
+  onHandoff, handingOff, handoffVersion, onLoadHandoff,
 }) {
   // The button is always present for the selected pattern: it reads "Save as
   // pattern" while there are unsaved changes (saved_at IS NULL) and flips to a
@@ -507,6 +513,38 @@ function TopBar({
         </button>
       )}
 
+      {/* Hand off — generate a versioned JSON handoff for the SELECTED file
+          (one handoff per pattern, versioned independently). */}
+      {selectedPattern && (
+        <button
+          onClick={onHandoff}
+          disabled={handingOff}
+          title="Generate a versioned JSON handoff for this file"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '6px 12px',
+            background: ui.pill, color: ui.text,
+            border: `1px solid ${ui.pillBorder}`,
+            borderRadius: 999,
+            fontSize: 12, fontWeight: 600,
+            cursor: handingOff ? 'wait' : 'pointer',
+            opacity: handingOff ? 0.6 : 1,
+            fontFamily: 'inherit',
+          }}
+        >
+          {handingOff ? <CircleNotch size={12} weight="bold" /> : <Export size={12} weight="bold" />}
+          {handingOff ? 'Handing off…' : 'Hand off'}
+          {handoffVersion && (
+            <span style={{
+              marginLeft: 2, fontSize: 10, fontWeight: 700, fontFamily: 'monospace',
+              color: ui.textMuted,
+            }}>
+              v{handoffVersion}
+            </span>
+          )}
+        </button>
+      )}
+
       <PillGroup>
         <IconButton active={mode === 'preview'} onClick={() => onModeChange('preview')} label="Preview" icon={Eye} />
         <IconButton active={mode === 'source'}  onClick={() => onModeChange('source')}  label="Source"  icon={Code} />
@@ -519,6 +557,9 @@ function TopBar({
       />
 
       <div style={{ flex: 1 }} />
+
+      {/* Load a previously-generated handoff back into Make */}
+      <IconButton label="Load handoff" icon={Tray} onClick={onLoadHandoff} />
 
       {/* Components library drawer trigger */}
       <IconButton label="Components" icon={Cube} onClick={onOpenComponents} />
@@ -2047,7 +2088,7 @@ export default function MyPatternsPage() {
   const activeProject = projects.find(p => p.id === activeProjectId) ?? null;
 
   const fetchProjects = () =>
-    fetch(`/api/projects?userEmail=${encodeURIComponent('vivka@eg.dk')}${getStoredOrgId() ? `&orgId=${encodeURIComponent(getStoredOrgId())}` : ''}`)
+    fetch(`/api/projects?userEmail=${encodeURIComponent(getUserEmail())}${getStoredOrgId() ? `&orgId=${encodeURIComponent(getStoredOrgId())}` : ''}`)
       .then(r => r.json())
       .then(body => { setProjects(body.projects ?? []); })
       .catch(() => setProjects([]));
@@ -2059,7 +2100,7 @@ export default function MyPatternsPage() {
   // newly-logged row without the user having to reload.
   const [usage, setUsage] = useState(null);
   const fetchUsage = () =>
-    fetch(`/api/brandsync-make/usage?userEmail=${encodeURIComponent('vivka@eg.dk')}`)
+    fetch(`/api/brandsync-make/usage?userEmail=${encodeURIComponent(getUserEmail())}`)
       .then(r => r.ok ? r.json() : null)
       .then(body => { if (body && !body.error) setUsage(body); })
       .catch(() => {});
@@ -2102,7 +2143,7 @@ export default function MyPatternsPage() {
       return;
     }
     setProjectFilesLoading(true);
-    fetch(`/api/projects/${activeProjectId}?userEmail=${encodeURIComponent('vivka@eg.dk')}`)
+    fetch(`/api/projects/${activeProjectId}?userEmail=${encodeURIComponent(getUserEmail())}`)
       .then(r => r.json())
       .then(body => setProjectFiles(body.files ?? []))
       .catch(() => setProjectFiles([]))
@@ -2248,7 +2289,7 @@ export default function MyPatternsPage() {
           'Accept': 'text/event-stream',
         },
         body: JSON.stringify({
-          userEmail: 'vivka@eg.dk',
+          userEmail: getUserEmail(),
           prompt: trimmed,
           projectId: activeProjectId,
           orgId: getStoredOrgId(),
@@ -2361,7 +2402,7 @@ export default function MyPatternsPage() {
           : [updatedPattern, ...prev]);
         if (activeProjectId) {
           const [detail] = await Promise.all([
-            fetch(`/api/projects/${activeProjectId}?userEmail=${encodeURIComponent('vivka@eg.dk')}`).then(r => r.json()),
+            fetch(`/api/projects/${activeProjectId}?userEmail=${encodeURIComponent(getUserEmail())}`).then(r => r.json()),
             fetchProjects(),
           ]);
           setProjectFiles(detail.files ?? []);
@@ -2386,11 +2427,11 @@ export default function MyPatternsPage() {
       // a new pattern instead of repeatedly trying to edit a ghost.
       if (typeof e.message === 'string' && e.message.toLowerCase().includes('edit target not found')) {
         setSelectedId(null);
-        fetch(`/api/my-patterns?userEmail=${encodeURIComponent('vivka@eg.dk')}${getStoredOrgId() ? `&orgId=${encodeURIComponent(getStoredOrgId())}` : ''}`)
+        fetch(`/api/my-patterns?userEmail=${encodeURIComponent(getUserEmail())}${getStoredOrgId() ? `&orgId=${encodeURIComponent(getStoredOrgId())}` : ''}`)
           .then(r => r.json()).then(d => setPatterns(d.patterns ?? []))
           .catch(() => {});
         if (activeProjectId) {
-          fetch(`/api/projects/${activeProjectId}?userEmail=${encodeURIComponent('vivka@eg.dk')}`)
+          fetch(`/api/projects/${activeProjectId}?userEmail=${encodeURIComponent(getUserEmail())}`)
             .then(r => r.json()).then(d => setProjectFiles(d.files ?? []))
             .catch(() => {});
         }
@@ -2405,7 +2446,7 @@ export default function MyPatternsPage() {
 
   const handleRemoveFileFromProject = async (fileId) => {
     if (!activeProjectId) return;
-    await fetch(`/api/projects/${activeProjectId}/files/${fileId}?userEmail=${encodeURIComponent('vivka@eg.dk')}`, {
+    await fetch(`/api/projects/${activeProjectId}/files/${fileId}?userEmail=${encodeURIComponent(getUserEmail())}`, {
       method: 'DELETE',
     });
     setProjectFiles(prev => prev.filter(f => f.id !== fileId));
@@ -2417,7 +2458,7 @@ export default function MyPatternsPage() {
   // current membership row. Pattern (corpus_entry) is untouched.
   const handleMoveFileToProject = async ({ projectFileId, corpusEntryId, targetProjectId }) => {
     if (!activeProjectId || !targetProjectId || activeProjectId === targetProjectId) return;
-    const userEmail = 'vivka@eg.dk';
+    const userEmail = getUserEmail();
     await fetch(`/api/projects/${targetProjectId}/files`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2434,7 +2475,7 @@ export default function MyPatternsPage() {
   // project_files FK cascades so any memberships go with it.
   const handleDeletePattern = async (patternId) => {
     if (!confirm('Delete this pattern? This removes it from every project and cannot be undone.')) return;
-    const res = await fetch(`/api/my-patterns/${patternId}?userEmail=${encodeURIComponent('vivka@eg.dk')}`, {
+    const res = await fetch(`/api/my-patterns/${patternId}?userEmail=${encodeURIComponent(getUserEmail())}`, {
       method: 'DELETE',
     });
     if (!res.ok) {
@@ -2467,7 +2508,7 @@ export default function MyPatternsPage() {
     const res = await fetch(`/api/my-patterns/${patternId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userEmail: 'vivka@eg.dk', slug: trimmed }),
+      body: JSON.stringify({ userEmail: getUserEmail(), slug: trimmed }),
     });
     const body = await res.json().catch(() => ({}));
     if (!res.ok) {
@@ -2491,7 +2532,7 @@ export default function MyPatternsPage() {
       const res = await fetch(`/api/my-patterns/${selectedId}/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userEmail: 'vivka@eg.dk' }),
+        body: JSON.stringify({ userEmail: getUserEmail() }),
       });
       const body = await res.json();
       if (!res.ok) {
@@ -2508,6 +2549,95 @@ export default function MyPatternsPage() {
     }
   };
 
+  // ── Design handoff ──────────────────────────────────────────────────────
+  // Generate a versioned JSON handoff for the active project and surface its
+  // version. The HandoffDialog (load) and HandoffGenerateDialog (save) are
+  // mounted below.
+  const [handingOff, setHandingOff] = useState(false);
+  const [handoffGenOpen, setHandoffGenOpen] = useState(false);
+  const [handoffLoadOpen, setHandoffLoadOpen] = useState(false);
+  const [handoffVersion, setHandoffVersion] = useState(null);
+  const [handoffPhase, setHandoffPhase] = useState(null);
+
+  // Reflect the selected file's latest handoff version in the TopBar badge.
+  useEffect(() => {
+    if (!selectedId) { setHandoffVersion(null); return; }
+    let cancelled = false;
+    fetch(`/api/handoff/list?userEmail=${encodeURIComponent(getUserEmail() || '')}`)
+      .then((r) => r.json())
+      .then((b) => {
+        if (cancelled) return;
+        const row = (b.handoffs || []).find((h) => h.patternId === selectedId);
+        setHandoffVersion(row?.version || null);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [selectedId]);
+
+  const handleGenerateHandoff = async ({ name, ticketOverride, bump }) => {
+    if (!selectedId || handingOff) return;
+    setHandingOff(true);
+    setHandoffPhase('Preparing…');
+    try {
+      const res = await fetch('/api/handoff/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+        body: JSON.stringify({ userEmail: getUserEmail(), patternId: selectedId, name, ticketOverride, bump }),
+      });
+
+      // Read the SSE stream: phase events update the dialog; complete/error end it.
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let done = false;
+      let result = null, errMsg = null;
+
+      while (!done) {
+        const { value, done: streamDone } = await reader.read();
+        if (streamDone) break;
+        buffer += decoder.decode(value, { stream: true });
+        const chunks = buffer.split('\n\n');
+        buffer = chunks.pop(); // keep incomplete frame
+        for (const chunk of chunks) {
+          const evLine = chunk.split('\n').find((l) => l.startsWith('event:'));
+          const dataLine = chunk.split('\n').find((l) => l.startsWith('data:'));
+          if (!dataLine) continue;
+          const event = evLine ? evLine.slice(6).trim() : 'message';
+          let data; try { data = JSON.parse(dataLine.slice(5).trim()); } catch { continue; }
+          if (event === 'phase') setHandoffPhase(data.message || data.phase);
+          else if (event === 'complete') { result = data; done = true; }
+          else if (event === 'error') { errMsg = data.error || 'Handoff failed'; done = true; }
+        }
+      }
+
+      if (errMsg) { alert('Handoff failed: ' + errMsg); return; }
+      if (result?.ok) {
+        setHandoffVersion(result.version);
+        setHandoffGenOpen(false);
+        const fromTo = result.previousVersion ? `${result.previousVersion} → ${result.version}` : `v${result.version}`;
+        const lvl = result.changeLevel ? ` (${result.changeLevel})` : '';
+        const reason = result.changeSummary ? `\n${result.changeSummary}` : '';
+        alert(`Handoff saved — ${result.ticket} ${fromTo}${lvl}${reason}`);
+      }
+    } catch (e) {
+      alert('Handoff failed: ' + e.message);
+    } finally {
+      setHandingOff(false);
+      setHandoffPhase(null);
+    }
+  };
+
+  const handleLoadHandoff = (item) => {
+    if (item?.error) { alert('Load failed: ' + item.error); return; }
+    if (item?.manifest) {
+      setHandoffVersion(item.manifest.version || null);
+      // v1: surface the loaded manifest; re-hydrating the canvas is a follow-up.
+      console.log('[handoff] loaded manifest', item.manifest);
+      const m = item.manifest;
+      alert(`Loaded ${item.ticket} v${m.version} — ${m.body?.views?.length ?? 0} view(s), ${m.corpus?.components?.length ?? 0} component(s) snapshotted.`);
+    }
+  };
+
   // Revert a pattern to the snapshot taken before a given edit turn.
   const [reverting, setReverting] = useState(false);
   const handleRevert = async ({ patternId, versionId }) => {
@@ -2517,7 +2647,7 @@ export default function MyPatternsPage() {
       const res = await fetch(`/api/my-patterns/${patternId}/revert`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userEmail: 'vivka@eg.dk', versionId }),
+        body: JSON.stringify({ userEmail: getUserEmail(), versionId }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
@@ -2562,7 +2692,7 @@ export default function MyPatternsPage() {
         const res = await fetch('/api/projects', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userEmail: 'vivka@eg.dk', name, orgId: getStoredOrgId(), brandPalette: pal, logoName }),
+          body: JSON.stringify({ userEmail: getUserEmail(), name, orgId: getStoredOrgId(), brandPalette: pal, logoName }),
         });
         const body = await res.json();
         if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
@@ -2575,7 +2705,7 @@ export default function MyPatternsPage() {
         const res = await fetch(`/api/projects/${activeProjectId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userEmail: 'vivka@eg.dk', brandPalette: pal, logoName }),
+          body: JSON.stringify({ userEmail: getUserEmail(), brandPalette: pal, logoName }),
         });
         const body = await res.json();
         if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
@@ -2697,9 +2827,9 @@ export default function MyPatternsPage() {
 
   useEffect(() => {
     // Local-dev identity. Swap for Keycloak session / Supabase auth
-    // before any non-local deploy — every `'vivka@eg.dk'` literal in
+    // before any non-local deploy — every `getUserEmail()` literal in
     // this file is a swap point.
-    const userEmail = 'vivka@eg.dk';
+    const userEmail = getUserEmail();
 
     Promise.all([
       fetch(`/api/my-patterns?userEmail=${encodeURIComponent(userEmail)}${getStoredOrgId() ? `&orgId=${encodeURIComponent(getStoredOrgId())}` : ''}`).then(r => r.json()),
@@ -2802,6 +2932,25 @@ export default function MyPatternsPage() {
         saving={savingPattern}
         usage={usage}
         onRefreshPreview={() => setPreviewReloadNonce((n) => n + 1)}
+        onHandoff={() => setHandoffGenOpen(true)}
+        handingOff={handingOff}
+        handoffVersion={handoffVersion}
+        onLoadHandoff={() => setHandoffLoadOpen(true)}
+      />
+
+      <HandoffGenerateDialog
+        open={handoffGenOpen}
+        onClose={() => setHandoffGenOpen(false)}
+        pattern={selected}
+        onGenerate={handleGenerateHandoff}
+        generating={handingOff}
+        phase={handoffPhase}
+      />
+
+      <HandoffDialog
+        open={handoffLoadOpen}
+        onClose={() => setHandoffLoadOpen(false)}
+        onSelect={handleLoadHandoff}
       />
 
       <ProjectBrandDialog

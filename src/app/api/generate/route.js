@@ -645,6 +645,12 @@ async function runConversation({ apiKey, model, system, userPrompt, editContext,
   // catalog" guidance verified.
   let componentHtmlPulls = 0;
   const toolNames = [];
+  // Bill of materials — which corpus refs the model actually pulled. Captured
+  // so a handoff manifest can be built (and snapshotted by value) from exactly
+  // what this prototype used. Dedup'd by ref.
+  const bomComponents = new Map(); // component name -> { include_html }
+  const bomPatterns = new Set();   // pattern names
+  const bomTokenFilters = new Set();
   let finalModel = model;
 
   for (let iter = 0; iter < MAX_TOOL_USE_ITERATIONS; iter++) {
@@ -690,7 +696,13 @@ async function runConversation({ apiKey, model, system, userPrompt, editContext,
           'Try a more focused change, or split it into smaller screens.',
         );
       }
-      return { text, usage: totalUsage, model: finalModel, mcpToolCalls, componentHtmlPulls, toolNames };
+      const bom = {
+        components: [...bomComponents.entries()].map(([ref, v]) => ({ ref, include_html: !!v.include_html })),
+        patterns: [...bomPatterns],
+        tokenFilters: [...bomTokenFilters],
+        toolNames,
+      };
+      return { text, usage: totalUsage, model: finalModel, mcpToolCalls, componentHtmlPulls, toolNames, bom };
     }
 
     // Append the assistant's tool-use turn verbatim — Anthropic requires
@@ -705,6 +717,15 @@ async function runConversation({ apiKey, model, system, userPrompt, editContext,
       mcpToolCalls++;
       if (t.name === 'get_component' && t.input && t.input.include_html) {
         componentHtmlPulls++;
+      }
+      // Record resolved refs for the bill of materials.
+      if (t.name === 'get_component' && t.input?.component) {
+        const prev = bomComponents.get(t.input.component) || {};
+        bomComponents.set(t.input.component, { include_html: prev.include_html || !!t.input?.include_html });
+      } else if (t.name === 'get_pattern' && t.input?.name) {
+        bomPatterns.add(t.input.name);
+      } else if (t.name === 'get_tokens') {
+        bomTokenFilters.add(t.input?.filter || 'all');
       }
       // Surface the in-flight tool call to the SSE stream so the UI
       // can show "Fetching Buttons…" instead of a generic spinner.
@@ -805,8 +826,8 @@ async function logUsage({ userEmail, projectId, startedAt, usage, success, error
     await getPool().query(
       `INSERT INTO tool_usage_logs
          (id, user_email, tool_name, duration_ms, success, error,
-          input_tokens, output_tokens, cache_read_tokens, project_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+          input_tokens, output_tokens, cache_read_tokens, cache_creation_tokens, project_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
       [
         // Anthropic-style cuid would be nicer but uuid is fine — the
         // column is plain text and the existing rows are a mix of
@@ -822,6 +843,10 @@ async function logUsage({ userEmail, projectId, startedAt, usage, success, error
         // Anthropic returns cache_read_input_tokens; the schema column
         // is just cache_read_tokens.
         usage?.cache_read_input_tokens ?? null,
+        // Cache WRITES — billed at 1.25× input. Previously dropped, which
+        // under-stated true cost (the prompt-cache prefix is rewritten on
+        // every cold start). Logging it closes that gap.
+        usage?.cache_creation_input_tokens ?? null,
         // Attributes this generation to a project so per-project daily
         // token meters can sum it. Null when generating outside a project.
         projectId ?? null,
@@ -1133,7 +1158,7 @@ async function handlePost(request, ctx, emit) {
 
   // Everything from here through the DB write is wrapped so we always
   // best-effort close the MCP session, even on error paths.
-  let pattern, edited, summary, envelopeScope, retried, mcpToolCalls, componentHtmlPulls, usageTotals, finalModel;
+  let pattern, edited, summary, envelopeScope, retried, mcpToolCalls, componentHtmlPulls, usageTotals, finalModel, bom;
   try {
     // First exchange (with tools — Claude may call MCP tools 0+ times
     // before producing the final envelope JSON).
@@ -1145,6 +1170,9 @@ async function handlePost(request, ctx, emit) {
     ctx.usage = usageTotals;
     mcpToolCalls = llm.mcpToolCalls ?? 0;
     componentHtmlPulls = llm.componentHtmlPulls ?? 0;
+    // BOM comes from the tool-using first pass; retries are toolless (mcpSession
+    // null), so the first pass is authoritative.
+    bom = llm.bom ?? null;
     finalModel = llm.model;
     let envelope;
     retried = false;
@@ -1325,6 +1353,20 @@ async function handlePost(request, ctx, emit) {
       }
     }
 
+    // Persist the bill of materials for this pattern (best-effort, mirrors the
+    // pattern_versions snapshot above). Tolerates the `bom` column not yet
+    // existing so generation never fails on it pre-migration.
+    if (pattern?.id && bom) {
+      try {
+        await client.query(
+          `UPDATE corpus_entries SET bom = $1 WHERE id = $2`,
+          [JSON.stringify({ ...bom, capturedAt: new Date().toISOString() }), pattern.id],
+        );
+      } catch (e) {
+        console.error('[generate] bom capture failed (column missing?):', e.message);
+      }
+    }
+
     envelopeScope = envelope.scope;
     // Observability: how much did this generation lean on the catalog vs.
     // pull full component markup? `componentHtmlPulls` is the priciest input;
@@ -1334,7 +1376,7 @@ async function handlePost(request, ctx, emit) {
       `[generate] scope=${envelope.scope} edited=${!!editTarget} ` +
       `mcpToolCalls=${mcpToolCalls} componentHtmlPulls=${componentHtmlPulls} ` +
       `in=${usageTotals.input_tokens ?? 0} cacheRead=${usageTotals.cache_read_input_tokens ?? 0} ` +
-      `out=${usageTotals.output_tokens ?? 0}`,
+      `cacheWrite=${usageTotals.cache_creation_input_tokens ?? 0} out=${usageTotals.output_tokens ?? 0}`,
     );
     // Defensive: the model is told to always include `summary`, but if
     // it forgets (or the second-pass retry strips it), fall back to

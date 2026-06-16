@@ -1,4 +1,5 @@
 "use client";
+import { getUserEmail } from "@/lib/userEmail";
 
 import { useEffect, useState } from "react";
 import {
@@ -31,7 +32,6 @@ import {
 
 // LOCAL DEV ONLY — same hardcoded user as the other Make dialogs.
 // When real auth lands, all of these switch in lockstep.
-const USER_EMAIL = "vivka@eg.dk";
 
 function RoleChip({ role, isDefault }) {
   if (role === "admin") {
@@ -183,7 +183,7 @@ function InvitePanel({ orgId }) {
 
   const loadInvites = async () => {
     try {
-      const res = await fetch(`/api/orgs/${orgId}/invitations?userEmail=${encodeURIComponent(USER_EMAIL)}`);
+      const res = await fetch(`/api/orgs/${orgId}/invitations?userEmail=${encodeURIComponent(getUserEmail())}`);
       const body = await res.json();
       if (res.ok) setInvites(body.invitations || []);
     } catch { /* non-fatal */ }
@@ -200,7 +200,7 @@ function InvitePanel({ orgId }) {
       const res = await fetch(`/api/orgs/${orgId}/invitations`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userEmail: USER_EMAIL, email: e, role }),
+        body: JSON.stringify({ userEmail: getUserEmail(), email: e, role }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
@@ -296,7 +296,7 @@ function OrgDetail({ org, onBack }) {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`/api/orgs/${org.id}/members?userEmail=${encodeURIComponent(USER_EMAIL)}`);
+        const res = await fetch(`/api/orgs/${org.id}/members?userEmail=${encodeURIComponent(getUserEmail())}`);
         const body = await res.json();
         if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
         setMembers(body.members || []);
@@ -368,7 +368,7 @@ function CreateOrgForm({ onCancel, onCreated }) {
       const res = await fetch("/api/orgs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userEmail: USER_EMAIL, name: n }),
+        body: JSON.stringify({ userEmail: getUserEmail(), name: n }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
@@ -408,7 +408,7 @@ function JoinForm({ onJoined }) {
       const res = await fetch("/api/invitations/accept", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userEmail: USER_EMAIL, token: t }),
+        body: JSON.stringify({ userEmail: getUserEmail(), token: t }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
@@ -451,7 +451,7 @@ export default function OrgDialog({ open, onClose }) {
   const load = async () => {
     setLoadError(null);
     try {
-      const res = await fetch(`/api/orgs?userEmail=${encodeURIComponent(USER_EMAIL)}`);
+      const res = await fetch(`/api/orgs?userEmail=${encodeURIComponent(getUserEmail())}`);
       const body = await res.json();
       if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
       setOrgs(body.orgs || []);

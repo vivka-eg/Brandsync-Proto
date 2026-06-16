@@ -1,4 +1,5 @@
 "use client";
+import { getUserEmail } from "@/lib/userEmail";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -14,9 +15,8 @@ import HandoffDialog from "./HandoffDialog";
 import ProjectsDialog from "./ProjectsDialog";
 import OrgDialog from "./OrgDialog";
 import OrgSwitcher from "./OrgSwitcher";
+import AccountMenu from "@/components/shared/AccountMenu";
 import { useActiveOrg } from "@/lib/useActiveOrg";
-
-const USER_EMAIL = "vivka@eg.dk";
 
 // Larger pool of starter prompts; the shuffle button rotates which four show.
 const CHIP_POOL = [
@@ -161,15 +161,15 @@ export default function BrandsyncMakePage() {
   useEffect(() => {
     if (orgLoading) return;
     const org = activeOrgId ? `&orgId=${encodeURIComponent(activeOrgId)}` : "";
-    fetch(`/api/projects?userEmail=${encodeURIComponent(USER_EMAIL)}${org}`)
+    fetch(`/api/projects?userEmail=${encodeURIComponent(getUserEmail())}${org}`)
       .then((r) => r.json()).then((b) => setProjects(b.projects ?? [])).catch(() => setProjects([]));
-    fetch(`/api/patterns?userEmail=${encodeURIComponent(USER_EMAIL)}${org}&scope=approved`)
+    fetch(`/api/patterns?userEmail=${encodeURIComponent(getUserEmail())}${org}&scope=approved`)
       .then((r) => r.json()).then((b) => setPatterns(b.patterns ?? [])).catch(() => setPatterns([]));
   }, [activeOrgId, orgLoading]);
 
   // Usage is per-user (not org-scoped) — fetch once.
   useEffect(() => {
-    fetch(`/api/brandsync-make/usage?userEmail=${encodeURIComponent(USER_EMAIL)}`)
+    fetch(`/api/brandsync-make/usage?userEmail=${encodeURIComponent(getUserEmail())}`)
       .then((r) => r.json()).then((b) => { if (b && !b.error) setUsage(b); }).catch(() => {});
   }, []);
 
@@ -222,9 +222,7 @@ export default function BrandsyncMakePage() {
               <Typography variant="caption" sx={{ color: "var(--bs-text-muted)", fontWeight: 500 }}>{budgetPct}% of budget</Typography>
             </Stack>
           )}
-          <Avatar sx={{ width: 30, height: 30, fontSize: 12, fontWeight: 700, bgcolor: "var(--bs-color-primary-container)", color: "var(--bs-color-primary-default)" }}>
-            {initials(null, USER_EMAIL)}
-          </Avatar>
+          <AccountMenu />
         </Stack>
       </Box>
 
