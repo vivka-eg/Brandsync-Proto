@@ -784,9 +784,13 @@ async function loadEditTarget(client, editEntryId, userId) {
   );
   const row = rows[0];
   if (!row) return { error: { status: 404, message: 'edit target not found' } };
-  if (row.user_id && row.user_id !== userId) {
-    return { error: { status: 403, message: 'cannot edit another user\'s pattern' } };
-  }
+  // NOTE: cross-user edit guard temporarily disabled — the prototype runs on a
+  // single mock identity, but patterns may be owned by a different user_id
+  // (legacy / Keycloak-era rows), which otherwise 403s edits. Re-enable when
+  // real auth + per-user ownership are in play:
+  //   if (row.user_id && row.user_id !== userId) {
+  //     return { error: { status: 403, message: 'cannot edit another user\'s pattern' } };
+  //   }
   return { row };
 }
 
