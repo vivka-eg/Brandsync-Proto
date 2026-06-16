@@ -29,11 +29,15 @@ import {
   FolderOpen,
   Check,
   Paperclip,
+  Export,
+  Tray,
 } from '@phosphor-icons/react';
 import ComponentsDrawer from '@/feature/brandsync-make/ComponentsDrawer';
 import OrgSwitcher from '@/feature/brandsync-make/OrgSwitcher';
 import TokenMeter from '@/feature/brandsync-make/TokenMeter';
 import ProjectBrandDialog from '@/feature/brandsync-make/ProjectBrandDialog';
+import HandoffDialog from '@/feature/brandsync-make/HandoffDialog';
+import HandoffGenerateDialog from '@/feature/brandsync-make/HandoffGenerateDialog';
 import { getStoredOrgId } from '@/lib/useActiveOrg';
 import { BRAND_PALETTES, brandOverrideCss, substituteBrand } from '@/lib/brand-substitute';
 
@@ -423,6 +427,7 @@ function TopBar({
   onSwitchProject, onCreateProject,
   selectedPattern, onSavePattern, saving, usage,
   onEditBrand, brandPalette, onRefreshPreview,
+  onHandoff, handingOff, handoffVersion, onLoadHandoff,
 }) {
   // The button is always present for the selected pattern: it reads "Save as
   // pattern" while there are unsaved changes (saved_at IS NULL) and flips to a
@@ -508,6 +513,38 @@ function TopBar({
         </button>
       )}
 
+      {/* Hand off — generate a versioned JSON handoff for the SELECTED file
+          (one handoff per pattern, versioned independently). */}
+      {selectedPattern && (
+        <button
+          onClick={onHandoff}
+          disabled={handingOff}
+          title="Generate a versioned JSON handoff for this file"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '6px 12px',
+            background: ui.pill, color: ui.text,
+            border: `1px solid ${ui.pillBorder}`,
+            borderRadius: 999,
+            fontSize: 12, fontWeight: 600,
+            cursor: handingOff ? 'wait' : 'pointer',
+            opacity: handingOff ? 0.6 : 1,
+            fontFamily: 'inherit',
+          }}
+        >
+          {handingOff ? <CircleNotch size={12} weight="bold" /> : <Export size={12} weight="bold" />}
+          {handingOff ? 'Handing off…' : 'Hand off'}
+          {handoffVersion && (
+            <span style={{
+              marginLeft: 2, fontSize: 10, fontWeight: 700, fontFamily: 'monospace',
+              color: ui.textMuted,
+            }}>
+              v{handoffVersion}
+            </span>
+          )}
+        </button>
+      )}
+
       <PillGroup>
         <IconButton active={mode === 'preview'} onClick={() => onModeChange('preview')} label="Preview" icon={Eye} />
         <IconButton active={mode === 'source'}  onClick={() => onModeChange('source')}  label="Source"  icon={Code} />
@@ -520,6 +557,9 @@ function TopBar({
       />
 
       <div style={{ flex: 1 }} />
+
+      {/* Load a previously-generated handoff back into Make */}
+      <IconButton label="Load handoff" icon={Tray} onClick={onLoadHandoff} />
 
       {/* Components library drawer trigger */}
       <IconButton label="Components" icon={Cube} onClick={onOpenComponents} />
@@ -2509,6 +2549,95 @@ export default function MyPatternsPage() {
     }
   };
 
+  // ── Design handoff ──────────────────────────────────────────────────────
+  // Generate a versioned JSON handoff for the active project and surface its
+  // version. The HandoffDialog (load) and HandoffGenerateDialog (save) are
+  // mounted below.
+  const [handingOff, setHandingOff] = useState(false);
+  const [handoffGenOpen, setHandoffGenOpen] = useState(false);
+  const [handoffLoadOpen, setHandoffLoadOpen] = useState(false);
+  const [handoffVersion, setHandoffVersion] = useState(null);
+  const [handoffPhase, setHandoffPhase] = useState(null);
+
+  // Reflect the selected file's latest handoff version in the TopBar badge.
+  useEffect(() => {
+    if (!selectedId) { setHandoffVersion(null); return; }
+    let cancelled = false;
+    fetch(`/api/handoff/list?userEmail=${encodeURIComponent(getUserEmail() || '')}`)
+      .then((r) => r.json())
+      .then((b) => {
+        if (cancelled) return;
+        const row = (b.handoffs || []).find((h) => h.patternId === selectedId);
+        setHandoffVersion(row?.version || null);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [selectedId]);
+
+  const handleGenerateHandoff = async ({ name, ticketOverride, bump }) => {
+    if (!selectedId || handingOff) return;
+    setHandingOff(true);
+    setHandoffPhase('Preparing…');
+    try {
+      const res = await fetch('/api/handoff/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+        body: JSON.stringify({ userEmail: getUserEmail(), patternId: selectedId, name, ticketOverride, bump }),
+      });
+
+      // Read the SSE stream: phase events update the dialog; complete/error end it.
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let done = false;
+      let result = null, errMsg = null;
+
+      while (!done) {
+        const { value, done: streamDone } = await reader.read();
+        if (streamDone) break;
+        buffer += decoder.decode(value, { stream: true });
+        const chunks = buffer.split('\n\n');
+        buffer = chunks.pop(); // keep incomplete frame
+        for (const chunk of chunks) {
+          const evLine = chunk.split('\n').find((l) => l.startsWith('event:'));
+          const dataLine = chunk.split('\n').find((l) => l.startsWith('data:'));
+          if (!dataLine) continue;
+          const event = evLine ? evLine.slice(6).trim() : 'message';
+          let data; try { data = JSON.parse(dataLine.slice(5).trim()); } catch { continue; }
+          if (event === 'phase') setHandoffPhase(data.message || data.phase);
+          else if (event === 'complete') { result = data; done = true; }
+          else if (event === 'error') { errMsg = data.error || 'Handoff failed'; done = true; }
+        }
+      }
+
+      if (errMsg) { alert('Handoff failed: ' + errMsg); return; }
+      if (result?.ok) {
+        setHandoffVersion(result.version);
+        setHandoffGenOpen(false);
+        const fromTo = result.previousVersion ? `${result.previousVersion} → ${result.version}` : `v${result.version}`;
+        const lvl = result.changeLevel ? ` (${result.changeLevel})` : '';
+        const reason = result.changeSummary ? `\n${result.changeSummary}` : '';
+        alert(`Handoff saved — ${result.ticket} ${fromTo}${lvl}${reason}`);
+      }
+    } catch (e) {
+      alert('Handoff failed: ' + e.message);
+    } finally {
+      setHandingOff(false);
+      setHandoffPhase(null);
+    }
+  };
+
+  const handleLoadHandoff = (item) => {
+    if (item?.error) { alert('Load failed: ' + item.error); return; }
+    if (item?.manifest) {
+      setHandoffVersion(item.manifest.version || null);
+      // v1: surface the loaded manifest; re-hydrating the canvas is a follow-up.
+      console.log('[handoff] loaded manifest', item.manifest);
+      const m = item.manifest;
+      alert(`Loaded ${item.ticket} v${m.version} — ${m.body?.views?.length ?? 0} view(s), ${m.corpus?.components?.length ?? 0} component(s) snapshotted.`);
+    }
+  };
+
   // Revert a pattern to the snapshot taken before a given edit turn.
   const [reverting, setReverting] = useState(false);
   const handleRevert = async ({ patternId, versionId }) => {
@@ -2803,6 +2932,25 @@ export default function MyPatternsPage() {
         saving={savingPattern}
         usage={usage}
         onRefreshPreview={() => setPreviewReloadNonce((n) => n + 1)}
+        onHandoff={() => setHandoffGenOpen(true)}
+        handingOff={handingOff}
+        handoffVersion={handoffVersion}
+        onLoadHandoff={() => setHandoffLoadOpen(true)}
+      />
+
+      <HandoffGenerateDialog
+        open={handoffGenOpen}
+        onClose={() => setHandoffGenOpen(false)}
+        pattern={selected}
+        onGenerate={handleGenerateHandoff}
+        generating={handingOff}
+        phase={handoffPhase}
+      />
+
+      <HandoffDialog
+        open={handoffLoadOpen}
+        onClose={() => setHandoffLoadOpen(false)}
+        onSelect={handleLoadHandoff}
       />
 
       <ProjectBrandDialog
