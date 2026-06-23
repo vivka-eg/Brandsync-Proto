@@ -228,7 +228,7 @@ export default function BrandsyncMakePage() {
 
       <Container maxWidth="md" sx={{ pt: { xs: 14, md: 32}, pb: { xs: 6, md: 10 } }}>
         <Stack spacing={4}>
-          {/* Headline */}
+          {/* Headline */} 
           <Typography variant="h3" fontWeight={700} textAlign="center" sx={{ color: "var(--bs-text-default)" }}>
             What do you want to{" "}
             <Box component="span" sx={{ color: "var(--bs-color-primary-default)" }}>prototype</Box>?

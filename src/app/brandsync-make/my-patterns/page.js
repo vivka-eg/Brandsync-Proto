@@ -37,6 +37,7 @@ import OrgSwitcher from '@/feature/brandsync-make/OrgSwitcher';
 import TokenMeter from '@/feature/brandsync-make/TokenMeter';
 import ProjectBrandDialog from '@/feature/brandsync-make/ProjectBrandDialog';
 import HandoffDialog from '@/feature/brandsync-make/HandoffDialog';
+import HandoffViewer from '@/feature/brandsync-make/HandoffViewer';
 import HandoffGenerateDialog from '@/feature/brandsync-make/HandoffGenerateDialog';
 import { getStoredOrgId } from '@/lib/useActiveOrg';
 import { BRAND_PALETTES, brandOverrideCss, substituteBrand } from '@/lib/brand-substitute';
@@ -2043,6 +2044,10 @@ function Canvas({
 // than a stuck spinner.
 const transcriptKeyFor = (projectId) => `bs-make:transcript:${projectId || '__all__'}`;
 
+// The selected file is kept per project in localStorage so a reload restores
+// the file you were working on instead of snapping back to the top of the list.
+const selectionKeyFor = (projectId) => `bs-make:selected:${projectId || '__all__'}`;
+
 function loadTranscript(projectId) {
   try {
     const raw = localStorage.getItem(transcriptKeyFor(projectId));
@@ -2558,10 +2563,16 @@ export default function MyPatternsPage() {
   const [handoffLoadOpen, setHandoffLoadOpen] = useState(false);
   const [handoffVersion, setHandoffVersion] = useState(null);
   const [handoffPhase, setHandoffPhase] = useState(null);
+  // The loaded handoff shown in the viewer (current version + ticket); the viewer
+  // fetches the previous version itself to show what this version changed.
+  const [handoffView, setHandoffView] = useState(null);
 
-  // Reflect the selected file's latest handoff version in the TopBar badge.
+  // The selected file's existing handoff row (if any) — drives the TopBar badge
+  // and lets the Generate dialog show "update" mode instead of asking for a name
+  // again on a file that's already been handed off.
+  const [handoffMeta, setHandoffMeta] = useState(null);
   useEffect(() => {
-    if (!selectedId) { setHandoffVersion(null); return; }
+    if (!selectedId) { setHandoffVersion(null); setHandoffMeta(null); return; }
     let cancelled = false;
     fetch(`/api/handoff/list?userEmail=${encodeURIComponent(getUserEmail() || '')}`)
       .then((r) => r.json())
@@ -2569,6 +2580,7 @@ export default function MyPatternsPage() {
         if (cancelled) return;
         const row = (b.handoffs || []).find((h) => h.patternId === selectedId);
         setHandoffVersion(row?.version || null);
+        setHandoffMeta(row || null);
       })
       .catch(() => {});
     return () => { cancelled = true; };
@@ -2613,11 +2625,23 @@ export default function MyPatternsPage() {
       if (errMsg) { alert('Handoff failed: ' + errMsg); return; }
       if (result?.ok) {
         setHandoffVersion(result.version);
+        setHandoffMeta((m) => ({ ...(m || {}), ticket: result.ticket, version: result.version, patternId: selectedId }));
         setHandoffGenOpen(false);
-        const fromTo = result.previousVersion ? `${result.previousVersion} → ${result.version}` : `v${result.version}`;
-        const lvl = result.changeLevel ? ` (${result.changeLevel})` : '';
-        const reason = result.changeSummary ? `\n${result.changeSummary}` : '';
-        alert(`Handoff saved — ${result.ticket} ${fromTo}${lvl}${reason}`);
+        // Show what changed: load the freshly-saved manifest and open the viewer,
+        // which diffs this new version against the previous one.
+        try {
+          const res2 = await fetch(
+            `/api/handoff/load?userEmail=${encodeURIComponent(getUserEmail() || '')}&ticket=${encodeURIComponent(result.ticket)}`,
+          );
+          const body2 = await res2.json();
+          if (body2.manifest) setHandoffView({ ticket: result.ticket, manifest: body2.manifest });
+          else {
+            const fromTo = result.previousVersion ? `${result.previousVersion} → ${result.version}` : `v${result.version}`;
+            alert(`Handoff saved — ${result.ticket} ${fromTo}`);
+          }
+        } catch {
+          alert(`Handoff saved — ${result.ticket} v${result.version}`);
+        }
       }
     } catch (e) {
       alert('Handoff failed: ' + e.message);
@@ -2631,10 +2655,9 @@ export default function MyPatternsPage() {
     if (item?.error) { alert('Load failed: ' + item.error); return; }
     if (item?.manifest) {
       setHandoffVersion(item.manifest.version || null);
-      // v1: surface the loaded manifest; re-hydrating the canvas is a follow-up.
-      console.log('[handoff] loaded manifest', item.manifest);
-      const m = item.manifest;
-      alert(`Loaded ${item.ticket} v${m.version} — ${m.body?.views?.length ?? 0} view(s), ${m.corpus?.components?.length ?? 0} component(s) snapshotted.`);
+      // Open the viewer: it shows this version's contents and diffs it against
+      // the previous version so the PM sees what the new version included.
+      setHandoffView({ ticket: item.ticket, manifest: item.manifest });
     }
   };
 
@@ -2843,7 +2866,9 @@ export default function MyPatternsPage() {
         const ps = data.patterns ?? [];
         setPatterns(ps);
         setTokensCss(`${css}\n\n/* ---- component kit ---- */\n${kitCss}`);
-        if (ps.length > 0) setSelectedId(ps[0].id);
+        // Don't force-select the first file here — the validity effect below
+        // restores the last-selected file (per project) from localStorage, and
+        // only falls back to the top of the list when there's nothing to restore.
       })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
@@ -2873,16 +2898,31 @@ export default function MyPatternsPage() {
   }, [activeProjectId, projectFiles, patterns]);
 
   // Keep selectedId valid when displayPatterns changes (e.g. switching
-  // projects, adding/removing files).
+  // projects, adding/removing files). When the current selection isn't valid
+  // (first load, project switch), restore the last-selected file for this
+  // project from localStorage so a reload keeps you on the file you were
+  // working on; fall back to the top of the list only when there's nothing
+  // valid to restore.
   useEffect(() => {
     if (displayPatterns.length === 0) {
       setSelectedId(null);
       return;
     }
     if (!displayPatterns.find(p => p.id === selectedId)) {
-      setSelectedId(displayPatterns[0].id);
+      let restored = null;
+      try { restored = localStorage.getItem(selectionKeyFor(activeProjectId)); } catch { /* private mode */ }
+      const valid = restored && displayPatterns.some(p => p.id === restored);
+      setSelectedId(valid ? restored : displayPatterns[0].id);
     }
-  }, [displayPatterns, selectedId]);
+  }, [displayPatterns, selectedId, activeProjectId]);
+
+  // Persist the selected file per project so a reload restores it. Only store
+  // a selection that belongs to the current list, so switching projects can't
+  // write the previous project's file under the new project's key.
+  useEffect(() => {
+    if (!selectedId || !displayPatterns.some(p => p.id === selectedId)) return;
+    try { localStorage.setItem(selectionKeyFor(activeProjectId), selectedId); } catch { /* private mode / quota */ }
+  }, [selectedId, activeProjectId, displayPatterns]);
 
   const selected = displayPatterns.find(p => p.id === selectedId);
   const title = selected
@@ -2942,6 +2982,7 @@ export default function MyPatternsPage() {
         open={handoffGenOpen}
         onClose={() => setHandoffGenOpen(false)}
         pattern={selected}
+        existingHandoff={handoffMeta?.patternId === selectedId ? handoffMeta : null}
         onGenerate={handleGenerateHandoff}
         generating={handingOff}
         phase={handoffPhase}
@@ -2951,6 +2992,13 @@ export default function MyPatternsPage() {
         open={handoffLoadOpen}
         onClose={() => setHandoffLoadOpen(false)}
         onSelect={handleLoadHandoff}
+      />
+
+      <HandoffViewer
+        open={!!handoffView}
+        onClose={() => setHandoffView(null)}
+        ticket={handoffView?.ticket}
+        manifest={handoffView?.manifest}
       />
 
       <ProjectBrandDialog

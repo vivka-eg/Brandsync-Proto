@@ -12,16 +12,25 @@ import {
   Button,
   CircularProgress,
 } from "@mui/material";
-import { X, PaperPlaneTilt, GitBranch } from "phosphor-react";
+import { X, PaperPlaneTilt, GitBranch, Ticket } from "phosphor-react";
 
 // Confirm + generate a versioned design handoff for the selected file (pattern).
-export default function HandoffGenerateDialog({ open, onClose, pattern, onGenerate, generating, phase }) {
+// When `existingHandoff` is set the file has already been handed off, so this is
+// an UPDATE — we don't re-ask for the name/ticket (they're already bound); we
+// just confirm and let the server compute the next version + what changed.
+export default function HandoffGenerateDialog({ open, onClose, pattern, existingHandoff, onGenerate, generating, phase }) {
   const [name, setName] = useState("");
   const [ticketOverride, setTicketOverride] = useState("");
 
   const patternName = pattern?.name || pattern?.slug || "";
+  const isUpdate = !!existingHandoff;
 
   const handleGenerate = () => {
+    if (isUpdate) {
+      // Keep the existing name/ticket binding — server bumps the version.
+      onGenerate?.({});
+      return;
+    }
     onGenerate?.({
       name: name.trim() || patternName,
       ticketOverride: ticketOverride.trim() || undefined,
@@ -63,10 +72,12 @@ export default function HandoffGenerateDialog({ open, onClose, pattern, onGenera
       >
         <Stack spacing={0.5}>
           <Typography variant="h6" fontWeight={700} sx={{ color: "var(--bs-text-default)" }}>
-            Generate handoff
+            {isUpdate ? "Update handoff" : "Generate handoff"}
           </Typography>
           <Typography variant="body2" sx={{ color: "var(--bs-text-muted)" }}>
-            Snapshot this file as a versioned JSON handoff for developers.
+            {isUpdate
+              ? "Snapshot the latest edits as a new version — we’ll show you what changed."
+              : "Snapshot this file as a versioned JSON handoff for developers."}
           </Typography>
         </Stack>
         <IconButton onClick={onClose} size="small" aria-label="Close" disabled={generating}>
@@ -76,31 +87,72 @@ export default function HandoffGenerateDialog({ open, onClose, pattern, onGenera
 
       <DialogContent sx={{ pt: 1 }}>
         <Stack spacing={2}>
-          <Stack spacing={0.75}>
-            <Typography variant="caption" fontWeight={600} sx={{ color: "var(--bs-text-muted)" }}>
-              Handoff name
-            </Typography>
-            <InputBase
-              fullWidth
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={patternName || "e.g. Asset filter chips refresh"}
-              sx={fieldSx}
-            />
-          </Stack>
+          {isUpdate ? (
+            // Already handed off — show the existing binding read-only instead of
+            // re-asking for a name. The new version is computed on generate.
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={1.5}
+              sx={{
+                px: 1.5, py: 1.25,
+                borderRadius: "var(--bs-border-radius-100)",
+                bgcolor: "var(--bs-surface-raised)",
+                border: "1px solid var(--bs-border-default)",
+              }}
+            >
+              <Ticket size={18} color="var(--bs-color-info-default)" />
+              <Stack spacing={0.25} sx={{ minWidth: 0, flex: 1 }}>
+                <Typography
+                  variant="caption"
+                  fontWeight={700}
+                  sx={{ color: "var(--bs-color-info-default)", fontFamily: "monospace", letterSpacing: "0.04em" }}
+                >
+                  {existingHandoff.ticket}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  fontWeight={600}
+                  sx={{ color: "var(--bs-text-default)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                >
+                  {existingHandoff.title || patternName}
+                </Typography>
+              </Stack>
+              {existingHandoff.version && (
+                <Typography variant="caption" fontWeight={700} sx={{ color: "var(--bs-text-muted)", fontFamily: "monospace" }}>
+                  currently v{existingHandoff.version}
+                </Typography>
+              )}
+            </Stack>
+          ) : (
+            <>
+              <Stack spacing={0.75}>
+                <Typography variant="caption" fontWeight={600} sx={{ color: "var(--bs-text-muted)" }}>
+                  Handoff name
+                </Typography>
+                <InputBase
+                  fullWidth
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder={patternName || "e.g. Asset filter chips refresh"}
+                  sx={fieldSx}
+                />
+              </Stack>
 
-          <Stack spacing={0.75}>
-            <Typography variant="caption" fontWeight={600} sx={{ color: "var(--bs-text-muted)" }}>
-              Jira ticket (optional)
-            </Typography>
-            <InputBase
-              fullWidth
-              value={ticketOverride}
-              onChange={(e) => setTicketOverride(e.target.value)}
-              placeholder="Bind a real ticket, e.g. APT-202 — leave blank for an auto key"
-              sx={fieldSx}
-            />
-          </Stack>
+              <Stack spacing={0.75}>
+                <Typography variant="caption" fontWeight={600} sx={{ color: "var(--bs-text-muted)" }}>
+                  Jira ticket (optional)
+                </Typography>
+                <InputBase
+                  fullWidth
+                  value={ticketOverride}
+                  onChange={(e) => setTicketOverride(e.target.value)}
+                  placeholder="Bind a real ticket, e.g. APT-202 — leave blank for an auto key"
+                  sx={fieldSx}
+                />
+              </Stack>
+            </>
+          )}
 
           <Stack
             direction="row"
@@ -134,7 +186,7 @@ export default function HandoffGenerateDialog({ open, onClose, pattern, onGenera
               startIcon={generating ? <CircularProgress size={14} color="inherit" /> : <PaperPlaneTilt size={16} weight="bold" />}
               sx={{ textTransform: "none", fontWeight: 600, flexShrink: 0 }}
             >
-              {generating ? "Generating…" : "Generate handoff"}
+              {generating ? "Generating…" : isUpdate ? "Generate new version" : "Generate handoff"}
             </Button>
           </Stack>
         </Stack>
